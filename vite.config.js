@@ -2,12 +2,16 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const BASE = '/BTMM_JORNADAS/'
+
 export default defineConfig({
+  base: BASE,
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
+      base: BASE,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         cleanupOutdatedCaches: true,
@@ -37,8 +41,8 @@ export default defineConfig({
         background_color: '#f1f5f9',
         display: 'standalone',
         orientation: 'any',
-        scope: '/',
-        start_url: '/',
+        scope: BASE,
+        start_url: BASE,
         lang: 'es',
         categories: ['productivity', 'utilities'],
         icons: [
