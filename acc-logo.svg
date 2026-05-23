@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 230">
+  <!-- Bottom oval arc (cradle) -->
+  <path d="M18,148 Q100,205 182,148" stroke="#1a1a1a" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Shield layers (right) — green → yellow-green → yellow -->
+  <path d="M112,55 L168,55 Q180,68 172,85 L108,85 Q106,70 112,55 Z" fill="#16a34a"/>
+  <path d="M108,85 L172,85 Q177,98 168,112 L105,112 Q104,98 108,85 Z" fill="#65a30d"/>
+  <path d="M105,112 L168,112 Q165,128 155,138 L104,138 Q104,124 105,112 Z" fill="#ca8a04"/>
+
+  <!-- Wing highlight top -->
+  <path d="M112,55 L168,55 Q180,68 172,85 L108,85 Q106,70 112,55 Z" fill="#22c55e" opacity="0.4"/>
+
+  <!-- Bird body -->
+  <ellipse cx="86" cy="108" rx="46" ry="42" fill="#4b5563"/>
+
+  <!-- Cyan chest -->
+  <path d="M60,118 Q78,158 114,130 Q96,100 60,118 Z" fill="#22d3ee"/>
+
+  <!-- Tail feather -->
+  <path d="M112,132 Q136,142 125,162 Q108,154 112,132 Z" fill="#6b7280"/>
+
+  <!-- Head -->
+  <ellipse cx="70" cy="72" rx="30" ry="28" fill="#374151"/>
+
+  <!-- Eye -->
+  <circle cx="62" cy="69" r="9" fill="white"/>
+  <circle cx="63" cy="70" r="5" fill="#111827"/>
+  <circle cx="61" cy="68" r="2" fill="white"/>
+
+  <!-- Beak -->
+  <path d="M38,76 L60,68 L46,84 Z" fill="#ea580c"/>
+
+  <!-- Cloud/bubble chain above head -->
+  <circle cx="82" cy="34" r="11" fill="white" stroke="#1a1a1a" stroke-width="2.5"/>
+  <circle cx="96" cy="24" r="9"  fill="white" stroke="#1a1a1a" stroke-width="2.5"/>
+  <circle cx="70" cy="26" r="8"  fill="white" stroke="#1a1a1a" stroke-width="2.5"/>
+  <circle cx="104" cy="34" r="7" fill="white" stroke="#1a1a1a" stroke-width="2.5"/>
+  <circle cx="64" cy="36" r="6"  fill="white" stroke="#1a1a1a" stroke-width="2.5"/>
+
+  <!-- ACC text -->
+  <text x="100" y="200" text-anchor="middle" font-size="40" font-weight="900"
+        fill="#111827" font-family="Arial Black, Arial, sans-serif" letter-spacing="2">ACC</text>
+</svg>
