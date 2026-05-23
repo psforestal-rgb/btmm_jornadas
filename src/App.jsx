@@ -79,14 +79,14 @@ function AlertStrip({ alerts, setView }) {
 function Sidebar({ view, setView, nAlertas }) {
   const grupos = [
     ["Principal", [["dashboard", "Dashboard", "🏠"], ["funcionarios", "Funcionarios", "👥"]]],
-    ["Jornadas", [["roles", "Roles", "📊"], ["planificacion", "Planificación general", "🗓️"], ["planFuncionario", "Planificación/Funcionario", "📋"], ["adelantos", "Adelanto de viáticos", "💵"], ["disponibilidad", "Disponibilidad", "🛡️"]]],
+    ["Jornadas", [["dia", "Detalle del día", "📅"], ["roles", "Roles", "📊"], ["planificacion", "Planificación general", "🗓️"], ["planFuncionario", "Planificación/Funcionario", "📋"], ["adelantos", "Adelanto de viáticos", "💵"], ["disponibilidad", "Disponibilidad", "🛡️"]]],
     ["Control", [["alertas", "Alertas", "🔔"]]],
   ];
   return <aside className="hidden w-60 shrink-0 flex-col bg-emerald-900 text-white lg:flex"><div className="border-b border-white/10 p-6"><div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">SINAC · Costa Rica</div><div className="mt-2 text-xl font-semibold leading-tight">Parque Nacional<br />Los Quetzales</div><div className="mt-2 text-sm text-white/65">Gestión de jornadas laborales</div></div><nav className="flex-1 p-3">{grupos.map(([g, items]) => <div key={g}><div className="px-3 pb-2 pt-4 text-xs font-semibold uppercase tracking-wider text-white/45">{g}</div>{items.map(([id, label, icon]) => <button key={id} onClick={() => setView(id)} className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold ${view === id ? "bg-white/20 text-white ring-1 ring-white/20" : "text-white/80 hover:bg-white/10"}`}><span>{icon}</span>{label}{id === "alertas" && nAlertas > 0 && <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{nAlertas}</span>}</button>)}</div>)}</nav><div className="border-t border-white/10 p-4 text-xs"><strong className="font-semibold">P. Sánchez N.</strong><div className="text-white/60">Guardaparques · ACC</div></div></aside>;
 }
 
 function Topbar({ view, setView, month, setMonth, year, setYear, compact, setCompact }) {
-  const titulo = { dashboard: "Dashboard", funcionarios: "Funcionarios", roles: "Roles", planificacion: "Planificación general", planFuncionario: "Planificación/Funcionario", adelantos: "Adelanto de viáticos", disponibilidad: "Disponibilidad", alertas: "Alertas" }[view];
+  const titulo = { dashboard: "Dashboard", dia: "Detalle del día", funcionarios: "Funcionarios", roles: "Roles", planificacion: "Planificación general", planFuncionario: "Planificación/Funcionario", adelantos: "Adelanto de viáticos", disponibilidad: "Disponibilidad", alertas: "Alertas" }[view];
   const moverMes = paso => {
     let nuevoMes = month + paso;
     let nuevoAno = year;
@@ -101,7 +101,7 @@ function Topbar({ view, setView, month, setMonth, year, setYear, compact, setCom
 function BottomNav({ view, setView, nAlertas }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const main = [["dashboard","Inicio","🏠"],["funcionarios","Personal","👥"],["planificacion","Plan","🗓️"],["alertas","Alertas","🔔"]];
-  const more = [["roles","Roles","📊"],["planFuncionario","Plan/Func.","📋"],["adelantos","Viáticos","💵"],["disponibilidad","Disponib.","🛡️"]];
+  const more = [["dia","Día","📅"],["roles","Roles","📊"],["planFuncionario","Plan/Func.","📋"],["adelantos","Viáticos","💵"],["disponibilidad","Disponib.","🛡️"]];
   return <>
     {moreOpen && <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setMoreOpen(false)} />}
     {moreOpen && <div className="fixed bottom-20 left-4 right-4 z-50 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl lg:hidden"><div className="grid grid-cols-2 gap-2">{more.map(([id,label,icon]) => <button key={id} onClick={() => { setView(id); setMoreOpen(false); }} className={`flex items-center gap-2 rounded-xl px-3 py-3 text-sm font-semibold ${view===id?"bg-emerald-800 text-white":"bg-slate-50 text-slate-700 hover:bg-slate-100"}`}><span>{icon}</span>{label}</button>)}</div></div>}
@@ -374,7 +374,7 @@ function Roles({ year, month, compact, roleData, setRoleData, personas, activida
   return <section className="space-y-4"><Card title={`Roles mensuales — ${meses[month]} ${year}`} icon="📊" action={<div className="flex flex-wrap gap-2"><button onClick={limpiarMes} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Restaurar mes</button><Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">Edición por fila</Badge></div>}><div className="mb-3 flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-semibold whitespace-nowrap shadow-sm"><span className="rounded-lg border border-emerald-300 bg-emerald-200 px-2 py-1 text-emerald-950">T1 Turno</span><span className="rounded-lg border border-amber-300 bg-amber-200 px-2 py-1 text-amber-950">L1 Libre</span><span className="rounded-lg border border-sky-300 bg-sky-200 px-2 py-1 text-sky-950">V1 Vacaciones</span><span className="rounded-lg border border-rose-300 bg-rose-200 px-2 py-1 text-rose-950">I1 Incapacidad</span><span className="rounded-lg border border-violet-300 bg-violet-200 px-2 py-1 text-violet-950">O1 Otro</span></div><div className="space-y-6">{gruposRoles.map((g, gi) => <PuestoRolCard key={g.nombre} grupo={g} gi={gi} days={days} year={year} month={month} compact={compact} roleData={roleData} setRoleData={setRoleData} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} />)}</div></Card></section>;
 }
 
-function Planificacion({ year, month, personas, actividadesPlan, setActividadesPlan, roleData }) {
+function Planificacion({ year, month, personas, actividadesPlan, setActividadesPlan, roleData, setView, setDiaVista }) {
   const [modal, setModal] = useState(null);
   const days = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
   const blanks = Array.from({ length: new Date(year, month, 1).getDay() }, (_, i) => i);
@@ -393,7 +393,7 @@ function Planificacion({ year, month, personas, actividadesPlan, setActividadesP
   };
   const eliminar = id => { setActividadesPlan(prev => prev.filter(a => a.id !== id)); setModal(null); };
   const turnoEnDia = d => personasActivas.filter(p => esRolActivo(codigoRolFuncionario(personas, roleData, year, month, p.nombre, d))).length;
-  return <Card title={`Planificación general — ${meses[month]} ${year}`} icon="🗓️" action={<button onClick={() => setModal(nuevo(isoDia(Math.min(new Date().getDate(), dim(year, month)))))} className="rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">+ Agregar actividad</button>}><div className="mb-4 flex flex-wrap gap-2"><Badge className="border-emerald-300 bg-emerald-100 text-emerald-950">Actividad programada</Badge><Badge className="border-orange-300 bg-orange-100 text-orange-950">Requiere adelanto de viático</Badge><Badge className="border-slate-300 bg-slate-100 text-slate-900">Fin de semana</Badge><Badge className="border-slate-300 bg-slate-100 text-slate-600">👥 = en turno</Badge></div><div className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm"><div className="grid grid-cols-7 bg-slate-900 text-white">{diasLargos.map(d => <div key={d} className="border-r border-white/10 px-2 py-2 text-center text-[11px] font-semibold tracking-wider">{d}</div>)}</div><div className="grid grid-cols-7 bg-slate-200">{blanks.map(b => <div key={b} className="min-h-[174px] border-b border-r border-slate-300 bg-slate-100" />)}{days.map(d => { const dow = new Date(year, month, d).getDay(); const items = actividadesDia(d); const turno = turnoEnDia(d); return <div key={d} className={`min-h-[174px] border-b border-r border-slate-300 p-2 ${dow === 0 || dow === 6 ? "bg-slate-100" : "bg-white"}`}><div className="mb-2 flex items-start justify-between gap-1"><button onClick={() => setModal(nuevo(isoDia(d)))} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800">{d}</button><div className="flex flex-col items-end gap-0.5">{turno > 0 && <span className="rounded-full bg-slate-600 px-1.5 py-0.5 text-[9px] font-semibold text-white" title={`${turno} funcionarios en turno`}>👥 {turno}</span>}{items.length > 0 && <span className="rounded-full bg-emerald-800 px-1.5 py-0.5 text-[9px] font-bold text-white" title={`${items.length} actividades`}>{items.length} act.</span>}</div></div><div className="space-y-1.5">{items.map(a => { const conf = conflictosActividadDia(a, d, year, month, personas, roleData); return <button key={a.id} onClick={() => setModal({ ...a })} className={`w-full rounded-xl border px-2 py-1.5 text-left shadow-sm transition hover:brightness-95 ${conf.length ? "border-red-500 bg-red-50 text-red-950 ring-2 ring-red-500" : a.viatico ? "border-orange-300 bg-orange-50 text-orange-950" : "border-emerald-200 bg-emerald-50 text-emerald-950"}`}><div className="line-clamp-2 text-[11px] font-semibold leading-tight">{a.titulo}</div><div className="mt-1 text-[10px] font-bold opacity-80">{a.funcionarios.length ? a.funcionarios.slice(0, 3).join(", ") : "Sin funcionarios"}{a.funcionarios.length > 3 ? ` +${a.funcionarios.length - 3}` : ""}</div>{a.lugar && <div className="mt-0.5 text-[10px] font-bold opacity-70">📍 {a.lugar}</div>}{a.viatico && <div className="mt-1 inline-flex rounded-md bg-orange-200 px-1.5 py-0.5 text-[9px] font-bold text-orange-950">VIÁTICO</div>}{conf.length > 0 && <div className="mt-1 rounded-md bg-red-700 px-1.5 py-0.5 text-[9px] font-bold text-white">⚠ ROL: {conf.join(", ")}</div>}</button>; })}</div></div>; })}</div></div>{modal && <ModalActividad valor={modal} personas={personasActivas} cerrar={() => setModal(null)} guardar={guardar} eliminar={eliminar} actividadesPlan={actividadesPlan} />}</Card>;
+  return <Card title={`Planificación general — ${meses[month]} ${year}`} icon="🗓️" action={<button onClick={() => setModal(nuevo(isoDia(Math.min(new Date().getDate(), dim(year, month)))))} className="rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">+ Agregar actividad</button>}><div className="mb-4 flex flex-wrap gap-2"><Badge className="border-emerald-300 bg-emerald-100 text-emerald-950">Actividad programada</Badge><Badge className="border-orange-300 bg-orange-100 text-orange-950">Requiere adelanto de viático</Badge><Badge className="border-slate-300 bg-slate-100 text-slate-900">Fin de semana</Badge><Badge className="border-slate-300 bg-slate-100 text-slate-600">👥 = en turno</Badge></div><div className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm"><div className="grid grid-cols-7 bg-slate-900 text-white">{diasLargos.map(d => <div key={d} className="border-r border-white/10 px-2 py-2 text-center text-[11px] font-semibold tracking-wider">{d}</div>)}</div><div className="grid grid-cols-7 bg-slate-200">{blanks.map(b => <div key={b} className="min-h-[174px] border-b border-r border-slate-300 bg-slate-100" />)}{days.map(d => { const dow = new Date(year, month, d).getDay(); const items = actividadesDia(d); const turno = turnoEnDia(d); return <div key={d} className={`min-h-[174px] border-b border-r border-slate-300 p-2 ${dow === 0 || dow === 6 ? "bg-slate-100" : "bg-white"}`}><div className="mb-2 flex items-start justify-between gap-1"><button onClick={() => { setDiaVista(isoDia(d)); setView("dia"); }} title="Ver detalle del día" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800">{d}</button><div className="flex flex-col items-end gap-0.5">{turno > 0 && <span className="rounded-full bg-slate-600 px-1.5 py-0.5 text-[9px] font-semibold text-white" title={`${turno} funcionarios en turno`}>👥 {turno}</span>}{items.length > 0 && <span className="rounded-full bg-emerald-800 px-1.5 py-0.5 text-[9px] font-bold text-white" title={`${items.length} actividades`}>{items.length} act.</span>}</div></div><div className="space-y-1.5">{items.map(a => { const conf = conflictosActividadDia(a, d, year, month, personas, roleData); return <button key={a.id} onClick={() => setModal({ ...a })} className={`w-full rounded-xl border px-2 py-1.5 text-left shadow-sm transition hover:brightness-95 ${conf.length ? "border-red-500 bg-red-50 text-red-950 ring-2 ring-red-500" : a.viatico ? "border-orange-300 bg-orange-50 text-orange-950" : "border-emerald-200 bg-emerald-50 text-emerald-950"}`}><div className="line-clamp-2 text-[11px] font-semibold leading-tight">{a.titulo}</div><div className="mt-1 text-[10px] font-bold opacity-80">{a.funcionarios.length ? a.funcionarios.slice(0, 3).join(", ") : "Sin funcionarios"}{a.funcionarios.length > 3 ? ` +${a.funcionarios.length - 3}` : ""}</div>{a.lugar && <div className="mt-0.5 text-[10px] font-bold opacity-70">📍 {a.lugar}</div>}{a.viatico && <div className="mt-1 inline-flex rounded-md bg-orange-200 px-1.5 py-0.5 text-[9px] font-bold text-orange-950">VIÁTICO</div>}{conf.length > 0 && <div className="mt-1 rounded-md bg-red-700 px-1.5 py-0.5 text-[9px] font-bold text-white">⚠ ROL: {conf.join(", ")}</div>}</button>; })}</div></div>; })}</div></div>{modal && <ModalActividad valor={modal} personas={personasActivas} cerrar={() => setModal(null)} guardar={guardar} eliminar={eliminar} actividadesPlan={actividadesPlan} />}</Card>;
 }
 
 function ModalActividad({ valor, personas, cerrar, guardar, eliminar, actividadesPlan = [] }) {
@@ -522,6 +522,183 @@ function AdelantoViaticos({ actividadesPlan, personas }) {
 function Disponibilidad({ personas }) { const con = personas.filter(f => f.disponibilidad); const sin = personas.filter(f => !f.disponibilidad); const lista = arr => <div className="divide-y divide-slate-200">{arr.map(f => { const d = faltan(f.vencimiento); return <div key={f.id} className="flex items-center gap-3 py-3"><Avatar name={f.nombre} /><div className="min-w-0 flex-1"><div className="font-semibold">{f.nombre}</div><div className="text-xs text-slate-500">{f.contrato || f.puesto} · {f.vencimiento ? `vence ${fecha(f.vencimiento)}` : f.condicion}</div></div><Badge className={d !== null && d <= 60 ? "border-orange-200 bg-orange-100 text-orange-900" : "border-slate-200 bg-slate-100 text-slate-700"}>{d === null ? "Sin contrato" : `${d} días`}</Badge></div>; })}</div>; return <section className="grid gap-4 xl:grid-cols-2"><Card title="Contratos activos — disponibilidad" icon="🛡️" action={<Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{con.length}</Badge>}>{lista(con)}<div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600"><strong>Control:</strong> la herramienta alerta; no ejecuta suspensiones automáticamente.</div></Card><Card title="Sin disponibilidad asignada" icon="🛡️" action={<Badge className="border-slate-200 bg-slate-100 text-slate-700">{sin.length}</Badge>}>{lista(sin)}</Card></section>; }
 function Alertas({ alerts }) { return <section className="space-y-4"><Card title={`Alertas del sistema (${alerts.length})`} icon="🔔" action={<Badge className="border-orange-200 bg-orange-100 text-orange-900">Requiere revisión</Badge>}><div className="space-y-2">{alerts.map((a, i) => <AlertItem key={i} a={a} />)}</div></Card><Card title="Semáforo normativo" icon="🚦"><div className="grid gap-3 md:grid-cols-5">{[["🟢", "Verificado"], ["🟡", "Confirmación interna"], ["🟠", "Criterio RH/Jurídico"], ["🔴", "No automatizar"], ["🔵", "Dato pendiente"]].map(([s, t]) => <div key={t} className="rounded-xl bg-slate-50 p-3"><div className="text-xl">{s}</div><div className="mt-1 text-sm font-semibold">{t}</div></div>)}</div></Card></section>; }
 
+function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData }) {
+  const [modalActividad, setModalActividad] = useState(null);
+  const [yearD, monthD, dayD] = diaVista.split("-").map(Number);
+  const monthIdx = monthD - 1;
+  const personasActivas = personas.filter(p => p.estado !== "Inactivo");
+  const finde = [0, 6].includes(new Date(diaVista + "T12:00:00").getDay());
+  const dowLabel = diasLargos[new Date(diaVista + "T12:00:00").getDay()];
+
+  const statusDia = personasActivas.map(p => {
+    const rol = codigoRolFuncionario(personas, roleData, yearD, monthIdx, p.nombre, dayD);
+    const cat = categoriaDe(rol);
+    const enTurno = esRolActivo(rol);
+    const acts = actividadesEnDia(actividadesPlan, diaVista).filter(a => (a.funcionarios || []).includes(p.nombre));
+    return { ...p, rol, cat, enTurno, acts, tieneActividad: acts.length > 0, tieneViatico: acts.some(a => a.viatico) };
+  });
+
+  const enTurnoConAct = statusDia.filter(p => p.enTurno && p.tieneActividad);
+  const enTurnoSinAct = statusDia.filter(p => p.enTurno && !p.tieneActividad);
+  const fueraDeTurno = statusDia.filter(p => !p.enTurno);
+  const conViatico = statusDia.filter(p => p.tieneViatico);
+  const actsDelDia = actividadesEnDia(actividadesPlan, diaVista).sort((a, b) => a.titulo.localeCompare(b.titulo));
+  const statsPuesto = opcionesPuestoOperativo.map(puesto => {
+    const del = statusDia.filter(p => (p.puestoOperativo || "") === puesto);
+    return { puesto, turno: del.filter(p => p.enTurno).length, programados: del.filter(p => p.tieneActividad).length, total: del.length };
+  });
+  const catLabel = { L: "Libre", V: "Vacaciones", I: "Incapacidad", O: "Otro", "": "Sin marcar" };
+  const catCls = { L: "border-amber-200 bg-amber-100 text-amber-900", V: "border-sky-200 bg-sky-100 text-sky-900", I: "border-red-200 bg-red-100 text-red-900", O: "border-violet-200 bg-violet-100 text-violet-900", "": "border-slate-200 bg-slate-100 text-slate-700" };
+  const fueraPorCat = fueraDeTurno.reduce((acc, p) => { const k = p.cat || ""; if (!acc[k]) acc[k] = []; acc[k].push(p); return acc; }, {});
+
+  const moveDay = delta => {
+    const d = new Date(diaVista + "T12:00:00");
+    d.setDate(d.getDate() + delta);
+    setDiaVista(`${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`);
+  };
+  const guardar = act => {
+    if (!act.titulo.trim()) return;
+    const normal = { ...act, fin: act.unDia ? act.inicio : (act.fin || act.inicio) };
+    if (normal.fin < normal.inicio) normal.fin = normal.inicio;
+    setActividadesPlan(prev => prev.some(a => a.id === normal.id) ? prev.map(a => a.id === normal.id ? normal : a) : [...prev, normal]);
+    setModalActividad(null);
+  };
+  const eliminar = id => { setActividadesPlan(prev => prev.filter(a => a.id !== id)); setModalActividad(null); };
+  const nuevaAct = (funs = [], lugar = "") => ({ id: `a${Date.now()}`, titulo: "", inicio: diaVista, fin: diaVista, unDia: true, funcionarios: funs, lugar, observaciones: "", viatico: false });
+
+  return <section className="space-y-5">
+    {/* Navegación de fecha */}
+    <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <button onClick={() => moveDay(-1)} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50">← Anterior</button>
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">{dowLabel} · {meses[monthIdx]} {yearD}</span>
+        <input type="date" value={diaVista} onChange={e => e.target.value && setDiaVista(e.target.value)} className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700" />
+      </div>
+      <button onClick={() => moveDay(1)} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50">Siguiente →</button>
+    </div>
+
+    {/* KPIs del día */}
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+      {[
+        { label: "En turno", value: enTurnoConAct.length + enTurnoSinAct.length, color: "text-emerald-700", bg: "border-emerald-200 bg-emerald-50" },
+        { label: "Con actividad", value: enTurnoConAct.length, color: "text-emerald-700", bg: "border-emerald-200 bg-emerald-50" },
+        { label: "Sin actividad", value: enTurnoSinAct.length, color: enTurnoSinAct.length > 0 ? "text-amber-600" : "text-slate-600", bg: enTurnoSinAct.length > 0 ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white" },
+        { label: "Fuera de turno", value: fueraDeTurno.length, color: "text-slate-600", bg: "border-slate-200 bg-white" },
+        { label: "Con viático", value: conViatico.length, color: conViatico.length > 0 ? "text-orange-700" : "text-slate-600", bg: conViatico.length > 0 ? "border-orange-200 bg-orange-50" : "border-slate-200 bg-white" },
+      ].map(({ label, value, color, bg }) => <div key={label} className={`rounded-2xl border p-4 ${bg}`}><div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div><div className={`mt-1 text-4xl font-black ${color}`}>{value}</div></div>)}
+    </div>
+
+    {/* Resumen por puesto */}
+    <Card title="Por puesto operativo" icon="📍">
+      <div className="grid gap-3 md:grid-cols-3">
+        {statsPuesto.map(({ puesto, turno, programados, total }) => <div key={puesto} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="mb-3 text-sm font-semibold text-slate-800">{puesto.replace("Puesto ", "")}</div>
+          <div className="grid grid-cols-3 gap-1 text-center">
+            <div><div className="text-2xl font-black text-emerald-700">{turno}</div><div className="text-[10px] text-slate-500">turno</div></div>
+            <div><div className="text-2xl font-black text-blue-700">{programados}</div><div className="text-[10px] text-slate-500">plan.</div></div>
+            <div><div className="text-2xl font-black text-slate-500">{total}</div><div className="text-[10px] text-slate-500">activos</div></div>
+          </div>
+        </div>)}
+      </div>
+    </Card>
+
+    {/* Actividades del día */}
+    <Card title={`Actividades planificadas (${actsDelDia.length})`} icon="🗓️" action={<button onClick={() => setModalActividad(nuevaAct())} className="rounded-xl bg-emerald-800 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700">+ Nueva</button>}>
+      {actsDelDia.length === 0
+        ? <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">Sin actividades planificadas para este día</div>
+        : <div className="space-y-3">{actsDelDia.map(act => {
+            const conf = conflictosActividadDia(act, dayD, yearD, monthIdx, personas, roleData);
+            return <div key={act.id} className={`rounded-2xl border p-4 ${conf.length ? "border-red-300 bg-red-50" : act.viatico ? "border-orange-200 bg-orange-50" : "border-emerald-200 bg-emerald-50"}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-slate-950">{act.titulo}</div>
+                  {act.lugar && <div className="mt-0.5 text-xs text-slate-500">📍 {act.lugar}</div>}
+                  {act.inicio !== (act.fin || act.inicio) && <div className="mt-0.5 text-xs text-slate-400">{fecha(act.inicio)} → {fecha(act.fin)}</div>}
+                </div>
+                <div className="flex shrink-0 flex-wrap items-start gap-1.5">
+                  {act.viatico && <Badge className="border-orange-300 bg-orange-100 text-orange-900">💵 Viático</Badge>}
+                  {conf.length > 0 && <Badge className="border-red-300 bg-red-100 text-red-900">⚠ {conf.length} conflicto{conf.length > 1 ? "s" : ""}</Badge>}
+                  <button onClick={() => setModalActividad({ ...act })} className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">Editar</button>
+                </div>
+              </div>
+              {act.funcionarios.length > 0 && <div className="mt-2.5 flex flex-wrap gap-1">{act.funcionarios.map(n => <span key={n} className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${conf.includes(n) ? "border-red-300 bg-white text-red-800" : "border-emerald-200 bg-white text-emerald-800"}`}>{n}{conf.includes(n) ? " ⚠" : ""}</span>)}</div>}
+            </div>;
+          })}</div>
+      }
+    </Card>
+
+    {/* En turno con actividad */}
+    <Card title={`En turno · con actividad (${enTurnoConAct.length})`} icon="✅">
+      {enTurnoConAct.length === 0
+        ? <p className="text-sm text-slate-400">Ningún funcionario en turno tiene actividad programada</p>
+        : <div className="divide-y divide-slate-100">{enTurnoConAct.map(p => <div key={p.id} className="flex items-start gap-3 py-3">
+            <Avatar name={p.nombre} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="font-semibold text-slate-950">{p.nombre}</span>
+                <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
+                {p.tieneViatico && <Badge className="border-orange-200 bg-orange-100 text-orange-900">💵 Viático</Badge>}
+              </div>
+              <div className="mt-0.5 text-xs text-slate-500">{p.puestoOperativo}</div>
+              <div className="mt-1.5 flex flex-wrap gap-1">{p.acts.map(a => <span key={a.id} className="rounded-full border border-emerald-200 bg-white px-2 py-0.5 text-[11px] text-emerald-800">{a.titulo}</span>)}</div>
+            </div>
+          </div>)}</div>
+      }
+    </Card>
+
+    {/* En turno sin actividad */}
+    <Card title={`En turno · sin actividad (${enTurnoSinAct.length})`} icon={enTurnoSinAct.length > 0 ? "⚠️" : "✅"}>
+      {enTurnoSinAct.length === 0
+        ? <p className="text-sm text-slate-400">Todos los funcionarios en turno tienen actividad asignada</p>
+        : <div className="divide-y divide-slate-100">{enTurnoSinAct.map(p => <div key={p.id} className="flex items-center gap-3 py-3">
+            <Avatar name={p.nombre} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="font-semibold text-slate-950">{p.nombre}</span>
+                <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
+              </div>
+              <div className="mt-0.5 text-xs text-slate-500">{p.puestoOperativo} · {p.puesto}</div>
+            </div>
+            <button onClick={() => setModalActividad(nuevaAct([p.nombre], p.puestoOperativo || ""))} className="shrink-0 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700">+ Asignar</button>
+          </div>)}</div>
+      }
+    </Card>
+
+    {/* Fuera de turno */}
+    <Card title={`Fuera de turno (${fueraDeTurno.length})`} icon="📴">
+      {fueraDeTurno.length === 0
+        ? <p className="text-sm text-slate-400">Todos los funcionarios activos están en turno</p>
+        : <div className="space-y-4">{Object.entries(fueraPorCat).sort(([a], [b]) => (catLabel[a] || "z").localeCompare(catLabel[b] || "z")).map(([cat, list]) => <div key={cat}>
+            <div className="mb-2 flex items-center gap-2">
+              <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${catCls[cat]}`}>{catLabel[cat] || "Sin marcar"}</span>
+              <span className="text-xs text-slate-400">{list.length} funcionario{list.length !== 1 ? "s" : ""}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">{list.map(p => <div key={p.id} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+              <Avatar name={p.nombre} />
+              <div>
+                <div className="text-sm font-semibold text-slate-900">{p.nombre}</div>
+                <div className="text-[10px] text-slate-400">{(p.puestoOperativo || "").replace("Puesto ", "")}</div>
+              </div>
+            </div>)}</div>
+          </div>)}</div>
+      }
+    </Card>
+
+    {/* Con viático */}
+    {conViatico.length > 0 && <Card title={`Con viático este día (${conViatico.length})`} icon="💵">
+      <div className="divide-y divide-slate-100">{conViatico.map(p => <div key={p.id} className="flex items-start gap-3 py-2.5">
+        <Avatar name={p.nombre} />
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-slate-950">{p.nombre}</div>
+          <div className="mt-1 flex flex-wrap gap-1">{p.acts.filter(a => a.viatico).map(a => <span key={a.id} className="rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] text-orange-800">{a.titulo}{a.lugar ? ` · ${a.lugar}` : ""}</span>)}</div>
+        </div>
+      </div>)}</div>
+    </Card>}
+
+    {modalActividad && <ModalActividad valor={modalActividad} personas={personasActivas} cerrar={() => setModalActividad(null)} guardar={guardar} eliminar={eliminar} actividadesPlan={actividadesPlan} />}
+  </section>;
+}
+
 export default function App() {
   const [view, setView] = useState("dashboard");
   const [personas, setPersonas] = useState(baseFuncionarios);
@@ -530,7 +707,8 @@ export default function App() {
   const [compact, setCompact] = useState(false);
   const [roleData, setRoleData] = useState({});
   const [actividadesPlan, setActividadesPlan] = useState(baseActividadesPlan);
+  const [diaVista, setDiaVista] = useState("2026-05-19");
   const alerts = useMemo(() => alertas(personas), [personas]);
   const nAlertas = alerts.filter(a => a.t === "danger" || a.t === "warn").length;
-  return <div className="min-h-screen bg-slate-100 text-slate-950"><div className="flex min-h-screen"><Sidebar view={view} setView={setView} nAlertas={nAlertas} /><main className="min-w-0 flex-1"><Topbar view={view} setView={setView} month={month} setMonth={setMonth} year={year} setYear={setYear} compact={compact} setCompact={setCompact} /><div className="space-y-5 p-4 pb-24 lg:p-6 lg:pb-6">{view === "dashboard" && <Dashboard personas={personas} alerts={alerts} setView={setView} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} month={month} year={year} />}{view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}{view === "roles" && <Roles year={year} month={month} compact={compact} roleData={roleData} setRoleData={setRoleData} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} />}{view === "planificacion" && <Planificacion year={year} month={month} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} />}{view === "planFuncionario" && <PlanificacionFuncionario year={year} month={month} setMonth={setMonth} setYear={setYear} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} setRoleData={setRoleData} />}{view === "adelantos" && <AdelantoViaticos actividadesPlan={actividadesPlan} personas={personas} />}{view === "disponibilidad" && <Disponibilidad personas={personas} />}{view === "alertas" && <Alertas alerts={alerts} />}</div></main></div><BottomNav view={view} setView={setView} nAlertas={nAlertas} /></div>;
+  return <div className="min-h-screen bg-slate-100 text-slate-950"><div className="flex min-h-screen"><Sidebar view={view} setView={setView} nAlertas={nAlertas} /><main className="min-w-0 flex-1"><Topbar view={view} setView={setView} month={month} setMonth={setMonth} year={year} setYear={setYear} compact={compact} setCompact={setCompact} /><div className="space-y-5 p-4 pb-24 lg:p-6 lg:pb-6">{view === "dashboard" && <Dashboard personas={personas} alerts={alerts} setView={setView} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} month={month} year={year} />}{view === "dia" && <DashboardDia diaVista={diaVista} setDiaVista={setDiaVista} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} />}{view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}{view === "roles" && <Roles year={year} month={month} compact={compact} roleData={roleData} setRoleData={setRoleData} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} />}{view === "planificacion" && <Planificacion year={year} month={month} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} setView={setView} setDiaVista={setDiaVista} />}{view === "planFuncionario" && <PlanificacionFuncionario year={year} month={month} setMonth={setMonth} setYear={setYear} personas={personas} actividadesPlan={actividadesPlan} setActividadesPlan={setActividadesPlan} roleData={roleData} setRoleData={setRoleData} />}{view === "adelantos" && <AdelantoViaticos actividadesPlan={actividadesPlan} personas={personas} />}{view === "disponibilidad" && <Disponibilidad personas={personas} />}{view === "alertas" && <Alertas alerts={alerts} />}</div></main></div><BottomNav view={view} setView={setView} nAlertas={nAlertas} /></div>;
 }
