@@ -543,9 +543,12 @@ function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setAct
   const fueraDeTurno = statusDia.filter(p => !p.enTurno);
   const conViatico = statusDia.filter(p => p.tieneViatico);
   const actsDelDia = actividadesEnDia(actividadesPlan, diaVista).sort((a, b) => a.titulo.localeCompare(b.titulo));
+  const arvHoy = actsDelDia.filter(a => a.titulo === actividadRutinariaVisitantes);
   const statsPuesto = opcionesPuestoOperativo.map(puesto => {
     const del = statusDia.filter(p => (p.puestoOperativo || "") === puesto);
-    return { puesto, turno: del.filter(p => p.enTurno).length, programados: del.filter(p => p.tieneActividad).length, total: del.length };
+    const necesitaARV = puesto === "Puesto Orosi" || puesto === "Puesto Quetzales";
+    const arvPersonas = necesitaARV ? del.filter(p => arvHoy.some(a => (a.funcionarios || []).includes(p.nombre))).length : null;
+    return { puesto, turno: del.filter(p => p.enTurno).length, programados: del.filter(p => p.tieneActividad).length, disponibles: del.filter(p => p.enTurno && !p.tieneActividad).length, necesitaARV, arvPersonas };
   });
   const catLabel = { L: "Libre", V: "Vacaciones", I: "Incapacidad", O: "Otro", "": "Sin marcar" };
   const catCls = { L: "border-amber-200 bg-amber-100 text-amber-900", V: "border-sky-200 bg-sky-100 text-sky-900", I: "border-red-200 bg-red-100 text-red-900", O: "border-violet-200 bg-violet-100 text-violet-900", "": "border-slate-200 bg-slate-100 text-slate-700" };
@@ -591,13 +594,14 @@ function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setAct
     {/* Resumen por puesto */}
     <Card title="Por puesto operativo" icon="📍">
       <div className="grid gap-3 md:grid-cols-3">
-        {statsPuesto.map(({ puesto, turno, programados, total }) => <div key={puesto} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        {statsPuesto.map(({ puesto, turno, programados, disponibles, necesitaARV, arvPersonas }) => <div key={puesto} className={`rounded-2xl border p-4 ${necesitaARV && arvPersonas === 0 ? "border-red-300 bg-red-50" : "border-slate-200 bg-slate-50"}`}>
           <div className="mb-3 text-sm font-semibold text-slate-800">{puesto.replace("Puesto ", "")}</div>
           <div className="grid grid-cols-3 gap-1 text-center">
             <div><div className="text-2xl font-black text-emerald-700">{turno}</div><div className="text-[10px] text-slate-500">turno</div></div>
             <div><div className="text-2xl font-black text-blue-700">{programados}</div><div className="text-[10px] text-slate-500">plan.</div></div>
-            <div><div className="text-2xl font-black text-slate-500">{total}</div><div className="text-[10px] text-slate-500">activos</div></div>
+            <div><div className={`text-2xl font-black ${disponibles > 0 ? "text-amber-600" : "text-slate-400"}`}>{disponibles}</div><div className="text-[10px] text-slate-500">disponibles</div></div>
           </div>
+          {necesitaARV && <div className={`mt-3 flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold ${arvPersonas === 0 ? "border-red-400 bg-red-100 text-red-900" : "border-emerald-300 bg-emerald-100 text-emerald-900"}`}>{arvPersonas === 0 ? <><span>⚠️</span><span>Sin Visit. asignada hoy</span></> : <><span>✅</span><span>{arvPersonas} en atención visitantes</span></>}</div>}
         </div>)}
       </div>
     </Card>
