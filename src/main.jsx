@@ -1,18 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { registerSW } from 'virtual:pwa-register'
 import App from './App.jsx'
 import PWAWrapper from './PWAWrapper.jsx'
+import { APP_VERSION, APP_BUILD_TIME, APP_COMMIT } from './lib/appVersion.js'
 import './index.css'
 
-registerSW({
-  onNeedRefresh() {
-    // La nueva versión del SW está disponible: actualiza automáticamente.
-  },
-  onOfflineReady() {
-    // La app está lista para funcionar sin conexión.
-  },
-})
+if (typeof console !== 'undefined') {
+  console.info(`PNLQ v${APP_VERSION} · build ${APP_BUILD_TIME} · commit ${APP_COMMIT}`)
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

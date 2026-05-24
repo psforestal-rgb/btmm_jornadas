@@ -1,13 +1,57 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'))
+
+const APP_VERSION = pkg.version
+const APP_BUILD_TIME = new Date().toISOString()
+const APP_COMMIT = (() => {
+  if (process.env.GIT_SHA) return process.env.GIT_SHA.slice(0, 7)
+  if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA.slice(0, 7)
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim()
+  } catch {
+    return 'dev'
+  }
+})()
+
+const versionJsonPlugin = () => ({
+  name: 'pnlq-version-json',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({
+      type: 'asset',
+      fileName: 'version.json',
+      source: JSON.stringify(
+        { version: APP_VERSION, buildTime: APP_BUILD_TIME, commit: APP_COMMIT },
+        null,
+        2,
+      ),
+    })
+  },
+})
 
 const BASE = '/BTMM_JORNADAS/'
 
 export default defineConfig({
   base: BASE,
+  define: {
+    __APP_VERSION__: JSON.stringify(APP_VERSION),
+    __APP_BUILD_TIME__: JSON.stringify(APP_BUILD_TIME),
+    __APP_COMMIT__: JSON.stringify(APP_COMMIT),
+    __APP_VERSION_URL__: JSON.stringify(`${BASE}version.json`),
+  },
   plugins: [
     react(),
+    versionJsonPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
@@ -15,14 +59,31 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         sourcemap: false,
+        navigateFallbackDenylist: [/^\/version\.json$/],
         runtimeCaching: [
           {
+            urlPattern: ({ url }) => url.pathname.endsWith('/version.json'),
+            handler: 'NetworkOnly',
+            options: { cacheName: 'pnlq-version-check' },
+          },
+          {
+            urlPattern: ({ request }) => request.destination === 'document',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pnlq-html-cache',
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 * 24 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             urlPattern: ({ request }) =>
-              request.destination === 'document' ||
-              request.destination === 'script'  ||
-              request.destination === 'style'   ||
-              request.destination === 'image'   ||
+              request.destination === 'script' ||
+              request.destination === 'style'  ||
+              request.destination === 'image'  ||
               request.destination === 'font',
             handler: 'StaleWhileRevalidate',
             options: {
