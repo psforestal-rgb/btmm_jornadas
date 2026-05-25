@@ -175,6 +175,36 @@ un alias por nombre. Cada icono que sea funcional debe llevar `label`
 (se anuncia a lectores de pantalla); los decorativos quedan
 `aria-hidden`.
 
+## Persistencia local (Fase 5 · Paso 0)
+
+La aplicación guarda automáticamente el estado en `localStorage` con
+debounce de 500 ms tras cada cambio:
+
+- **Clave**: `pnlq:state` (más `pnlq:lastSavedAt` con la marca temporal).
+- **Esquema versionado**: el snapshot lleva `schemaVersion`; si la
+  versión persistida no coincide con la actual, la app crea un backup
+  automático (`pnlq:backup:vN-<timestamp>`) y descarta el estado
+  obsoleto en lugar de leer estructuras incompatibles.
+- **Campos persistidos**: `personas`, `actividadesPlan`, `roleData`.
+- **No se persisten** datos efímeros de UI (`view`, `compact`,
+  `diaVista`, `month`, `year`).
+
+La vista **Datos · respaldo** (sidebar grupo "Control") expone:
+
+- Estado de la copia local (última fecha guardada, cambios pendientes
+  durante el debounce, versión del esquema).
+- Conteo de funcionarios, actividades y celdas de rol con override.
+- **Exportar JSON** — descarga `pnlq-snapshot-<timestamp>.json` con
+  metadatos (unidad, área, fecha de exportación).
+- **Importar JSON** — valida `schemaVersion`, rechaza versiones
+  incompatibles con mensaje claro.
+- **Reiniciar a datos semilla** — modal de confirmación con
+  recomendación de exportar antes.
+
+> La copia local **no sustituye** al backend institucional. Fase
+> siguiente prevé migrar a IndexedDB (Dexie) con cola de cambios
+> preparada para sincronización con el sistema central del SINAC.
+
 ## Ergonomía móvil (Fase 4)
 
 Tres vistas alternas optimizadas para uso en campo, sin remover

@@ -13,6 +13,7 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
     adelantos: "Adelanto de viáticos",
     disponibilidad: "Disponibilidad",
     alertas: "Alertas",
+    datos: "Datos · respaldo",
   }[view];
   const moverMes = (paso) => {
     let nuevoMes = month + paso;

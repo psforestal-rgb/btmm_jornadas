@@ -15,6 +15,7 @@ export default function BottomNav({ view, setView, nAlertas }) {
     ["planFuncionario", "Plan/Func.", "clipboard"],
     ["adelantos", "Viáticos", "banknote"],
     ["disponibilidad", "Disponib.", "shield"],
+    ["datos", "Datos", "shieldAlert"],
   ];
   return (
     <>
