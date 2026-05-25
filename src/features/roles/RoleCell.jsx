@@ -14,7 +14,7 @@ export default function RoleCell({ value, onOpen, onConflicto, finde, compact, e
         type="button"
         onClick={handleClick}
         disabled={!clickable}
-        className={`relative w-full ${compact ? "h-9 text-[11px]" : "h-11 text-[12px]"} font-semibold tracking-wide outline-none transition ${
+        className={`relative w-full ${compact ? "h-9 text-[11px]" : "min-h-touch h-12 text-[12px]"} font-semibold tracking-wide outline-none transition focus-visible:outline-none ${
           conflicto
             ? "cursor-pointer hover:brightness-90 focus:ring-2 focus:ring-red-500"
             : editable

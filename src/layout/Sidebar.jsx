@@ -1,20 +1,21 @@
 import { APP_VERSION, APP_BUILD_TIME, APP_COMMIT, formatBuildTime } from "../lib/appVersion.js";
+import Icon from "../ui/Icon.jsx";
 
 export default function Sidebar({ view, setView, nAlertas }) {
   const grupos = [
-    ["Principal", [["dashboard", "Dashboard", "🏠"], ["funcionarios", "Funcionarios", "👥"]]],
+    ["Principal", [["dashboard", "Dashboard", "home"], ["funcionarios", "Funcionarios", "users"]]],
     [
       "Jornadas",
       [
-        ["dia", "Detalle del día", "📅"],
-        ["roles", "Roles", "📊"],
-        ["planificacion", "Planificación general", "🗓️"],
-        ["planFuncionario", "Planificación/Funcionario", "📋"],
-        ["adelantos", "Adelanto de viáticos", "💵"],
-        ["disponibilidad", "Disponibilidad", "🛡️"],
+        ["dia", "Detalle del día", "calendar"],
+        ["roles", "Roles", "chart"],
+        ["planificacion", "Planificación general", "calendarDays"],
+        ["planFuncionario", "Planificación/Funcionario", "clipboard"],
+        ["adelantos", "Adelanto de viáticos", "banknote"],
+        ["disponibilidad", "Disponibilidad", "shield"],
       ],
     ],
-    ["Control", [["alertas", "Alertas", "🔔"]]],
+    ["Control", [["alertas", "Alertas", "bell"]]],
   ];
   return (
     <aside className="hidden w-60 shrink-0 flex-col bg-emerald-900 text-white lg:flex">
@@ -41,14 +42,15 @@ export default function Sidebar({ view, setView, nAlertas }) {
               <button
                 key={id}
                 onClick={() => setView(id)}
-                className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold ${
+                aria-current={view === id ? "page" : undefined}
+                className={`mb-1 flex min-h-touch w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
                   view === id ? "bg-white/20 text-white ring-1 ring-white/20" : "text-white/80 hover:bg-white/10"
                 }`}
               >
-                <span>{icon}</span>
+                <Icon name={icon} size={18} />
                 {label}
                 {id === "alertas" && nAlertas > 0 && (
-                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{nAlertas}</span>
+                  <span aria-label={`${nAlertas} alertas pendientes`} className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{nAlertas}</span>
                 )}
               </button>
             ))}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import Avatar from "../../ui/Avatar.jsx";
+import EmptyState from "../../ui/EmptyState.jsx";
 import { meses } from "../../data/calendario.js";
 import { dim, fecha, pad2 } from "../../domain/fechas.js";
 
@@ -67,9 +68,12 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
           </div>
         </div>
         {actividades.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-sm font-bold text-slate-500">
-            No hay actividades del mes siguiente marcadas como “requiere tramitar adelanto de viático”.
-          </div>
+          <EmptyState
+            icon="banknote"
+            title="Sin actividades con viático para el próximo mes"
+            description={`Aún no hay actividades de ${nombreMes} marcadas como “requiere tramitar adelanto de viático”. Vaya a Planificación general o Plan/Funcionario para asignarlas.`}
+            tone="neutral"
+          />
         ) : vista === "funcionario" ? (
           <div className="grid gap-3 xl:grid-cols-2">
             {registrosFuncionario.map(({ funcionario, actividades }) => (

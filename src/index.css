@@ -2,7 +2,144 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Scrollbar delgada en navegadores Webkit/Blink */
+/* =====================================================================
+   TOKENS SEMÁNTICOS — TEMA CLARO (default)
+   Cada token se expresa como triplete R G B (sin "rgb()"), para que
+   Tailwind pueda añadir <alpha-value> mediante la utilidad bg-X/40, etc.
+   ===================================================================== */
+:root,
+[data-theme="light"] {
+  --c-brand: 6 78 59;            /* emerald-900 institucional */
+  --c-brand-fg: 255 255 255;
+  --c-brand-soft: 209 250 229;   /* emerald-100 */
+
+  --c-surface: 255 255 255;
+  --c-surface-alt: 241 245 249;  /* slate-100 */
+  --c-surface-inset: 248 250 252;/* slate-50 */
+
+  --c-ink: 15 23 42;             /* slate-900 */
+  --c-ink-muted: 71 85 105;      /* slate-600 */
+  --c-ink-subtle: 148 163 184;   /* slate-400 */
+  --c-ink-inverse: 255 255 255;
+
+  --c-line: 203 213 225;         /* slate-300 */
+  --c-line-strong: 100 116 139;  /* slate-500 */
+
+  --c-critical: 185 28 28;       /* red-700 (AA en blanco) */
+  --c-critical-fg: 127 29 29;    /* red-900 */
+  --c-critical-soft: 254 226 226;/* red-100 */
+
+  --c-warning: 180 83 9;         /* amber-700 (AA en blanco) */
+  --c-warning-fg: 120 53 15;     /* amber-900 */
+  --c-warning-soft: 254 243 199; /* amber-100 */
+
+  --c-ok: 21 128 61;             /* green-700 */
+  --c-ok-fg: 6 78 59;            /* emerald-900 */
+  --c-ok-soft: 209 250 229;      /* emerald-100 */
+
+  --c-info: 29 78 216;           /* blue-700 */
+  --c-info-fg: 23 37 84;         /* blue-950 */
+  --c-info-soft: 219 234 254;    /* blue-100 */
+
+  --c-viatico: 194 65 12;        /* orange-700 (AA en blanco) */
+  --c-viatico-fg: 124 45 18;     /* orange-900 */
+  --c-viatico-soft: 255 237 213; /* orange-100 */
+}
+
+/* =====================================================================
+   TEMA OSCURO
+   ===================================================================== */
+[data-theme="dark"] {
+  --c-brand: 16 185 129;         /* emerald-500 */
+  --c-brand-fg: 6 78 59;         /* emerald-900 */
+  --c-brand-soft: 6 95 70;       /* emerald-800 */
+
+  --c-surface: 15 23 42;         /* slate-900 */
+  --c-surface-alt: 30 41 59;     /* slate-800 */
+  --c-surface-inset: 51 65 85;   /* slate-700 */
+
+  --c-ink: 241 245 249;          /* slate-100 */
+  --c-ink-muted: 203 213 225;    /* slate-300 */
+  --c-ink-subtle: 148 163 184;   /* slate-400 */
+  --c-ink-inverse: 15 23 42;
+
+  --c-line: 71 85 105;           /* slate-600 */
+  --c-line-strong: 148 163 184;  /* slate-400 */
+
+  --c-critical: 248 113 113;     /* red-400 */
+  --c-critical-fg: 254 226 226;
+  --c-critical-soft: 127 29 29;
+
+  --c-warning: 251 191 36;       /* amber-400 */
+  --c-warning-fg: 254 243 199;
+  --c-warning-soft: 120 53 15;
+
+  --c-ok: 74 222 128;            /* green-400 */
+  --c-ok-fg: 209 250 229;
+  --c-ok-soft: 6 95 70;
+
+  --c-info: 96 165 250;          /* blue-400 */
+  --c-info-fg: 219 234 254;
+  --c-info-soft: 30 58 138;
+
+  --c-viatico: 251 146 60;       /* orange-400 */
+  --c-viatico-fg: 255 237 213;
+  --c-viatico-soft: 124 45 18;
+}
+
+/* =====================================================================
+   TEMA ALTO CONTRASTE (campo/sol)
+   Cumple WCAG AAA: contraste ≥ 7:1 entre ink y surface.
+   ===================================================================== */
+[data-theme="hc"] {
+  --c-brand: 0 0 0;
+  --c-brand-fg: 255 255 255;
+  --c-brand-soft: 255 255 255;
+
+  --c-surface: 255 255 255;
+  --c-surface-alt: 255 255 255;
+  --c-surface-inset: 255 255 255;
+
+  --c-ink: 0 0 0;
+  --c-ink-muted: 0 0 0;
+  --c-ink-subtle: 0 0 0;
+  --c-ink-inverse: 255 255 255;
+
+  --c-line: 0 0 0;
+  --c-line-strong: 0 0 0;
+
+  --c-critical: 153 0 0;
+  --c-critical-fg: 255 255 255;
+  --c-critical-soft: 255 230 230;
+
+  --c-warning: 153 76 0;
+  --c-warning-fg: 255 255 255;
+  --c-warning-soft: 255 240 200;
+
+  --c-ok: 0 102 51;
+  --c-ok-fg: 255 255 255;
+  --c-ok-soft: 220 252 231;
+
+  --c-info: 0 51 153;
+  --c-info-fg: 255 255 255;
+  --c-info-soft: 219 234 254;
+
+  --c-viatico: 153 51 0;
+  --c-viatico-fg: 255 255 255;
+  --c-viatico-soft: 255 224 200;
+}
+
+[data-theme="hc"] * {
+  border-width: 2px !important;
+}
+
+[data-theme="hc"] body {
+  font-weight: 600;
+}
+
+/* =====================================================================
+   Scrollbar (preserva apariencia institucional)
+   ===================================================================== */
 * {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
@@ -19,7 +156,9 @@
   border-radius: 3px;
 }
 
-/* Tipografía base */
+/* =====================================================================
+   Tipografía y safe-area
+   ===================================================================== */
 html {
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
@@ -27,10 +166,35 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Area segura para notch/home indicator en iOS */
 body {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* =====================================================================
+   Foco visible (a11y) — anillo de alto contraste en todos los modos
+   ===================================================================== */
+:focus-visible {
+  outline: 2px solid rgb(var(--c-brand));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Animación sutil para anillos de conflicto */
+@keyframes pnlq-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.pnlq-pulse {
+  animation: pnlq-pulse 1.6s ease-in-out infinite;
+}
+
+/* Reducir movimiento si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .pnlq-pulse,
+  .animate-pulse {
+    animation: none !important;
+  }
 }

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { opcionesPuesto, opcionesCondicion, opcionesEstado, opcionesModalidad } from "../../data/opciones.js";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
+import { useEscapeClose } from "../../lib/a11y.js";
 
 export default function ModalFuncionario({ valor, cerrar, guardar }) {
+  useEscapeClose(cerrar);
   const [f, setF] = useState(valor);
   const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
   const cls = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none";
@@ -13,8 +15,8 @@ export default function ModalFuncionario({ valor, cerrar, guardar }) {
     </label>
   );
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4">
-      <div className="max-h-[94vh] w-full max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <div role="dialog" aria-modal="true" aria-label={valor.nombre ? `Editar funcionario ${valor.nombre}` : "Agregar funcionario"} className="max-h-[94vh] w-full max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex justify-between border-b p-5">
           <h3 className="text-lg font-semibold">{valor.nombre ? "Editar funcionario" : "Agregar funcionario"}</h3>
           <button onClick={cerrar} className="font-black">✕</button>

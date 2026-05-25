@@ -14,7 +14,8 @@ SINAC · Área de Conservación Central · Costa Rica.
 ## Stack
 
 - React 18 + Vite 6 (sin enrutador externo; navegación por estado).
-- Tailwind CSS 3.
+- Tailwind CSS 3 con tokens semánticos (claro / oscuro / alto contraste).
+- `lucide-react` para iconografía SVG accesible.
 - PWA con `vite-plugin-pwa` + Workbox + `workbox-window`.
 - Idioma: español (es-CR).
 - Vitest 2 para pruebas unitarias de dominio.
@@ -47,7 +48,8 @@ src/
 ├── index.css                   # Tailwind base
 ├── lib/                        # Utilidades transversales
 │   ├── appVersion.js           # APP_VERSION / BUILD_TIME / COMMIT
-│   └── versionCheck.js         # Heartbeat anti-cache (/version.json)
+│   ├── versionCheck.js         # Heartbeat anti-cache (/version.json)
+│   └── a11y.js                 # useModalA11y, useEscapeClose
 ├── data/                       # Constantes y datos semilla
 │   ├── calendario.js           # meses, dias, diasLargos
 │   ├── puestos.js              # puestos operativos + opciones
@@ -69,13 +71,18 @@ src/
 │   ├── Card.jsx
 │   ├── AlertItem.jsx
 │   ├── AlertStrip.jsx
+│   ├── Icon.jsx                # wrapper de lucide-react con mapping de emojis
+│   ├── EmptyState.jsx          # estado vacío con icono + CTA
+│   ├── Modal.jsx               # modal accesible (ARIA + focus trap + Esc)
+│   ├── ThemeToggle.jsx         # toggle claro / oscuro / alto contraste
 │   └── styles.js               # codigoCls, estadoCls, avatar, iniciales
 ├── layout/                     # Chrome global
 │   ├── Sidebar.jsx             # Navegación lateral + footer con versión
 │   ├── Topbar.jsx              # Cabecera sticky + navegación mes/año
 │   └── BottomNav.jsx           # Navegación inferior (móvil)
 ├── context/
-│   └── AppContext.jsx          # useReducer + Context, setters compatibles
+│   ├── AppContext.jsx          # useReducer + Context, setters compatibles
+│   └── ThemeContext.jsx        # light / dark / hc, persistido en localStorage
 └── features/                   # Vistas (una por pantalla del sistema)
     ├── dashboard/
     │   ├── Dashboard.jsx
@@ -143,6 +150,43 @@ celda, respetando la **modalidad** del funcionario:
 | 20x10 | 20 | 10 |
 
 ---
+
+## Tema visual (Fase 3)
+
+La aplicación soporta tres temas, persistidos en `localStorage` con la
+clave `pnlq:theme`:
+
+| Tema | Cuándo usar | Contraste |
+|---|---|---|
+| `light` | Escritorio / oficina (default) | WCAG AA |
+| `dark` | Uso nocturno / pantalla con poca luz | WCAG AA |
+| `hc` | Campo bajo sol / accesibilidad reforzada | WCAG AAA, bordes de 2 px |
+
+El toggle vive en la barra superior (Topbar) y cicla entre los tres
+modos. Los tokens semánticos (`critical`, `warning`, `ok`, `info`,
+`viatico`, `surface`, `ink`, `line`, ...) se exponen como utilidades
+Tailwind (`bg-critical`, `text-warning-fg`, etc.).
+
+## Iconografía (Fase 3)
+
+La aplicación usa `lucide-react` a través del componente `Icon`, que
+acepta tanto un emoji literal (mapeado al ícono correspondiente) como
+un alias por nombre. Cada icono que sea funcional debe llevar `label`
+(se anuncia a lectores de pantalla); los decorativos quedan
+`aria-hidden`.
+
+## Accesibilidad (Fase 3)
+
+- **Modales**: ARIA `role="dialog"` + `aria-modal="true"` +
+  `aria-labelledby`. Cierre por Esc + clic en backdrop + botón ✕
+  visible. El componente `Modal` añade además trampa de foco y
+  restauración al disparador.
+- **Foco visible**: anillo de alto contraste en todos los elementos
+  interactivos vía `:focus-visible`.
+- **Tamaño táctil mínimo**: `min-h-touch` (48 px) en BottomNav,
+  Sidebar nav items, RoleCell (modo amplio), botones de cierre de
+  modal y CTAs principales.
+- **Movimiento reducido**: respeta `prefers-reduced-motion`.
 
 ## Mecanismo anti-cache (Fase 1)
 
