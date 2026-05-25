@@ -2,6 +2,7 @@ import { useState } from "react";
 import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import Avatar from "../../ui/Avatar.jsx";
+import Icon from "../../ui/Icon.jsx";
 import { codigoCls } from "../../ui/styles.js";
 import { meses, diasLargos } from "../../data/calendario.js";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
@@ -9,6 +10,7 @@ import { pad2, fecha } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo, categoriaDe } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { conflictosActividadDia } from "../../domain/conflictos.js";
+import { useSwipe } from "../../lib/useSwipe.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData }) {
@@ -81,12 +83,24 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
     viatico: false,
   });
 
+  // Swipe horizontal entre días. Los botones de navegación siguen siendo la
+  // ruta principal (a11y, teclado, escritorio).
+  const swipeRef = useSwipe({
+    onSwipeLeft: () => moveDay(1),
+    onSwipeRight: () => moveDay(-1),
+  });
+
   return (
-    <section className="space-y-5">
+    <section ref={swipeRef} className="space-y-5">
       {/* Navegación de fecha */}
       <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <button onClick={() => moveDay(-1)} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50">
-          ← Anterior
+        <button
+          onClick={() => moveDay(-1)}
+          aria-label="Día anterior"
+          className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+        >
+          <Icon name="chevronLeft" size={16} />
+          Anterior
         </button>
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -96,11 +110,18 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
             type="date"
             value={diaVista}
             onChange={(e) => e.target.value && setDiaVista(e.target.value)}
-            className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700"
+            aria-label="Seleccionar fecha"
+            className="min-h-touch rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700"
           />
+          <span className="text-[10px] text-slate-400 lg:hidden">Deslice ←/→ para cambiar día</span>
         </div>
-        <button onClick={() => moveDay(1)} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50">
-          Siguiente →
+        <button
+          onClick={() => moveDay(1)}
+          aria-label="Día siguiente"
+          className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+        >
+          Siguiente
+          <Icon name="chevronRight" size={16} />
         </button>
       </div>
 

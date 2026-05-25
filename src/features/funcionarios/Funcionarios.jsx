@@ -2,14 +2,23 @@ import { useMemo, useState } from "react";
 import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import Avatar from "../../ui/Avatar.jsx";
+import Icon from "../../ui/Icon.jsx";
+import EmptyState from "../../ui/EmptyState.jsx";
 import { estadoCls } from "../../ui/styles.js";
 import { fecha } from "../../domain/fechas.js";
+import { useIsMobile } from "../../lib/responsive.js";
 import ModalFuncionario from "./ModalFuncionario.jsx";
+import FuncionarioCard from "./FuncionarioCard.jsx";
 
 export default function Funcionarios({ personas, setPersonas }) {
   const [q, setQ] = useState("");
   const [filtro, setFiltro] = useState("todos");
   const [modal, setModal] = useState(null);
+  const isMobile = useIsMobile();
+  // En móvil el default son tarjetas; en escritorio, tabla. El usuario puede
+  // alternar manualmente. Persistimos sólo durante la sesión.
+  const [vista, setVista] = useState(null); // null = auto (depende de isMobile)
+  const vistaEfectiva = vista ?? (isMobile ? "tarjetas" : "tabla");
   const [borrar, setBorrar] = useState(null);
   const filtrados = useMemo(
     () =>
@@ -58,9 +67,38 @@ export default function Funcionarios({ personas, setPersonas }) {
         title="Funcionarios"
         icon="👥"
         action={
-          <button onClick={() => setModal(nuevo())} className="rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white">
-            + Agregar funcionario
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <div role="group" aria-label="Vista" className="inline-flex overflow-hidden rounded-xl border border-slate-300 bg-white">
+              <button
+                type="button"
+                onClick={() => setVista("tabla")}
+                aria-pressed={vistaEfectiva === "tabla"}
+                className={`min-h-touch px-3 py-2 text-xs font-bold ${
+                  vistaEfectiva === "tabla" ? "bg-emerald-800 text-white" : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                Tabla
+              </button>
+              <button
+                type="button"
+                onClick={() => setVista("tarjetas")}
+                aria-pressed={vistaEfectiva === "tarjetas"}
+                className={`min-h-touch border-l border-slate-300 px-3 py-2 text-xs font-bold ${
+                  vistaEfectiva === "tarjetas" ? "bg-emerald-800 text-white" : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                Tarjetas
+              </button>
+            </div>
+            <button
+              onClick={() => setModal(nuevo())}
+              className="inline-flex min-h-touch items-center gap-1 rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            >
+              <Icon name="plus" size={16} />
+              <span className="hidden sm:inline">Agregar funcionario</span>
+              <span className="sm:hidden">Agregar</span>
+            </button>
+          </div>
         }
       >
         <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center">
@@ -90,10 +128,30 @@ export default function Funcionarios({ personas, setPersonas }) {
               </button>
             ))}
           </div>
-          <div className="text-sm font-bold text-slate-500 xl:ml-auto">
+          <div className="text-sm font-bold text-slate-500 xl:ml-auto" aria-live="polite">
             {filtrados.length}/{personas.length}
           </div>
         </div>
+        {filtrados.length === 0 && (
+          <EmptyState
+            icon="search"
+            title="Sin resultados"
+            description="Ajuste la búsqueda o los filtros para encontrar funcionarios."
+          />
+        )}
+        {filtrados.length > 0 && vistaEfectiva === "tarjetas" && (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filtrados.map((f) => (
+              <FuncionarioCard
+                key={f.id}
+                f={f}
+                onEditar={() => setModal({ ...f })}
+                onBorrar={() => setBorrar(f.id)}
+              />
+            ))}
+          </div>
+        )}
+        {filtrados.length > 0 && vistaEfectiva === "tabla" && (
         <div className="overflow-auto rounded-xl border border-slate-300">
           <table className="min-w-[1040px] w-full border-collapse text-sm">
             <thead className="bg-slate-100 text-left text-[11px] uppercase tracking-wider text-slate-500">
@@ -176,6 +234,7 @@ export default function Funcionarios({ personas, setPersonas }) {
             </tbody>
           </table>
         </div>
+        )}
         <div className="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
           <span>🛡️ Autoridad de policía</span>
           <span>🔥 Brigada forestal</span>

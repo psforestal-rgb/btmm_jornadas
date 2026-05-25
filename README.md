@@ -175,6 +175,31 @@ un alias por nombre. Cada icono que sea funcional debe llevar `label`
 (se anuncia a lectores de pantalla); los decorativos quedan
 `aria-hidden`.
 
+## Ergonomía móvil (Fase 4)
+
+Tres vistas alternas optimizadas para uso en campo, sin remover
+ninguna funcionalidad de escritorio:
+
+- **Funcionarios** — toggle "Tabla / Tarjetas". Default automático
+  por viewport (`< 1024 px` → tarjetas). `FuncionarioCard` reproduce
+  toda la información de la fila: avatar, cargo, puesto operativo,
+  condición, jornada/modalidad, "🔵 Sin resolución", disponibilidad
+  + vencimiento, atributos (Policía/Brigada/ONG), estado y acciones.
+- **Roles** — toggle "Tabla mensual / Por semana". La vista por
+  semana muestra una tarjeta por funcionario con 7 botones de día
+  ≥ 48 px, conservando: códigos T/L/V/I/O, anillo verde "INICIO",
+  anillo rojo de conflicto, candado de edición + modalidad/Aplicar
+  patrón, modales `MenuCelda` / `ConflictoModal` /
+  `ActividadesDiaModal`. La fila "CANTIDAD EN TURNO" se reubica
+  como **tarjeta resumen al final de la semana**.
+- **Detalle del día** — swipe horizontal (← →) entre días en
+  dispositivos táctiles. Los botones Anterior/Siguiente y el
+  selector de fecha siguen siendo la ruta principal (a11y).
+
+Toda nueva vista respeta la condición rectora: ningún indicador,
+alerta o registro de las anteriores se pierde — solo cambia de
+representación.
+
 ## Accesibilidad (Fase 3)
 
 - **Modales**: ARIA `role="dialog"` + `aria-modal="true"` +
