@@ -1,11 +1,13 @@
 import { fecha } from "../../domain/fechas.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { useEscapeClose } from "../../lib/a11y.js";
 
 export default function AsignarActividadModal({ data, actividadesPlan, cerrar, crear, agregar }) {
+  useEscapeClose(cerrar);
   const existentes = actividadesEnDia(actividadesPlan, data.iso).filter((a) => !(a.funcionarios || []).includes(data.funcionario));
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4">
-      <div className="w-full max-w-2xl rounded-t-3xl bg-white p-5 shadow-2xl md:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <div role="dialog" aria-modal="true" aria-label={`Asignar actividad para ${data.funcionario} en ${fecha(data.iso)}`} className="w-full max-w-2xl rounded-t-3xl bg-white p-5 shadow-2xl md:rounded-3xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold">Asignar actividad</h3>

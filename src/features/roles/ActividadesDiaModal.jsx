@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { fecha } from "../../domain/fechas.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { useEscapeClose } from "../../lib/a11y.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function ActividadesDiaModal({ funcionario, iso, allActividadesPlan, personas, setActividadesPlan, cerrar }) {
+  useEscapeClose(cerrar);
   const [editando, setEditando] = useState(null);
   const [confirmarEliminar, setConfirmarEliminar] = useState(null);
   const personasActivas = personas.filter((p) => p.estado !== "Inactivo");
@@ -51,8 +53,8 @@ export default function ActividadesDiaModal({ funcionario, iso, allActividadesPl
       </div>
     );
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <div role="dialog" aria-modal="true" aria-label={`Actividades de ${funcionario} en ${fecha(iso)}`} className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
             <h3 className="text-lg font-semibold">Actividades · {funcionario}</h3>

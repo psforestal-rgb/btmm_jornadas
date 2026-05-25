@@ -117,18 +117,23 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     const d = faltan(f.vencimiento);
     return d !== null && d >= 0 && d <= 30;
   }).length;
-  const kpis = [
-    {
-      label: "Cobertura crítica",
-      value: diasSinVisit,
-      sub: "días sin Visit. asignada",
-      color: diasSinVisit > 0 ? "text-red-600" : "text-slate-900",
-    },
+  // KPIs separados por horizonte temporal: "Hoy" vs "Este mes".
+  // Esto facilita lectura rápida en campo y administración.
+  const kpisHoy = [
     {
       label: "Sin actividad",
       value: sinActividadHoy,
       sub: "en turno hoy sin planificar",
       color: sinActividadHoy > 0 ? "text-amber-600" : "text-slate-900",
+      cta: { label: "Ver detalle del día", action: () => setView("dia") },
+    },
+  ];
+  const kpisMes = [
+    {
+      label: "Cobertura crítica",
+      value: diasSinVisit,
+      sub: "días sin Visit. asignada",
+      color: diasSinVisit > 0 ? "text-red-600" : "text-slate-900",
     },
     {
       label: "Por vencer",
@@ -204,15 +209,62 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   return (
     <section className="space-y-5">
       <AlertStrip alerts={alerts} setView={setView} />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {kpis.map(({ label, value, sub, color }) => (
-          <div key={label} className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
-            <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
-            <div className="mt-1 text-xs text-slate-400">{sub}</div>
-          </div>
-        ))}
-      </div>
+
+      {/* BLOQUE HOY — atención inmediata */}
+      <section aria-labelledby="hoy-heading" className="space-y-2">
+        <header className="flex items-center justify-between gap-2">
+          <h2 id="hoy-heading" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-700">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+            Hoy · día {diaRef}
+          </h2>
+          <button
+            type="button"
+            onClick={() => setView("dia")}
+            className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Ver detalle del día →
+          </button>
+        </header>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {kpisHoy.map(({ label, value, sub, color, cta }) => (
+            <div key={label} className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm xl:col-span-2">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">Hoy</span>
+              </div>
+              <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
+              <div className="mt-1 text-xs text-slate-400">{sub}</div>
+              {cta && value > 0 && (
+                <button onClick={cta.action} className="mt-3 inline-flex min-h-touch items-center gap-1 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700">
+                  {cta.label}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* BLOQUE ESTE MES — control y tendencia */}
+      <section aria-labelledby="mes-heading" className="space-y-3">
+        <header>
+          <h2 id="mes-heading" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-700">
+            <span className="inline-block h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />
+            Este mes · {meses[month]} {year}
+          </h2>
+        </header>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {kpisMes.map(({ label, value, sub, color }) => (
+            <div key={label} className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-800">Mes</span>
+              </div>
+              <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
+              <div className="mt-1 text-xs text-slate-400">{sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
       <Card
         title={`Cobertura por puesto operativo — ${meses[month]} ${year}`}
         icon="📍"

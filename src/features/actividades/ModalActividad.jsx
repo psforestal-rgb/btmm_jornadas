@@ -2,8 +2,10 @@ import { useState } from "react";
 import Badge from "../../ui/Badge.jsx";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
 import { opcionesLugarActividad, opcionesActividadBase, actividadRutinariaVisitantes } from "../../data/opciones.js";
+import { useEscapeClose } from "../../lib/a11y.js";
 
 export default function ModalActividad({ valor, personas, cerrar, guardar, eliminar, actividadesPlan = [] }) {
+  useEscapeClose(cerrar);
   const [a, setA] = useState(valor);
   const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
   const cls = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100";
@@ -20,8 +22,8 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
   const toggleFuncionario = (nombre) => (a.funcionarios.includes(nombre) ? quitarFuncionario(nombre) : agregarFuncionario(nombre));
   const modificarActividadExistente = (act) => setA({ ...act });
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4">
-      <div className="max-h-[94vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <div role="dialog" aria-modal="true" aria-label={esExistente ? "Editar actividad" : "Agregar actividad"} className="max-h-[94vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
             <h3 className="text-lg font-semibold">{esExistente ? "Editar actividad" : "Agregar actividad"}</h3>

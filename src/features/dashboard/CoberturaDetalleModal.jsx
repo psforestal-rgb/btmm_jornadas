@@ -1,6 +1,8 @@
 import { fecha } from "../../domain/fechas.js";
+import { useEscapeClose } from "../../lib/a11y.js";
 
 export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, onEditarActividad }) {
+  useEscapeClose(cerrar);
   const agrupadosTurno = data.turno.reduce((acc, f) => {
     const puesto = f.puestoOperativo || "Sin puesto operativo";
     if (!acc[puesto]) acc[puesto] = [];
@@ -8,8 +10,8 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
     return acc;
   }, {});
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4">
-      <div className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <div role="dialog" aria-modal="true" aria-label={`Cobertura ${data.puesto} ${fecha(data.fecha)}`} className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
             <h3 className="text-lg font-semibold">Cobertura programada</h3>

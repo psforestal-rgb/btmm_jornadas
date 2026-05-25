@@ -1,4 +1,6 @@
 import { meses } from "../data/calendario.js";
+import Icon from "../ui/Icon.jsx";
+import ThemeToggle from "../ui/ThemeToggle.jsx";
 
 export default function Topbar({ view, setView, month, setMonth, year, setYear, compact, setCompact }) {
   const titulo = {
@@ -38,12 +40,16 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
             <>
               <button
                 onClick={() => moverMes(-1)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                aria-label="Mes anterior"
+                className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
               >
-                ← Mes anterior
+                <Icon name="chevronLeft" size={16} />
+                <span className="hidden sm:inline">Mes anterior</span>
+                <span className="sm:hidden">Mes</span>
               </button>
               <select
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
+                aria-label="Mes"
+                className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
               >
@@ -54,7 +60,8 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
                 ))}
               </select>
               <select
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
+                aria-label="Año"
+                className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
               >
@@ -64,22 +71,27 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
               </select>
               <button
                 onClick={() => moverMes(1)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                aria-label="Mes siguiente"
+                className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
               >
-                Mes siguiente →
+                <span className="hidden sm:inline">Mes siguiente</span>
+                <span className="sm:hidden">Mes</span>
+                <Icon name="chevronRight" size={16} />
               </button>
               {view === "roles" && (
                 <button
                   onClick={() => setCompact(!compact)}
-                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                  className="inline-flex min-h-touch items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                  aria-pressed={compact}
                 >
                   {compact ? "Vista amplia" : "Vista compacta"}
                 </button>
               )}
             </>
           )}
-          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          <ThemeToggle />
+          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Estado: activo">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
             Activo
           </span>
         </div>

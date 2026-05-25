@@ -1,6 +1,8 @@
 import { fecha } from "../../domain/fechas.js";
+import { useEscapeClose } from "../../lib/a11y.js";
 
 export default function ModificarRolModal({ data, cerrar, aplicar }) {
+  useEscapeClose(cerrar);
   const opciones = [
     ["T", "Turno", "border-emerald-300 bg-emerald-100 text-emerald-950"],
     ["L", "Libre", "border-amber-300 bg-amber-100 text-amber-950"],
@@ -9,8 +11,8 @@ export default function ModificarRolModal({ data, cerrar, aplicar }) {
     ["O", "Otro", "border-violet-300 bg-violet-100 text-violet-950"],
   ];
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4">
-      <div className="w-full max-w-xl rounded-t-3xl bg-white p-5 shadow-2xl md:rounded-3xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <div role="dialog" aria-modal="true" aria-label={`Modificar rol de ${data.funcionario} en ${fecha(data.iso)}`} className="w-full max-w-xl rounded-t-3xl bg-white p-5 shadow-2xl md:rounded-3xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold">Modificar rol</h3>

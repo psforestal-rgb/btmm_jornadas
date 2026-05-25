@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import PWAWrapper from './PWAWrapper.jsx'
+import { ThemeProvider } from './context/ThemeContext.jsx'
 import { APP_VERSION, APP_BUILD_TIME, APP_COMMIT } from './lib/appVersion.js'
 import './index.css'
 
@@ -11,8 +12,10 @@ if (typeof console !== 'undefined') {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <PWAWrapper>
-      <App />
-    </PWAWrapper>
+    <ThemeProvider>
+      <PWAWrapper>
+        <App />
+      </PWAWrapper>
+    </ThemeProvider>
   </React.StrictMode>,
 )
