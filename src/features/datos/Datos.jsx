@@ -1,0 +1,215 @@
+import { useRef, useState } from "react";
+import Card from "../../ui/Card.jsx";
+import Badge from "../../ui/Badge.jsx";
+import Icon from "../../ui/Icon.jsx";
+import { useApp } from "../../context/AppContext.jsx";
+import { exportSnapshot, parseSnapshot, SCHEMA_VERSION } from "../../lib/storage.js";
+import { formatBuildTime } from "../../lib/appVersion.js";
+
+function descargarArchivo(nombre, contenido) {
+  try {
+    const blob = new Blob([contenido], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = nombre;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export default function Datos() {
+  const ctx = useApp();
+  const fileInputRef = useRef(null);
+  const [importError, setImportError] = useState(null);
+  const [importOk, setImportOk] = useState(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const totalPersonas = (ctx.personas || []).length;
+  const totalActividades = (ctx.actividadesPlan || []).length;
+  const totalRoleEntries = Object.keys(ctx.roleData || {}).length;
+
+  const onExport = () => {
+    const snap = exportSnapshot({
+      personas: ctx.personas,
+      actividadesPlan: ctx.actividadesPlan,
+      roleData: ctx.roleData,
+    });
+    const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    descargarArchivo(`pnlq-snapshot-${ts}.json`, JSON.stringify(snap, null, 2));
+  };
+
+  const onPickImport = () => fileInputRef.current?.click();
+
+  const onImportFile = async (e) => {
+    setImportError(null);
+    setImportOk(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parseSnapshot(text);
+      if (!parsed.ok) {
+        setImportError(parsed.reason);
+        return;
+      }
+      ctx.replaceState({
+        personas: parsed.state.personas ?? ctx.personas,
+        actividadesPlan: parsed.state.actividadesPlan ?? ctx.actividadesPlan,
+        roleData: parsed.state.roleData ?? ctx.roleData,
+      });
+      setImportOk({ exportadoEn: parsed.exportadoEn, archivo: file.name });
+    } catch (err) {
+      setImportError(`Error al leer archivo: ${err.message}`);
+    } finally {
+      // Reset input para permitir re-importar el mismo archivo si hace falta.
+      e.target.value = "";
+    }
+  };
+
+  const onReset = () => {
+    ctx.resetToSeed();
+    setConfirmReset(false);
+    setImportOk(null);
+    setImportError(null);
+  };
+
+  const estado = ctx.pendingChanges > 0
+    ? { tono: "warning", icon: "alert", msg: `${ctx.pendingChanges} cambio${ctx.pendingChanges > 1 ? "s" : ""} pendiente${ctx.pendingChanges > 1 ? "s" : ""} de guardar (debounce 500 ms)` }
+    : ctx.lastSavedAt
+    ? { tono: "ok", icon: "check", msg: `Última copia local guardada el ${formatBuildTime(ctx.lastSavedAt)}` }
+    : { tono: "info", icon: "info", msg: "Sin copia local todavía: los cambios se guardarán automáticamente al editar." };
+
+  return (
+    <section className="space-y-4">
+      <Card
+        title="Datos · respaldo local"
+        icon="🛡️"
+        action={
+          <Badge className="border-slate-300 bg-slate-100 text-slate-700">
+            Esquema v{SCHEMA_VERSION}
+          </Badge>
+        }
+      >
+        <div
+          className={`mb-4 flex items-start gap-3 rounded-2xl border p-4 ${
+            estado.tono === "warning"
+              ? "border-amber-300 bg-amber-50 text-amber-950"
+              : estado.tono === "ok"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-950"
+              : "border-blue-200 bg-blue-50 text-blue-950"
+          }`}
+        >
+          <Icon name={estado.icon} size={20} />
+          <div>
+            <p className="text-sm font-semibold">{estado.msg}</p>
+            <p className="mt-1 text-xs opacity-80">
+              La copia vive en el navegador (localStorage). Sirve como respaldo entre sesiones; no sustituye al backend institucional.
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Funcionarios</p>
+            <p className="mt-1 text-3xl font-black text-slate-900">{totalPersonas}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Actividades planificadas</p>
+            <p className="mt-1 text-3xl font-black text-slate-900">{totalActividades}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Celdas de rol con override</p>
+            <p className="mt-1 text-3xl font-black text-slate-900">{totalRoleEntries}</p>
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <button
+            type="button"
+            onClick={onExport}
+            className="inline-flex min-h-touch items-center justify-center gap-2 rounded-2xl bg-emerald-800 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+          >
+            <Icon name="banknote" size={18} />
+            Exportar JSON
+          </button>
+          <button
+            type="button"
+            onClick={onPickImport}
+            className="inline-flex min-h-touch items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
+          >
+            <Icon name="clipboard" size={18} />
+            Importar JSON…
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmReset(true)}
+            className="inline-flex min-h-touch items-center justify-center gap-2 rounded-2xl border border-red-300 bg-white px-4 py-3 text-sm font-semibold text-red-800 shadow-sm hover:bg-red-50"
+          >
+            <Icon name="refresh" size={18} />
+            Reiniciar datos semilla
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={onImportFile}
+            className="hidden"
+            aria-label="Archivo JSON a importar"
+          />
+        </div>
+
+        {importError && (
+          <div className="mt-4 rounded-2xl border border-red-300 bg-red-50 p-3 text-sm text-red-950" role="alert">
+            <p className="font-semibold">Importación rechazada</p>
+            <p className="mt-1 text-xs opacity-90">{importError}</p>
+          </div>
+        )}
+        {importOk && (
+          <div className="mt-4 rounded-2xl border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-950" role="status">
+            <p className="font-semibold">Snapshot importado</p>
+            <p className="mt-1 text-xs opacity-90">
+              Archivo: {importOk.archivo}{importOk.exportadoEn ? ` · exportado ${formatBuildTime(importOk.exportadoEn)}` : ""}.
+            </p>
+          </div>
+        )}
+
+        {confirmReset && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-label="Confirmar reinicio de datos">
+            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-semibold text-red-900">Reiniciar a datos semilla</h3>
+              <p className="mt-2 text-sm text-slate-700">
+                Se descartará la copia local y la app volverá a los datos de ejemplo. <strong>Esta acción no se puede deshacer</strong> a menos que hayas exportado primero un JSON de respaldo.
+              </p>
+              <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
+                Recomendación: pulse <strong>Exportar JSON</strong> antes de reiniciar.
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <button type="button" onClick={() => setConfirmReset(false)} className="min-h-touch rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold">
+                  Cancelar
+                </button>
+                <button type="button" onClick={onReset} className="min-h-touch rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
+                  Reiniciar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <Card title="¿Por qué hay copia local?" icon="ℹ️">
+        <ul className="list-inside list-disc space-y-1.5 text-sm text-slate-700">
+          <li>El navegador guarda automáticamente cada cambio con un retraso de 500 ms para evitar perder información al recargar la página o cerrar el navegador.</li>
+          <li>La copia <strong>NO sustituye</strong> al backend institucional: cuando exista la integración con el sistema central del SINAC, el respaldo local servirá como cola offline y se sincronizará automáticamente.</li>
+          <li>El esquema lleva versión (`v{SCHEMA_VERSION}`); si el formato cambia en una nueva versión de la app, se crea un backup automático antes de aplicar la migración.</li>
+          <li>Exporte un JSON periódicamente como seguro adicional, especialmente antes de cambios mayores o cuando termine la jornada en campo.</li>
+        </ul>
+      </Card>
+    </section>
+  );
+}

@@ -13,6 +13,7 @@ import PlanificacionFuncionario from "./features/planFuncionario/PlanificacionFu
 import AdelantoViaticos from "./features/viaticos/AdelantoViaticos.jsx";
 import Disponibilidad from "./features/disponibilidad/Disponibilidad.jsx";
 import Alertas from "./features/alertas/Alertas.jsx";
+import Datos from "./features/datos/Datos.jsx";
 
 function AppShell() {
   const {
@@ -116,6 +117,7 @@ function AppShell() {
             {view === "adelantos" && <AdelantoViaticos actividadesPlan={actividadesPlan} personas={personas} />}
             {view === "disponibilidad" && <Disponibilidad personas={personas} />}
             {view === "alertas" && <Alertas alerts={alerts} />}
+            {view === "datos" && <Datos />}
           </div>
         </main>
       </div>
