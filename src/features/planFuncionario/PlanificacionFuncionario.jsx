@@ -14,6 +14,7 @@ import {
   funcionarioPorNombre,
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 import ModificarRolModal from "./ModificarRolModal.jsx";
 import AsignarActividadModal from "./AsignarActividadModal.jsx";
@@ -33,6 +34,7 @@ export default function PlanificacionFuncionario({
   const [modalActividad, setModalActividad] = useState(null);
   const [modalRol, setModalRol] = useState(null);
   const [abiertos, setAbiertos] = useState({});
+  const feriados = useFeriadosDelAno(year);
   const days = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
   const personasActivas = personas.filter((p) => p.estado !== "Inactivo");
   const guardar = (act) => {
@@ -90,7 +92,7 @@ export default function PlanificacionFuncionario({
     days
       .map((d) => {
         const iso = isoFecha(year, month, d);
-        const rol = codigoRolFuncionario(personas, roleData, year, month, p.nombre, d);
+        const rol = codigoRolFuncionario(personas, roleData, year, month, p.nombre, d, feriados);
         const turno = esRolActivo(rol);
         const acts = actividadesEnDia(actividadesPlan, iso).filter((a) => (a.funcionarios || []).includes(p.nombre));
         const visible = turno || acts.length > 0;
@@ -105,7 +107,7 @@ export default function PlanificacionFuncionario({
     const modalidad = modalidadFuncionario(personas, roleData, year, month, funcionario);
     const categorias = {};
     days.forEach((d) => {
-      categorias[d] = categoriaDe(codigoRolFuncionario(personas, roleData, year, month, funcionario, d));
+      categorias[d] = categoriaDe(codigoRolFuncionario(personas, roleData, year, month, funcionario, d, feriados));
     });
     categorias[dia] = categoria;
     const cambios = {};

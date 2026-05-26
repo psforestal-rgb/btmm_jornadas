@@ -11,18 +11,20 @@ import { codigoRolFuncionario, esRolActivo, categoriaDe } from "../../domain/rol
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { conflictosActividadDia } from "../../domain/conflictos.js";
 import { useSwipe } from "../../lib/useSwipe.js";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData }) {
   const [modalActividad, setModalActividad] = useState(null);
   const [yearD, monthD, dayD] = diaVista.split("-").map(Number);
   const monthIdx = monthD - 1;
+  const feriados = useFeriadosDelAno(yearD);
   const personasActivas = personas.filter((p) => p.estado !== "Inactivo");
   const finde = [0, 6].includes(new Date(diaVista + "T12:00:00").getDay());
   const dowLabel = diasLargos[new Date(diaVista + "T12:00:00").getDay()];
 
   const statusDia = personasActivas.map((p) => {
-    const rol = codigoRolFuncionario(personas, roleData, yearD, monthIdx, p.nombre, dayD);
+    const rol = codigoRolFuncionario(personas, roleData, yearD, monthIdx, p.nombre, dayD, feriados);
     const cat = categoriaDe(rol);
     const enTurno = esRolActivo(rol);
     const acts = actividadesEnDia(actividadesPlan, diaVista).filter((a) => (a.funcionarios || []).includes(p.nombre));
@@ -191,7 +193,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
         ) : (
           <div className="space-y-3">
             {actsDelDia.map((act) => {
-              const conf = conflictosActividadDia(act, dayD, yearD, monthIdx, personas, roleData);
+              const conf = conflictosActividadDia(act, dayD, yearD, monthIdx, personas, roleData, feriados);
               return (
                 <div
                   key={act.id}

@@ -12,6 +12,7 @@ import {
   formatearCategoria,
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import RoleCell from "./RoleCell.jsx";
 import MenuCelda from "./MenuCelda.jsx";
 import ConflictoModal from "./ConflictoModal.jsx";
@@ -34,7 +35,8 @@ export default function PuestoRolCard({
   const [menu, setMenu] = useState(null);
   const [conflictoActivo, setConflictoActivo] = useState(null);
   const [actividadesDiaModal, setActividadesDiaModal] = useState(null);
-  const inicio = primerDiaLaboral(year, month);
+  const feriados = useFeriadosDelAno(year);
+  const inicio = primerDiaLaboral(year, month, feriados);
   const toggleEdit = (nombre) => setEditRows((prev) => ({ ...prev, [nombre]: !prev[nombre] }));
   const getCfg = (persona) =>
     roleData[rolCfgKey(year, month, grupo.nombre, persona)] || personas.find((f) => f.nombre === persona)?.modalidad || "10x5";

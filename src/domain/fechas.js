@@ -21,10 +21,14 @@ export function faltan(f, hoy = new Date(2026, 4, 19)) {
   return Math.round((new Date(f + "T00:00:00") - hoy) / 86400000);
 }
 
-export function primerDiaLaboral(year, month) {
+export function primerDiaLaboral(year, month, feriados = null) {
   for (let d = 1; d <= dim(year, month); d++) {
     const dow = new Date(year, month, d).getDay();
-    if (dow >= 1 && dow <= 5) return d;
+    if (dow >= 1 && dow <= 5) {
+      if (!feriados) return d;
+      const iso = isoFecha(year, month, d);
+      if (!feriados.has(iso)) return d;
+    }
   }
   return 1;
 }

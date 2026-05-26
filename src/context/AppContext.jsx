@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { baseFuncionarios } from "../data/seedFuncionarios.js";
 import { baseActividadesPlan } from "../data/seedActividades.js";
 import { loadState, saveState, clearState, getLastSavedAt, SCHEMA_VERSION } from "../lib/storage.js";
+import { REGLAS_DEFAULT, mergeReglas } from "../config/reglas.js";
 
 const AppContext = createContext(null);
 
@@ -15,6 +16,7 @@ const seedState = {
   roleData: {},
   actividadesPlan: baseActividadesPlan,
   diaVista: "2026-05-19",
+  reglas: { ...REGLAS_DEFAULT },
 };
 
 // Inicializador perezoso: intenta cargar desde storage, cae al seed.
@@ -22,10 +24,13 @@ function initialState() {
   const stored = loadState();
   if (!stored) return seedState;
   // Mezcla defensiva: si el shape persistido no tiene todos los campos,
-  // completamos con seed para evitar `undefined`.
+  // completamos con seed para evitar `undefined`. Las reglas se mezclan
+  // con los defaults para garantizar que campos nuevos (futuras versiones)
+  // siempre tengan un valor.
   return {
     ...seedState,
     ...stored,
+    reglas: mergeReglas(stored.reglas),
   };
 }
 
@@ -53,9 +58,17 @@ function reducer(state, action) {
       return { ...state, actividadesPlan: resolveUpdater(action.payload, state.actividadesPlan) };
     case "SET_ROLE_DATA":
       return { ...state, roleData: resolveUpdater(action.payload, state.roleData) };
+    case "SET_REGLAS": {
+      const next = resolveUpdater(action.payload, state.reglas);
+      return { ...state, reglas: mergeReglas(next) };
+    }
     case "REPLACE_STATE":
       // Reemplaza completamente el estado persistido (import JSON o reset).
-      return { ...seedState, ...action.payload };
+      return {
+        ...seedState,
+        ...action.payload,
+        reglas: mergeReglas(action.payload?.reglas),
+      };
     default:
       return state;
   }
@@ -110,9 +123,14 @@ export function AppProvider({ children }) {
   const setPersonas = useCallback((v) => dispatch({ type: "SET_PERSONAS", payload: v }), []);
   const setActividadesPlan = useCallback((v) => dispatch({ type: "SET_ACTIVIDADES_PLAN", payload: v }), []);
   const setRoleData = useCallback((v) => dispatch({ type: "SET_ROLE_DATA", payload: v }), []);
+  const setReglas = useCallback((v) => dispatch({ type: "SET_REGLAS", payload: v }), []);
 
   const replaceState = useCallback((next) => {
     dispatch({ type: "REPLACE_STATE", payload: next });
+  }, []);
+
+  const resetReglas = useCallback(() => {
+    dispatch({ type: "SET_REGLAS", payload: { ...REGLAS_DEFAULT } });
   }, []);
 
   const resetToSeed = useCallback(() => {
@@ -132,6 +150,8 @@ export function AppProvider({ children }) {
       setPersonas,
       setActividadesPlan,
       setRoleData,
+      setReglas,
+      resetReglas,
       replaceState,
       resetToSeed,
       lastSavedAt,
@@ -139,7 +159,7 @@ export function AppProvider({ children }) {
       schemaVersion: SCHEMA_VERSION,
       dispatch,
     }),
-    [state, setView, setMonth, setYear, setCompact, setDiaVista, setPersonas, setActividadesPlan, setRoleData, replaceState, resetToSeed, lastSavedAt, pendingChanges]
+    [state, setView, setMonth, setYear, setCompact, setDiaVista, setPersonas, setActividadesPlan, setRoleData, setReglas, resetReglas, replaceState, resetToSeed, lastSavedAt, pendingChanges]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
