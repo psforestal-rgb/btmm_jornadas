@@ -1,8 +1,12 @@
 name: Compilar y desplegar en GitHub Pages
 
 on:
-  push:
+  # Se dispara solo cuando CI termina exitoso sobre main, evitando
+  # desplegar versiones con tests rotos.
+  workflow_run:
+    workflows: ["CI · tests + build"]
     branches: [main]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -11,6 +15,8 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Solo desplegar si el workflow de CI terminó exitoso.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,6 +31,9 @@ jobs:
         run: npm ci
 
       - name: Compilar
+        env:
+          # SHA real del commit para version.json (anti-cache de Fase 1).
+          GIT_SHA: ${{ github.sha }}
         run: npm run build
 
       - name: Desplegar en rama gh-pages
