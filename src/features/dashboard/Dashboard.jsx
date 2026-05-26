@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import Avatar from "../../ui/Avatar.jsx";
@@ -24,45 +24,64 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const { reglas } = useApp();
   const puestosRequieren = reglas?.puestosRequierenVisitantesDiario;
   const feriados = useFeriadosDelAno(year);
-  const personasActivas = personas.filter((p) => p.estado !== "Inactivo");
-  const diasMes = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
+  const personasActivas = useMemo(() => personas.filter((p) => p.estado !== "Inactivo"), [personas]);
+  const diasMes = useMemo(() => Array.from({ length: dim(year, month) }, (_, i) => i + 1), [year, month]);
   const diasCalendario = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"];
-  const blancosInicioMes = Array.from({ length: (new Date(year, month, 1).getDay() + 6) % 7 }, (_, i) => i);
+  const blancosInicioMes = useMemo(
+    () => Array.from({ length: (new Date(year, month, 1).getDay() + 6) % 7 }, (_, i) => i),
+    [year, month],
+  );
 
-  const funcionariosProgramadosPuestoDia = (puesto, d) => {
-    const iso = isoFecha(year, month, d);
-    const mapa = new Map();
-    actividadesEnDia(actividadesPlan || [], iso).forEach((a) => {
-      if ((a.lugar || "") === puesto) {
-        (a.funcionarios || []).forEach((n) => {
-          if (!mapa.has(n)) mapa.set(n, []);
-          mapa.get(n).push(a.titulo);
-        });
+  // Cache memoizado: para cada puesto y día calcula una vez los conjuntos
+  // de programados, en turno y atención rutinaria. Reemplaza N*M iteraciones
+  // ad-hoc por una sola pasada. Recalcula solo cuando cambian las
+  // dependencias.
+  const coberturaCache = useMemo(() => {
+    const out = {};
+    for (const puesto of opcionesPuestoOperativo) {
+      out[puesto] = {};
+      for (const d of diasMes) {
+        const iso = isoFecha(year, month, d);
+        const acts = actividadesEnDia(actividadesPlan || [], iso);
+
+        // Programados en actividades cuyo lugar coincide con el puesto.
+        const mapa = new Map();
+        for (const a of acts) {
+          if ((a.lugar || "") === puesto) {
+            for (const n of a.funcionarios || []) {
+              if (!mapa.has(n)) mapa.set(n, []);
+              mapa.get(n).push(a.titulo);
+            }
+          }
+        }
+        const programados = Array.from(mapa.entries()).map(([nombre, actividades]) => ({ nombre, actividades }));
+
+        // Funcionarios en turno según rol (con feriados aplicados).
+        const turno = personas
+          .filter(
+            (p) =>
+              (p.puestoOperativo || "Puesto Quetzales") === puesto &&
+              p.estado !== "Inactivo" &&
+              esRolActivo(codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d, feriados)),
+          )
+          .map((p) => ({
+            ...p,
+            rol: codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d, feriados),
+            actividades: acts.filter((a) => (a.funcionarios || []).includes(p.nombre)),
+          }));
+
+        // Asignados a "Atención rutinaria de visitantes" en este puesto.
+        const atencion = acts.filter((a) => (a.lugar || "") === puesto && esAtencionRutinaria(a)).flatMap((a) => a.funcionarios || []);
+
+        out[puesto][d] = { iso, programados, turno, atencion };
       }
-    });
-    return Array.from(mapa.entries()).map(([nombre, actividades]) => ({ nombre, actividades }));
-  };
-  const funcionariosEnTurnoPuestoDia = (puesto, d) => {
-    const iso = isoFecha(year, month, d);
-    return personas
-      .filter(
-        (p) =>
-          (p.puestoOperativo || "Puesto Quetzales") === puesto &&
-          p.estado !== "Inactivo" &&
-          esRolActivo(codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d, feriados))
-      )
-      .map((p) => ({
-        ...p,
-        rol: codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d, feriados),
-        actividades: actividadesEnDia(actividadesPlan || [], iso).filter((a) => (a.funcionarios || []).includes(p.nombre)),
-      }));
-  };
-  const atencionRutinariaPuestoDia = (puesto, d) => {
-    const iso = isoFecha(year, month, d);
-    return actividadesEnDia(actividadesPlan || [], iso)
-      .filter((a) => (a.lugar || "") === puesto && esAtencionRutinaria(a))
-      .flatMap((a) => a.funcionarios || []);
-  };
+    }
+    return out;
+  }, [year, month, diasMes, personas, roleData, actividadesPlan, feriados]);
+
+  const funcionariosProgramadosPuestoDia = (puesto, d) => coberturaCache[puesto]?.[d]?.programados || [];
+  const funcionariosEnTurnoPuestoDia = (puesto, d) => coberturaCache[puesto]?.[d]?.turno || [];
+  const atencionRutinariaPuestoDia = (puesto, d) => coberturaCache[puesto]?.[d]?.atencion || [];
   const conteoPorPuestoDia = (puesto, d) => funcionariosProgramadosPuestoDia(puesto, d).length;
   const totalRolPuestoDia = (puesto, d) => funcionariosEnTurnoPuestoDia(puesto, d).length;
   const abrirDetalle = (puesto, d) => {
@@ -107,23 +126,38 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
 
   const diaRef = Math.min(19, dim(year, month));
   const isoHoy = isoFecha(year, month, diaRef);
-  const diasSinVisit = diasMes.filter((d) =>
-    opcionesPuestoOperativo.some((p) => puestoRequiereAtencionRutinaria(p, puestosRequieren) && atencionRutinariaPuestoDia(p, d).length === 0)
-  ).length;
-  const sinActividadHoy = personasActivas.filter((p) => {
-    const rol = codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, diaRef, feriados);
-    if (!esRolActivo(rol)) return false;
-    return (
-      actividadesEnDia(actividadesPlan || [], isoHoy).filter((a) => (a.funcionarios || []).includes(p.nombre)).length === 0
-    );
-  }).length;
-  const porVencer = personas.filter((f) => {
-    if (!f.disponibilidad || !f.vencimiento) return false;
-    const d = faltan(f.vencimiento);
-    return d !== null && d >= 0 && d <= 30;
-  }).length;
+
+  // KPIs derivados del cache; recalculan solo cuando cambia el cache o las
+  // entradas que afectan al "hoy".
+  const diasSinVisit = useMemo(
+    () =>
+      diasMes.filter((d) =>
+        opcionesPuestoOperativo.some(
+          (p) => puestoRequiereAtencionRutinaria(p, puestosRequieren) && (coberturaCache[p]?.[d]?.atencion?.length || 0) === 0,
+        ),
+      ).length,
+    [diasMes, coberturaCache, puestosRequieren],
+  );
+  const sinActividadHoy = useMemo(() => {
+    const actsHoy = actividadesEnDia(actividadesPlan || [], isoHoy);
+    return personasActivas.filter((p) => {
+      const rol = codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, diaRef, feriados);
+      if (!esRolActivo(rol)) return false;
+      return actsHoy.filter((a) => (a.funcionarios || []).includes(p.nombre)).length === 0;
+    }).length;
+  }, [personasActivas, actividadesPlan, isoHoy, personas, roleData, year, month, diaRef, feriados]);
+  const porVencer = useMemo(
+    () =>
+      personas.filter((f) => {
+        if (!f.disponibilidad || !f.vencimiento) return false;
+        const d = faltan(f.vencimiento);
+        return d !== null && d >= 0 && d <= 30;
+      }).length,
+    [personas],
+  );
+  const totalActivos = useMemo(() => personas.filter((f) => f.estado === "Activo").length, [personas]);
+
   // KPIs separados por horizonte temporal: "Hoy" vs "Este mes".
-  // Esto facilita lectura rápida en campo y administración.
   const kpisHoy = [
     {
       label: "Sin actividad",
@@ -148,16 +182,28 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     },
     {
       label: "Personal activo",
-      value: personas.filter((f) => f.estado === "Activo").length,
+      value: totalActivos,
       sub: `/ ${personas.length} total`,
       color: "text-slate-900",
     },
   ];
-  const resumenPuesto = (puesto) => {
-    const sv = diasMes.filter((d) => puestoRequiereAtencionRutinaria(puesto, puestosRequieren) && atencionRutinariaPuestoDia(puesto, d).length === 0).length;
-    const sp = diasMes.filter((d) => conteoPorPuestoDia(puesto, d) === 0 && totalRolPuestoDia(puesto, d) > 0).length;
-    return { sinVisit: sv, sinPlan: sp };
-  };
+
+  // Resumen por puesto memoizado por puesto. Evita recálculos al cambiar
+  // de pill o al re-renderizar el modal de detalle.
+  const resumenesPorPuesto = useMemo(() => {
+    const out = {};
+    for (const puesto of opcionesPuestoOperativo) {
+      const sv = diasMes.filter(
+        (d) => puestoRequiereAtencionRutinaria(puesto, puestosRequieren) && (coberturaCache[puesto]?.[d]?.atencion?.length || 0) === 0,
+      ).length;
+      const sp = diasMes.filter(
+        (d) => (coberturaCache[puesto]?.[d]?.programados?.length || 0) === 0 && (coberturaCache[puesto]?.[d]?.turno?.length || 0) > 0,
+      ).length;
+      out[puesto] = { sinVisit: sv, sinPlan: sp };
+    }
+    return out;
+  }, [diasMes, coberturaCache, puestosRequieren]);
+  const resumenPuesto = (puesto) => resumenesPorPuesto[puesto] || { sinVisit: 0, sinPlan: 0 };
 
   const DiaCobertura = ({ puesto, d }) => {
     const programados = conteoPorPuestoDia(puesto, d);

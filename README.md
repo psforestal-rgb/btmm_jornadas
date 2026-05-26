@@ -175,6 +175,25 @@ un alias por nombre. Cada icono que sea funcional debe llevar `label`
 (se anuncia a lectores de pantalla); los decorativos quedan
 `aria-hidden`.
 
+## Rendimiento (Fase 7)
+
+- **Lazy loading por feature** — `React.lazy` + `Suspense` envuelven
+  cada vista no-default. La carga inicial baja ~22 % (gzip ~71 KB
+  vs ~91 KB antes) y cada feature se descarga solo cuando el
+  usuario la abre.
+- **Memoización en Dashboard** — un `useMemo` precomputa el cache
+  de cobertura por (puesto × día) en una sola pasada (vs N×M
+  iteraciones ad-hoc por render). Los KPIs `diasSinVisit`,
+  `sinActividadHoy`, `porVencer`, `totalActivos` y los resúmenes
+  por puesto se derivan de ese cache con `useMemo` propios.
+- **`React.memo(RoleCell)`** — comparación shallow personalizada
+  que ignora la identidad de `onOpen`/`onConflicto`. Resultado:
+  ~3 puestos × 16 funcionarios × 31 días = ~1500 celdas que dejan
+  de re-renderizarse al cambiar otro estado (p. ej. abrir un modal).
+- `prefers-reduced-motion` ya se respetaba; la animación pulsante
+  de conflicto usa la clase `pnlq-pulse` que es no-op si el usuario
+  lo solicita.
+
 ## Reglas configurables (Fase 6)
 
 Las reglas duras que antes vivían en código ahora se editan desde la
