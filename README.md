@@ -1,5 +1,8 @@
 # PNLQ — Gestión de Jornadas Laborales
 
+[![CI · tests + build](https://github.com/psforestal-rgb/BTMM_JORNADAS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/psforestal-rgb/BTMM_JORNADAS/actions/workflows/ci.yml)
+[![Deploy](https://github.com/psforestal-rgb/BTMM_JORNADAS/actions/workflows/deploy.yml/badge.svg?branch=main)](https://github.com/psforestal-rgb/BTMM_JORNADAS/actions/workflows/deploy.yml)
+
 Aplicación web (PWA instalable, con soporte offline) para planificar,
 visualizar, controlar y alertar sobre jornadas laborales, cobertura
 operativa y actividades del personal del **Parque Nacional Los
@@ -174,6 +177,18 @@ acepta tanto un emoji literal (mapeado al ícono correspondiente) como
 un alias por nombre. Cada icono que sea funcional debe llevar `label`
 (se anuncia a lectores de pantalla); los decorativos quedan
 `aria-hidden`.
+
+## CI / despliegue automático
+
+Workflows en `.github/workflows/`:
+
+| Workflow | Disparador | Qué hace |
+|---|---|---|
+| **`ci.yml`** · CI · tests + build | `pull_request` a `main`, `push` a `main`, manual | Corre `npm test` (126 tests). Si pasa, ejecuta `npm run build` con `GIT_SHA` real. Sube `dist/` como artefacto por 3 días. |
+| **`deploy.yml`** · GitHub Pages | `workflow_run` de CI exitoso sobre `main`, manual | Solo despliega si CI terminó OK. Genera build con `GIT_SHA` real para `version.json` (mecanismo anti-cache Fase 1). |
+
+Resultado: ningún merge a `main` queda con tests rojos, ningún
+despliegue a producción sucede si el build falla.
 
 ## Tests, i18n y documentación (Fase 8)
 

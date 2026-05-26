@@ -1,0 +1,76 @@
+name: CI · tests + build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancela ejecuciones anteriores cuando se hace push rápido en el mismo PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Vitest · 126 tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Correr tests
+        run: npm test
+
+  build:
+    name: Build de producción
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar
+        env:
+          # Pasa el SHA real del commit a `vite.config.js` para que
+          # `version.json` lo incluya en lugar del fallback "dev".
+          GIT_SHA: ${{ github.sha }}
+        run: npm run build
+
+      - name: Verificar artefactos generados
+        run: |
+          test -f dist/version.json || (echo "version.json no generado" && exit 1)
+          test -f dist/sw.js || (echo "service worker no generado" && exit 1)
+          test -f dist/index.html || (echo "index.html no generado" && exit 1)
+          echo "✓ Artefactos PWA presentes"
+          cat dist/version.json
+
+      - name: Subir artefactos como evidencia (3 días)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 3
+          if-no-files-found: error
