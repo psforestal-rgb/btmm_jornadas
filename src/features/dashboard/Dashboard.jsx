@@ -11,6 +11,8 @@ import { dim, faltan, isoFecha } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo } from "../../domain/roles.js";
 import { actividadesEnDia, esAtencionRutinaria } from "../../domain/actividades.js";
 import { puestoRequiereAtencionRutinaria } from "../../domain/cobertura.js";
+import { useApp } from "../../context/AppContext.jsx";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import CoberturaDetalleModal from "./CoberturaDetalleModal.jsx";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
@@ -19,6 +21,9 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const [modalActividad, setModalActividad] = useState(null);
   const [puestoActivo, setPuestoActivo] = useState(opcionesPuestoOperativo[0]);
   const [normativaAbierta, setNormativaAbierta] = useState(false);
+  const { reglas } = useApp();
+  const puestosRequieren = reglas?.puestosRequierenVisitantesDiario;
+  const feriados = useFeriadosDelAno(year);
   const personasActivas = personas.filter((p) => p.estado !== "Inactivo");
   const diasMes = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
   const diasCalendario = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"];
@@ -44,11 +49,11 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
         (p) =>
           (p.puestoOperativo || "Puesto Quetzales") === puesto &&
           p.estado !== "Inactivo" &&
-          esRolActivo(codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d))
+          esRolActivo(codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d, feriados))
       )
       .map((p) => ({
         ...p,
-        rol: codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d),
+        rol: codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, d, feriados),
         actividades: actividadesEnDia(actividadesPlan || [], iso).filter((a) => (a.funcionarios || []).includes(p.nombre)),
       }));
   };
@@ -70,7 +75,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
       rol: totalRolPuestoDia(puesto, d),
       turno: funcionariosEnTurnoPuestoDia(puesto, d),
       atencionRutinaria: atencionRutinariaPuestoDia(puesto, d),
-      requiereAtencionRutinaria: puestoRequiereAtencionRutinaria(puesto),
+      requiereAtencionRutinaria: puestoRequiereAtencionRutinaria(puesto, puestosRequieren),
     });
   };
   const nuevaActividadPara = (nombre, iso, lugar) => ({
@@ -103,10 +108,10 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const diaRef = Math.min(19, dim(year, month));
   const isoHoy = isoFecha(year, month, diaRef);
   const diasSinVisit = diasMes.filter((d) =>
-    opcionesPuestoOperativo.some((p) => puestoRequiereAtencionRutinaria(p) && atencionRutinariaPuestoDia(p, d).length === 0)
+    opcionesPuestoOperativo.some((p) => puestoRequiereAtencionRutinaria(p, puestosRequieren) && atencionRutinariaPuestoDia(p, d).length === 0)
   ).length;
   const sinActividadHoy = personasActivas.filter((p) => {
-    const rol = codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, diaRef);
+    const rol = codigoRolFuncionario(personas, roleData || {}, year, month, p.nombre, diaRef, feriados);
     if (!esRolActivo(rol)) return false;
     return (
       actividadesEnDia(actividadesPlan || [], isoHoy).filter((a) => (a.funcionarios || []).includes(p.nombre)).length === 0
@@ -149,7 +154,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     },
   ];
   const resumenPuesto = (puesto) => {
-    const sv = diasMes.filter((d) => puestoRequiereAtencionRutinaria(puesto) && atencionRutinariaPuestoDia(puesto, d).length === 0).length;
+    const sv = diasMes.filter((d) => puestoRequiereAtencionRutinaria(puesto, puestosRequieren) && atencionRutinariaPuestoDia(puesto, d).length === 0).length;
     const sp = diasMes.filter((d) => conteoPorPuestoDia(puesto, d) === 0 && totalRolPuestoDia(puesto, d) > 0).length;
     return { sinVisit: sv, sinPlan: sp };
   };
@@ -158,7 +163,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     const programados = conteoPorPuestoDia(puesto, d);
     const rol = totalRolPuestoDia(puesto, d);
     const atencion = atencionRutinariaPuestoDia(puesto, d).length;
-    const faltaAtencion = puestoRequiereAtencionRutinaria(puesto) && atencion === 0;
+    const faltaAtencion = puestoRequiereAtencionRutinaria(puesto, puestosRequieren) && atencion === 0;
     const faltaActividad = rol > 0 && programados === 0;
     const dow = new Date(year, month, d).getDay();
     return (
@@ -308,7 +313,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
                   {sinPlan > 0 ? `${sinPlan} días sin Plan` : "Plan completo"}
                 </div>
               </div>
-              {puestoRequiereAtencionRutinaria(puestoActivo) && (
+              {puestoRequiereAtencionRutinaria(puestoActivo, puestosRequieren) && (
                 <Badge className="border-red-200 bg-red-50 text-red-900">Requiere Visit. diario</Badge>
               )}
             </div>

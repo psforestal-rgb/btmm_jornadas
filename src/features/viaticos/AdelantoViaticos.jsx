@@ -5,19 +5,33 @@ import Avatar from "../../ui/Avatar.jsx";
 import EmptyState from "../../ui/EmptyState.jsx";
 import { meses } from "../../data/calendario.js";
 import { dim, fecha, pad2 } from "../../domain/fechas.js";
+import { useApp } from "../../context/AppContext.jsx";
 
 export default function AdelantoViaticos({ actividadesPlan, personas }) {
   const [vista, setVista] = useState("funcionario");
+  const { reglas } = useApp();
+  const diaCorte = reglas?.diaCorteViaticos ?? 15;
+  const mesObjetivoConfig = reglas?.mesObjetivoViaticos ?? "siguiente";
+  const permitirConsulta = reglas?.permitirConsultaDespuesCierre ?? true;
+
   const hoy = new Date();
-  const mesObjetivo = hoy.getMonth() === 11 ? 0 : hoy.getMonth() + 1;
-  const anoObjetivo = hoy.getMonth() === 11 ? hoy.getFullYear() + 1 : hoy.getFullYear();
-  const plazoAbierto = hoy.getDate() <= 15;
+  const enMesSiguiente = mesObjetivoConfig === "siguiente";
+  const mesObjetivo = enMesSiguiente
+    ? hoy.getMonth() === 11 ? 0 : hoy.getMonth() + 1
+    : hoy.getMonth();
+  const anoObjetivo = enMesSiguiente
+    ? hoy.getMonth() === 11 ? hoy.getFullYear() + 1 : hoy.getFullYear()
+    : hoy.getFullYear();
+  const plazoAbierto = hoy.getDate() <= diaCorte;
   const inicioMes = `${anoObjetivo}-${pad2(mesObjetivo + 1)}-01`;
   const finMes = `${anoObjetivo}-${pad2(mesObjetivo + 1)}-${pad2(dim(anoObjetivo, mesObjetivo))}`;
   const actividades = actividadesPlan
     .filter((a) => a.viatico && a.inicio <= finMes && (a.fin || a.inicio) >= inicioMes)
     .sort((a, b) => a.inicio.localeCompare(b.inicio) || a.titulo.localeCompare(b.titulo));
   const nombreMes = `${meses[mesObjetivo]} ${anoObjetivo}`;
+  // Si el administrador desactivó "permitir consulta tras cierre" y ya pasó
+  // el plazo, ocultamos el listado y solo dejamos el banner informativo.
+  const mostrarListado = plazoAbierto || permitirConsulta;
   const registrosFuncionario = personas
     .filter((p) => actividades.some((a) => a.funcionarios.includes(p.nombre)))
     .map((p) => ({ funcionario: p, actividades: actividades.filter((a) => a.funcionarios.includes(p.nombre)) }))
@@ -64,10 +78,17 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
             </>
           )}
           <div className="mt-1 text-xs font-bold opacity-80">
-            Mes a tramitar: {nombreMes}. Corte administrativo: día 15 del mes anterior.
+            Mes a tramitar: {nombreMes}. Corte administrativo: día {diaCorte} del mes {enMesSiguiente ? "anterior" : "en curso"}.
           </div>
         </div>
-        {actividades.length === 0 ? (
+        {!mostrarListado ? (
+          <EmptyState
+            icon="banknote"
+            title="Listado oculto tras el cierre"
+            description={`Según la configuración administrativa, el listado se oculta cuando el plazo (día ${diaCorte}) ya venció. Puede reactivar la consulta en Configuración → Viáticos.`}
+            tone="warning"
+          />
+        ) : actividades.length === 0 ? (
           <EmptyState
             icon="banknote"
             title="Sin actividades con viático para el próximo mes"

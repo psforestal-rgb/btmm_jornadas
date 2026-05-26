@@ -175,6 +175,37 @@ un alias por nombre. Cada icono que sea funcional debe llevar `label`
 (se anuncia a lectores de pantalla); los decorativos quedan
 `aria-hidden`.
 
+## Reglas configurables (Fase 6)
+
+Las reglas duras que antes vivían en código ahora se editan desde la
+vista **Configuración** (sidebar grupo "Control"):
+
+- **Cobertura · puestos con Visit. diario** — toggle por puesto
+  operativo. Por defecto Orosi y Quetzales. Si un día un puesto
+  marcado no tiene a nadie asignado a "Atención rutinaria de
+  visitantes", el Dashboard lo marca como **cobertura crítica** (rojo).
+- **Viáticos** — día de corte administrativo (1–28), mes objetivo
+  (`siguiente` o `actual`), permitir consulta tras cierre (boolean).
+- **Feriados oficiales CR** — toggle que excluye feriados del cálculo
+  del primer día laboral del mes (afecta INICIO de la rotación T/L).
+  Lista cargada desde `src/data/feriadosCR.js` con base en
+  comunicados del MTSS para 2025/2026/2027.
+- **Alertas adicionales** — checkboxes para activar/desactivar
+  individualmente: persona inactiva con actividad futura,
+  incapacitado con actividad futura, acumulativa sin modalidad.
+
+Los cambios requieren confirmación explícita ("Aplicar cambios → Confirmar").
+El botón "Restaurar valores predeterminados" devuelve al estado de fábrica.
+
+Alertas ampliadas en Fase 6:
+
+| Alerta | Tono | Disparador |
+|---|---|---|
+| Disponibilidad vence HOY | 🚨 danger | `faltan(vencimiento) === 0` |
+| Inactivo con actividad futura | ⚠️ warn | `estado === "Inactivo"` + actividad ≥ hoy |
+| Incapacitado con actividad futura | 🩺 danger | `estado === "Incapacitado"` + actividad ≥ hoy |
+| Acumulativa sin modalidad | 📄 warn | `jornada === "Acumulativa"` + `!modalidad` |
+
 ## Persistencia local (Fase 5 · Paso 0)
 
 La aplicación guarda automáticamente el estado en `localStorage` con

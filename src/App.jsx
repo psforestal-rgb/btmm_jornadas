@@ -14,6 +14,7 @@ import AdelantoViaticos from "./features/viaticos/AdelantoViaticos.jsx";
 import Disponibilidad from "./features/disponibilidad/Disponibilidad.jsx";
 import Alertas from "./features/alertas/Alertas.jsx";
 import Datos from "./features/datos/Datos.jsx";
+import Configuracion from "./features/configuracion/Configuracion.jsx";
 
 function AppShell() {
   const {
@@ -33,9 +34,13 @@ function AppShell() {
     setActividadesPlan,
     diaVista,
     setDiaVista,
+    reglas,
   } = useApp();
 
-  const alerts = useMemo(() => alertas(personas), [personas]);
+  const alerts = useMemo(
+    () => alertas(personas, { actividadesPlan, flags: reglas }),
+    [personas, actividadesPlan, reglas],
+  );
   const nAlertas = alerts.filter((a) => a.t === "danger" || a.t === "warn").length;
 
   return (
@@ -118,6 +123,7 @@ function AppShell() {
             {view === "disponibilidad" && <Disponibilidad personas={personas} />}
             {view === "alertas" && <Alertas alerts={alerts} />}
             {view === "datos" && <Datos />}
+            {view === "configuracion" && <Configuracion />}
           </div>
         </main>
       </div>

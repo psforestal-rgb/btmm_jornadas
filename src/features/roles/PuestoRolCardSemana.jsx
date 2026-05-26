@@ -14,6 +14,7 @@ import {
   formatearCategoria,
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import MenuCelda from "./MenuCelda.jsx";
 import ConflictoModal from "./ConflictoModal.jsx";
 import ActividadesDiaModal from "./ActividadesDiaModal.jsx";
@@ -63,7 +64,8 @@ export default function PuestoRolCardSemana({
   const totalSemanas = semanas.length;
   const [semIdx, setSemIdx] = useState(0);
   const semana = semanas[Math.min(semIdx, totalSemanas - 1)] || [];
-  const inicio = primerDiaLaboral(year, month);
+  const feriados = useFeriadosDelAno(year);
+  const inicio = primerDiaLaboral(year, month, feriados);
 
   const [editRows, setEditRows] = useState({});
   const [menu, setMenu] = useState(null);

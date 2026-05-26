@@ -15,7 +15,14 @@ export default function Sidebar({ view, setView, nAlertas }) {
         ["disponibilidad", "Disponibilidad", "shield"],
       ],
     ],
-    ["Control", [["alertas", "Alertas", "bell"], ["datos", "Datos · respaldo", "shieldAlert"]]],
+    [
+      "Control",
+      [
+        ["alertas", "Alertas", "bell"],
+        ["datos", "Datos · respaldo", "shieldAlert"],
+        ["configuracion", "Configuración", "traffic"],
+      ],
+    ],
   ];
   return (
     <aside className="hidden w-60 shrink-0 flex-col bg-emerald-900 text-white lg:flex">

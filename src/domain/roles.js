@@ -89,11 +89,11 @@ export function modalidadFuncionario(personas, roleData, year, month, nombre) {
   return roleData[rolCfgKey(year, month, f.puestoOperativo || "Puesto Quetzales", nombre)] || f.modalidad || "10x5";
 }
 
-export function codigoRolFuncionario(personas, roleData, year, month, nombre, dia) {
+export function codigoRolFuncionario(personas, roleData, year, month, nombre, dia, feriados = null) {
   const f = funcionarioPorNombre(personas, nombre);
   if (!f) return "";
   const puesto = f.puestoOperativo || "Puesto Quetzales";
-  const inicio = primerDiaLaboral(year, month);
+  const inicio = primerDiaLaboral(year, month, feriados);
   return (
     roleData[rolKey(year, month, puesto, nombre, dia)] ??
     generarValorPatron(modalidadFuncionario(personas, roleData, year, month, nombre), dia, inicio, year, month)

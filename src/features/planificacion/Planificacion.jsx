@@ -5,6 +5,7 @@ import { meses, diasLargos } from "../../data/calendario.js";
 import { dim, pad2 } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo } from "../../domain/roles.js";
 import { conflictosActividadDia } from "../../domain/conflictos.js";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function Planificacion({
@@ -18,6 +19,7 @@ export default function Planificacion({
   setDiaVista,
 }) {
   const [modal, setModal] = useState(null);
+  const feriados = useFeriadosDelAno(year);
   const days = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
   const blanks = Array.from({ length: new Date(year, month, 1).getDay() }, (_, i) => i);
   const isoDia = (d) => `${year}-${pad2(month + 1)}-${pad2(d)}`;
@@ -52,7 +54,7 @@ export default function Planificacion({
     setModal(null);
   };
   const turnoEnDia = (d) =>
-    personasActivas.filter((p) => esRolActivo(codigoRolFuncionario(personas, roleData, year, month, p.nombre, d))).length;
+    personasActivas.filter((p) => esRolActivo(codigoRolFuncionario(personas, roleData, year, month, p.nombre, d, feriados))).length;
   return (
     <Card
       title={`Planificación general — ${meses[month]} ${year}`}
@@ -125,7 +127,7 @@ export default function Planificacion({
                 </div>
                 <div className="space-y-1.5">
                   {items.map((a) => {
-                    const conf = conflictosActividadDia(a, d, year, month, personas, roleData);
+                    const conf = conflictosActividadDia(a, d, year, month, personas, roleData, feriados);
                     return (
                       <button
                         key={a.id}
