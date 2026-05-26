@@ -1,20 +1,39 @@
-import { useMemo } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { AppProvider, useApp } from "./context/AppContext.jsx";
 import { alertas } from "./domain/alertas.js";
 import Sidebar from "./layout/Sidebar.jsx";
 import Topbar from "./layout/Topbar.jsx";
 import BottomNav from "./layout/BottomNav.jsx";
+
+// Eager: vista por defecto. Las demás se cargan bajo demanda con React.lazy
+// para reducir el tiempo de carga inicial en dispositivos modestos.
 import Dashboard from "./features/dashboard/Dashboard.jsx";
-import DashboardDia from "./features/dia/DashboardDia.jsx";
-import Funcionarios from "./features/funcionarios/Funcionarios.jsx";
-import Roles from "./features/roles/Roles.jsx";
-import Planificacion from "./features/planificacion/Planificacion.jsx";
-import PlanificacionFuncionario from "./features/planFuncionario/PlanificacionFuncionario.jsx";
-import AdelantoViaticos from "./features/viaticos/AdelantoViaticos.jsx";
-import Disponibilidad from "./features/disponibilidad/Disponibilidad.jsx";
-import Alertas from "./features/alertas/Alertas.jsx";
-import Datos from "./features/datos/Datos.jsx";
-import Configuracion from "./features/configuracion/Configuracion.jsx";
+
+const DashboardDia = lazy(() => import("./features/dia/DashboardDia.jsx"));
+const Funcionarios = lazy(() => import("./features/funcionarios/Funcionarios.jsx"));
+const Roles = lazy(() => import("./features/roles/Roles.jsx"));
+const Planificacion = lazy(() => import("./features/planificacion/Planificacion.jsx"));
+const PlanificacionFuncionario = lazy(() => import("./features/planFuncionario/PlanificacionFuncionario.jsx"));
+const AdelantoViaticos = lazy(() => import("./features/viaticos/AdelantoViaticos.jsx"));
+const Disponibilidad = lazy(() => import("./features/disponibilidad/Disponibilidad.jsx"));
+const Alertas = lazy(() => import("./features/alertas/Alertas.jsx"));
+const Datos = lazy(() => import("./features/datos/Datos.jsx"));
+const Configuracion = lazy(() => import("./features/configuracion/Configuracion.jsx"));
+
+function FallbackVista() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-[200px] items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+    >
+      <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
+        Cargando vista…
+      </div>
+    </div>
+  );
+}
 
 function AppShell() {
   const {
@@ -41,7 +60,10 @@ function AppShell() {
     () => alertas(personas, { actividadesPlan, flags: reglas }),
     [personas, actividadesPlan, reglas],
   );
-  const nAlertas = alerts.filter((a) => a.t === "danger" || a.t === "warn").length;
+  const nAlertas = useMemo(
+    () => alerts.filter((a) => a.t === "danger" || a.t === "warn").length,
+    [alerts],
+  );
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
@@ -59,71 +81,73 @@ function AppShell() {
             setCompact={setCompact}
           />
           <div className="space-y-5 p-4 pb-24 lg:p-6 lg:pb-6">
-            {view === "dashboard" && (
-              <Dashboard
-                personas={personas}
-                alerts={alerts}
-                setView={setView}
-                actividadesPlan={actividadesPlan}
-                setActividadesPlan={setActividadesPlan}
-                roleData={roleData}
-                month={month}
-                year={year}
-              />
-            )}
-            {view === "dia" && (
-              <DashboardDia
-                diaVista={diaVista}
-                setDiaVista={setDiaVista}
-                personas={personas}
-                actividadesPlan={actividadesPlan}
-                setActividadesPlan={setActividadesPlan}
-                roleData={roleData}
-              />
-            )}
-            {view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}
-            {view === "roles" && (
-              <Roles
-                year={year}
-                month={month}
-                compact={compact}
-                roleData={roleData}
-                setRoleData={setRoleData}
-                personas={personas}
-                actividadesPlan={actividadesPlan}
-                setActividadesPlan={setActividadesPlan}
-              />
-            )}
-            {view === "planificacion" && (
-              <Planificacion
-                year={year}
-                month={month}
-                personas={personas}
-                actividadesPlan={actividadesPlan}
-                setActividadesPlan={setActividadesPlan}
-                roleData={roleData}
-                setView={setView}
-                setDiaVista={setDiaVista}
-              />
-            )}
-            {view === "planFuncionario" && (
-              <PlanificacionFuncionario
-                year={year}
-                month={month}
-                setMonth={setMonth}
-                setYear={setYear}
-                personas={personas}
-                actividadesPlan={actividadesPlan}
-                setActividadesPlan={setActividadesPlan}
-                roleData={roleData}
-                setRoleData={setRoleData}
-              />
-            )}
-            {view === "adelantos" && <AdelantoViaticos actividadesPlan={actividadesPlan} personas={personas} />}
-            {view === "disponibilidad" && <Disponibilidad personas={personas} />}
-            {view === "alertas" && <Alertas alerts={alerts} />}
-            {view === "datos" && <Datos />}
-            {view === "configuracion" && <Configuracion />}
+            <Suspense fallback={<FallbackVista />}>
+              {view === "dashboard" && (
+                <Dashboard
+                  personas={personas}
+                  alerts={alerts}
+                  setView={setView}
+                  actividadesPlan={actividadesPlan}
+                  setActividadesPlan={setActividadesPlan}
+                  roleData={roleData}
+                  month={month}
+                  year={year}
+                />
+              )}
+              {view === "dia" && (
+                <DashboardDia
+                  diaVista={diaVista}
+                  setDiaVista={setDiaVista}
+                  personas={personas}
+                  actividadesPlan={actividadesPlan}
+                  setActividadesPlan={setActividadesPlan}
+                  roleData={roleData}
+                />
+              )}
+              {view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}
+              {view === "roles" && (
+                <Roles
+                  year={year}
+                  month={month}
+                  compact={compact}
+                  roleData={roleData}
+                  setRoleData={setRoleData}
+                  personas={personas}
+                  actividadesPlan={actividadesPlan}
+                  setActividadesPlan={setActividadesPlan}
+                />
+              )}
+              {view === "planificacion" && (
+                <Planificacion
+                  year={year}
+                  month={month}
+                  personas={personas}
+                  actividadesPlan={actividadesPlan}
+                  setActividadesPlan={setActividadesPlan}
+                  roleData={roleData}
+                  setView={setView}
+                  setDiaVista={setDiaVista}
+                />
+              )}
+              {view === "planFuncionario" && (
+                <PlanificacionFuncionario
+                  year={year}
+                  month={month}
+                  setMonth={setMonth}
+                  setYear={setYear}
+                  personas={personas}
+                  actividadesPlan={actividadesPlan}
+                  setActividadesPlan={setActividadesPlan}
+                  roleData={roleData}
+                  setRoleData={setRoleData}
+                />
+              )}
+              {view === "adelantos" && <AdelantoViaticos actividadesPlan={actividadesPlan} personas={personas} />}
+              {view === "disponibilidad" && <Disponibilidad personas={personas} />}
+              {view === "alertas" && <Alertas alerts={alerts} />}
+              {view === "datos" && <Datos />}
+              {view === "configuracion" && <Configuracion />}
+            </Suspense>
           </div>
         </main>
       </div>

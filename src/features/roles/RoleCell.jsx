@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { codigoCls } from "../../ui/styles.js";
 
-export default function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInicio, conflicto }) {
+function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInicio, conflicto }) {
   const v = String(value || "").toUpperCase();
   const handleClick = conflicto ? onConflicto : editable ? onOpen : undefined;
   const clickable = conflicto || editable;
@@ -33,7 +34,7 @@ export default function RoleCell({ value, onOpen, onConflicto, finde, compact, e
           {v || "—"}
         </span>
         {conflicto && (
-          <span className="absolute right-0 top-0 flex h-4 w-4 animate-pulse items-center justify-center rounded-bl-md bg-red-700 text-[10px] text-white">
+          <span className="pnlq-pulse absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-bl-md bg-red-700 text-[10px] text-white">
             !
           </span>
         )}
@@ -46,3 +47,19 @@ export default function RoleCell({ value, onOpen, onConflicto, finde, compact, e
     </td>
   );
 }
+
+// Comparación shallow personalizada: ignora cambios en `onOpen`/`onConflicto`
+// si su identidad cambia pero el valor visible no. Esto evita re-renders
+// cuando los handlers se re-crean en cada render del padre.
+function areEqual(prev, next) {
+  return (
+    prev.value === next.value &&
+    prev.finde === next.finde &&
+    prev.compact === next.compact &&
+    prev.editable === next.editable &&
+    prev.esInicio === next.esInicio &&
+    prev.conflicto === next.conflicto
+  );
+}
+
+export default memo(RoleCell, areEqual);
