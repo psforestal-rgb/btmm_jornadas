@@ -1,21 +1,11 @@
 import { meses } from "../data/calendario.js";
 import Icon from "../ui/Icon.jsx";
 import ThemeToggle from "../ui/ThemeToggle.jsx";
+import { useT } from "../i18n/useT.js";
 
 export default function Topbar({ view, setView, month, setMonth, year, setYear, compact, setCompact }) {
-  const titulo = {
-    dashboard: "Dashboard",
-    dia: "Detalle del día",
-    funcionarios: "Funcionarios",
-    roles: "Roles",
-    planificacion: "Planificación general",
-    planFuncionario: "Planificación/Funcionario",
-    adelantos: "Adelanto de viáticos",
-    disponibilidad: "Disponibilidad",
-    alertas: "Alertas",
-    datos: "Datos · respaldo",
-    configuracion: "Configuración",
-  }[view];
+  const t = useT();
+  const titulo = t(`view.${view}`);
   const moverMes = (paso) => {
     let nuevoMes = month + paso;
     let nuevoAno = year;
@@ -42,7 +32,7 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
             <>
               <button
                 onClick={() => moverMes(-1)}
-                aria-label="Mes anterior"
+                aria-label={t("topbar.mesAnterior")}
                 className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
               >
                 <Icon name="chevronLeft" size={16} />
@@ -73,7 +63,7 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
               </select>
               <button
                 onClick={() => moverMes(1)}
-                aria-label="Mes siguiente"
+                aria-label={t("topbar.mesSiguiente")}
                 className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
               >
                 <span className="hidden sm:inline">Mes siguiente</span>

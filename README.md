@@ -175,6 +175,44 @@ un alias por nombre. Cada icono que sea funcional debe llevar `label`
 (se anuncia a lectores de pantalla); los decorativos quedan
 `aria-hidden`.
 
+## Tests, i18n y documentación (Fase 8)
+
+### Pruebas automatizadas
+**126/126 verde** en ~3 s, organizados en 15 archivos:
+- 97 tests sobre dominio puro (`src/domain/*`, `src/config/*`).
+- 26 tests sobre infraestructura (storage, a11y stack de Esc, i18n).
+- 12 tests de integración UI con React Testing Library
+  (`EmptyState`, `Funcionarios`).
+
+Scripts:
+```bash
+npm test              # corre todo
+npm run test:watch    # vitest en watch mode
+```
+
+Detalle por carpeta en `docs/TESTING.md`. Plan de E2E con
+Playwright también documentado allí (instalación diferida hasta
+release oficial).
+
+### Internacionalización liviana
+- Diccionario es-CR en `src/i18n/es-CR.js` con notación punteada
+  (`dashboard.bloqueHoy`).
+- Helper puro `t(path, vars)` con interpolación `{nombre}`.
+- Hook `useT()` para componentes React.
+- Si una clave falta, se renderiza la propia clave (`view.xxx`)
+  para detectarlo en QA.
+- Cobertura inicial: títulos de vistas, KPIs, alertas, acciones,
+  estados, modales. Topbar ya migrado como demostración.
+
+### Documentación operativa
+- `docs/GLOSARIO.md` — términos institucionales (Visit., Turno,
+  INICIO, Conflicto, Jornadas, Modalidades, Atributos, Viáticos,
+  Marco normativo).
+- `docs/MANUAL.md` — manual breve por perfil (guardaparques,
+  administración, jefatura). Apto para impresión a una cara.
+- `docs/TESTING.md` — estructura de tests, cobertura por
+  indicador, plan E2E.
+
 ## Rendimiento (Fase 7)
 
 - **Lazy loading por feature** — `React.lazy` + `Suspense` envuelven
