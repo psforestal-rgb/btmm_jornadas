@@ -3,9 +3,11 @@ import Badge from "../../ui/Badge.jsx";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
 import { opcionesLugarActividad, opcionesActividadBase, actividadRutinariaVisitantes } from "../../data/opciones.js";
 import { useEscapeClose } from "../../lib/a11y.js";
+import { useT } from "../../i18n/useT.js";
 
 export default function ModalActividad({ valor, personas, cerrar, guardar, eliminar, actividadesPlan = [] }) {
   useEscapeClose(cerrar);
+  const t = useT();
   const [a, setA] = useState(valor);
   const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
   const cls = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100";
@@ -21,20 +23,21 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
   const quitarFuncionario = (nombre) => set("funcionarios", a.funcionarios.filter((x) => x !== nombre));
   const toggleFuncionario = (nombre) => (a.funcionarios.includes(nombre) ? quitarFuncionario(nombre) : agregarFuncionario(nombre));
   const modificarActividadExistente = (act) => setA({ ...act });
+  const titulo = esExistente ? t("modalActividad.editar") : t("modalActividad.agregar");
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
-      <div role="dialog" aria-modal="true" aria-label={esExistente ? "Editar actividad" : "Agregar actividad"} className="max-h-[94vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+      <div role="dialog" aria-modal="true" aria-label={titulo} className="max-h-[94vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
-            <h3 className="text-lg font-semibold">{esExistente ? "Editar actividad" : "Agregar actividad"}</h3>
-            <p className="text-sm text-slate-600">Registre actividad, periodo, lugar, funcionarios participantes y necesidad de adelanto de viático.</p>
+            <h3 className="text-lg font-semibold">{titulo}</h3>
+            <p className="text-sm text-slate-600">{t("modalActividad.sub")}</p>
           </div>
-          <button onClick={cerrar} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
         </div>
         <div className="max-h-[72vh] overflow-y-auto p-5">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="md:col-span-2">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">Actividad</span>
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.titulo")}</span>
               <div className="grid gap-2 md:grid-cols-[260px_1fr]">
                 <select
                   className={cls}
@@ -44,22 +47,22 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                   {opcionesActividadBase.map((x) => (
                     <option key={x} value={x}>{x}</option>
                   ))}
-                  <option value="Otra">Otra actividad</option>
+                  <option value="Otra">{t("modalActividad.otra")}</option>
                 </select>
                 <input
                   className={cls}
                   value={a.titulo}
                   onChange={(e) => set("titulo", e.target.value)}
-                  placeholder="O escriba otra actividad: patrullaje, inspección, reunión, mantenimiento..."
+                  placeholder={t("modalActividad.placeholderTitulo")}
                 />
               </div>
             </label>
             <label>
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">Fecha inicio</span>
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.fechaInicio")}</span>
               <input type="date" className={cls} value={a.inicio} onChange={(e) => set("inicio", e.target.value)} />
             </label>
             <label>
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">Fecha final</span>
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.fechaFinal")}</span>
               <input type="date" className={cls} value={a.unDia ? a.inicio : a.fin} disabled={a.unDia} onChange={(e) => set("fin", e.target.value)} />
             </label>
             <label className="flex items-center gap-2 rounded-xl border border-slate-300 p-3 text-sm font-semibold">
@@ -68,27 +71,27 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                 checked={a.unDia}
                 onChange={(e) => setA((p) => ({ ...p, unDia: e.target.checked, fin: e.target.checked ? p.inicio : p.fin }))}
               />
-              Actividad de un solo día
+              {t("modalActividad.unDia")}
             </label>
             <label className="flex items-center gap-2 rounded-xl border border-orange-300 bg-orange-50 p-3 text-sm font-semibold text-orange-950">
               <input type="checkbox" checked={a.viatico} onChange={(e) => set("viatico", e.target.checked)} />
-              Requiere tramitar adelanto de viático
+              {t("modalActividad.requiereViatico")}
             </label>
             <label className="md:col-span-2">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">Lugar</span>
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.lugar")}</span>
               <div className="grid gap-2">
                 <select className={cls} value={lugarModo} onChange={(e) => set("lugar", e.target.value === "Otro" ? "" : e.target.value)}>
                   {opcionesLugarActividad.map((x) => (
                     <option key={x} value={x}>{x}</option>
                   ))}
-                  <option value="Otro">Otro</option>
+                  <option value="Otro">{t("modalActividad.otro")}</option>
                 </select>
                 {lugarModo === "Otro" && (
                   <input
                     className={cls}
                     value={a.lugar}
                     onChange={(e) => set("lugar", e.target.value)}
-                    placeholder="Escriba otro lugar: sector, sendero, oficina, comunidad..."
+                    placeholder={t("modalActividad.placeholderLugar")}
                   />
                 )}
               </div>
@@ -96,8 +99,8 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
           </div>
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Funcionarios participantes</span>
-              <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{a.funcionarios.length} seleccionados</Badge>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.participantes")}</span>
+              <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{t("modalActividad.seleccionados", { n: a.funcionarios.length })}</Badge>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
               {porPuesto.map((g) => (
@@ -124,7 +127,7 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                           </label>
                           {avisos.length > 0 && (
                             <div className="mt-2 rounded-lg border border-yellow-300 bg-yellow-100 p-2 text-[11px] leading-snug text-yellow-950">
-                              <div className="font-black">Funcionario con actividad ya planificada</div>
+                              <div className="font-black">{t("modalActividad.avisoTraslape")}</div>
                               <div className="mt-1 font-bold">{avisos.map((x) => x.titulo).join(" · ")}</div>
                               <div className="mt-2 flex flex-wrap gap-1.5">
                                 <button
@@ -132,14 +135,14 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                                   onClick={() => agregarFuncionario(f.nombre)}
                                   className="rounded-lg bg-yellow-700 px-2 py-1 text-[10px] font-bold text-white hover:bg-yellow-800"
                                 >
-                                  Agregar de todos modos
+                                  {t("modalActividad.agregarAunAsi")}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => modificarActividadExistente(avisos[0])}
                                   className="rounded-lg border border-yellow-700 bg-white px-2 py-1 text-[10px] font-bold text-yellow-900 hover:bg-yellow-50"
                                 >
-                                  Modificar actividad
+                                  {t("modalActividad.modificarActividad")}
                                 </button>
                               </div>
                             </div>
@@ -153,12 +156,12 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
             </div>
           </div>
           <label className="mt-5 block">
-            <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">Observaciones</span>
+            <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.obs")}</span>
             <textarea
               className={`${cls} min-h-24`}
               value={a.observaciones}
               onChange={(e) => set("observaciones", e.target.value)}
-              placeholder="Detalle operativo, coordinación, expediente, requerimientos, vehículo, equipo, etc."
+              placeholder={t("modalActividad.placeholderObs")}
             />
           </label>
         </div>
@@ -169,16 +172,16 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                 onClick={() => eliminar(a.id)}
                 className="rounded-xl border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50"
               >
-                Eliminar
+                {t("acciones.eliminar")}
               </button>
             )}
           </div>
           <div className="flex gap-2">
             <button onClick={cerrar} className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50">
-              Cancelar
+              {t("acciones.cancelar")}
             </button>
             <button onClick={() => guardar(a)} className="rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-              Guardar actividad
+              {t("modalActividad.guardarActividad")}
             </button>
           </div>
         </div>

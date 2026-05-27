@@ -15,6 +15,7 @@ import {
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useT } from "../../i18n/useT.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 import ModificarRolModal from "./ModificarRolModal.jsx";
 import AsignarActividadModal from "./AsignarActividadModal.jsx";
@@ -30,6 +31,7 @@ export default function PlanificacionFuncionario({
   roleData,
   setRoleData,
 }) {
+  const t = useT();
   const [asignar, setAsignar] = useState(null);
   const [modalActividad, setModalActividad] = useState(null);
   const [modalRol, setModalRol] = useState(null);
@@ -135,7 +137,7 @@ export default function PlanificacionFuncionario({
   return (
     <section className="space-y-4">
       <Card
-        title={`Planificación/Funcionario — ${meses[month]} ${year}`}
+        title={t("planFuncionario.titulo", { mes: meses[month], anio: year })}
         icon="📋"
         action={
           <div className="flex flex-wrap items-center gap-2">
@@ -173,21 +175,21 @@ export default function PlanificacionFuncionario({
               onClick={expandirTodo}
               className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900"
             >
-              Expandir
+              {t("planFuncionario.expandir")}
             </button>
             <button
               onClick={colapsarTodo}
               className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700"
             >
-              Colapsar
+              {t("planFuncionario.colapsar")}
             </button>
           </div>
         }
       >
         <div className="mb-4 flex flex-wrap gap-2">
-          <Badge className="border-emerald-300 bg-emerald-100 text-emerald-950">Turno con actividad</Badge>
-          <Badge className="border-yellow-300 bg-yellow-100 text-yellow-950">Falta asignar actividad</Badge>
-          <Badge className="border-red-400 bg-red-100 text-red-950">Actividad no coincide con rol</Badge>
+          <Badge className="border-emerald-300 bg-emerald-100 text-emerald-950">{t("planFuncionario.leyendaTurnoAct")}</Badge>
+          <Badge className="border-yellow-300 bg-yellow-100 text-yellow-950">{t("planFuncionario.leyendaFaltaAct")}</Badge>
+          <Badge className="border-red-400 bg-red-100 text-red-950">{t("planFuncionario.leyendaConflicto")}</Badge>
         </div>
         <div className="space-y-3">
           {personasActivas.map((p) => {
@@ -215,16 +217,16 @@ export default function PlanificacionFuncionario({
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge className="border-slate-200 bg-white text-slate-700">{filas.length} días visibles</Badge>
-                    <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{actividadesAsignadas} actividades</Badge>
+                    <Badge className="border-slate-200 bg-white text-slate-700">{t("planFuncionario.diasVisibles", { n: filas.length })}</Badge>
+                    <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{t("planFuncionario.actividades", { n: actividadesAsignadas })}</Badge>
                     {faltantes > 0 && (
-                      <Badge className="border-yellow-300 bg-yellow-100 text-yellow-950">{faltantes} sin asignar</Badge>
+                      <Badge className="border-yellow-300 bg-yellow-100 text-yellow-950">{t("planFuncionario.sinAsignar", { n: faltantes })}</Badge>
                     )}
                     {conflictos > 0 && (
-                      <Badge className="border-red-300 bg-red-100 text-red-950">{conflictos} conflictos</Badge>
+                      <Badge className="border-red-300 bg-red-100 text-red-950">{t("planFuncionario.conflictos", { n: conflictos })}</Badge>
                     )}
                     <span className="rounded-full bg-slate-900 px-2 py-1 text-xs font-bold text-white">
-                      {abierto ? "Ocultar" : "Ver"}
+                      {abierto ? t("planFuncionario.ocultar") : t("planFuncionario.ver")}
                     </span>
                   </div>
                 </button>
@@ -260,17 +262,17 @@ export default function PlanificacionFuncionario({
                                 }`}
                               >
                                 {a.titulo}
-                                <span className="ml-2 text-xs font-bold opacity-70">{a.lugar || "Sin lugar"}</span>
+                                <span className="ml-2 text-xs font-bold opacity-70">{a.lugar || t("planFuncionario.sinLugar")}</span>
                                 {f.conflicto && (
                                   <span className="ml-2 rounded-md bg-red-700 px-1.5 py-0.5 text-[10px] text-white">
-                                    NO COINCIDE CON ROL
+                                    {t("planFuncionario.noCoincideRol")}
                                   </span>
                                 )}
                               </button>
                             ))
                           ) : (
                             <div className="rounded-xl border border-yellow-300 bg-yellow-100 px-3 py-2 text-sm font-semibold text-yellow-950">
-                              Falta asignar actividad
+                              {t("planFuncionario.faltaAsignar")}
                             </div>
                           )}
                         </div>
@@ -281,13 +283,13 @@ export default function PlanificacionFuncionario({
                                 onClick={() => setModalActividad({ ...f.acts[0] })}
                                 className="rounded-xl bg-red-700 px-3 py-2 text-xs font-bold text-white hover:bg-red-800"
                               >
-                                Modificar actividad
+                                {t("planFuncionario.modificarActividad")}
                               </button>
                               <button
                                 onClick={() => setModalRol({ funcionario: p.nombre, dia: f.d, iso: f.iso, rol: f.rol })}
                                 className="rounded-xl border border-red-300 bg-white px-3 py-2 text-xs font-bold text-red-800 hover:bg-red-50"
                               >
-                                Modificar rol
+                                {t("planFuncionario.modificarRol")}
                               </button>
                             </>
                           ) : f.turno && !f.acts.length ? (
@@ -295,14 +297,14 @@ export default function PlanificacionFuncionario({
                               onClick={() => setAsignar({ funcionario: p.nombre, iso: f.iso })}
                               className="rounded-xl bg-yellow-600 px-3 py-2 text-xs font-bold text-white hover:bg-yellow-700"
                             >
-                              Asignar
+                              {t("planFuncionario.asignar")}
                             </button>
                           ) : (
                             <button
                               onClick={() => setModalActividad(nuevaActividad(p.nombre, f.iso))}
                               className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
                             >
-                              Nueva
+                              {t("planFuncionario.nueva")}
                             </button>
                           )}
                         </div>

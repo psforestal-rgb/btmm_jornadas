@@ -10,8 +10,15 @@ describe("i18n.lookup", () => {
     expect(lookup("no.existe")).toBe("no.existe");
     expect(lookup("view.inexistente")).toBe("view.inexistente");
   });
-  it("clave que apunta a objeto (no string) devuelve la propia clave", () => {
-    expect(lookup("view")).toBe("view");
+  it("clave que apunta a objeto devuelve el objeto (útil para grupos)", () => {
+    const v = lookup("view");
+    expect(typeof v).toBe("object");
+    expect(v.dashboard).toBe("Dashboard");
+  });
+  it("clave que apunta a array devuelve el array (para listas)", () => {
+    const v = lookup("datos.porQue");
+    expect(Array.isArray(v)).toBe(true);
+    expect(v.length).toBeGreaterThan(0);
   });
 });
 

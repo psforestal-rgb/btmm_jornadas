@@ -1,14 +1,23 @@
 import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import AlertItem from "../../ui/AlertItem.jsx";
+import { useT } from "../../i18n/useT.js";
 
 export default function Alertas({ alerts }) {
+  const t = useT();
+  const semaforo = [
+    ["🟢", t("alertas.semaforo.verde")],
+    ["🟡", t("alertas.semaforo.amarillo")],
+    ["🟠", t("alertas.semaforo.naranja")],
+    ["🔴", t("alertas.semaforo.rojo")],
+    ["🔵", t("alertas.semaforo.azul")],
+  ];
   return (
     <section className="space-y-4">
       <Card
-        title={`Alertas del sistema (${alerts.length})`}
+        title={t("alertas.titulo", { n: alerts.length })}
         icon="🔔"
-        action={<Badge className="border-orange-200 bg-orange-100 text-orange-900">Requiere revisión</Badge>}
+        action={<Badge className="border-orange-200 bg-orange-100 text-orange-900">{t("alertas.requiereRevision")}</Badge>}
       >
         <div className="space-y-2">
           {alerts.map((a, i) => (
@@ -16,18 +25,12 @@ export default function Alertas({ alerts }) {
           ))}
         </div>
       </Card>
-      <Card title="Semáforo normativo" icon="🚦">
+      <Card title={t("alertas.semaforoTitulo")} icon="🚦">
         <div className="grid gap-3 md:grid-cols-5">
-          {[
-            ["🟢", "Verificado"],
-            ["🟡", "Confirmación interna"],
-            ["🟠", "Criterio RH/Jurídico"],
-            ["🔴", "No automatizar"],
-            ["🔵", "Dato pendiente"],
-          ].map(([s, t]) => (
-            <div key={t} className="rounded-xl bg-slate-50 p-3">
+          {semaforo.map(([s, txt]) => (
+            <div key={txt} className="rounded-xl bg-slate-50 p-3">
               <div className="text-xl">{s}</div>
-              <div className="mt-1 text-sm font-semibold">{t}</div>
+              <div className="mt-1 text-sm font-semibold">{txt}</div>
             </div>
           ))}
         </div>

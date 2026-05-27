@@ -6,15 +6,15 @@ import { useApp } from "../../context/AppContext.jsx";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
 import { VIATICOS_OBJETIVO_OPCIONES, validarReglas, REGLAS_DEFAULT } from "../../config/reglas.js";
 import { FERIADOS_CR } from "../../data/feriadosCR.js";
+import { useT } from "../../i18n/useT.js";
+import { plural } from "../../i18n/es-CR.js";
 
 /**
  * Editor administrativo de reglas duras configurables. Cada cambio se
  * confirma explícitamente para evitar apagar alertas por error.
- *
- * Filosofía: la herramienta sigue registrando y alertando; cambiar una
- * regla no genera derechos automáticos.
  */
 export default function Configuracion() {
+  const t = useT();
   const { reglas, setReglas, resetReglas } = useApp();
   const [draft, setDraft] = useState(reglas);
   const [confirmar, setConfirmar] = useState(false);
@@ -37,16 +37,10 @@ export default function Configuracion() {
   };
 
   const setCampo = (clave, valor) => setDraft((prev) => ({ ...prev, [clave]: valor }));
-
-  const aplicar = () => {
-    setReglas(draft);
-    setConfirmar(false);
-  };
-
+  const aplicar = () => { setReglas(draft); setConfirmar(false); };
   const descartar = () => setDraft(reglas);
-
   const onResetTotal = () => {
-    if (confirm("¿Restaurar todas las reglas a sus valores predeterminados? Las alertas y cobertura volverán al estado inicial.")) {
+    if (confirm(t("configuracion.restaurarConfirm"))) {
       resetReglas();
       setDraft(REGLAS_DEFAULT);
     }
@@ -55,28 +49,26 @@ export default function Configuracion() {
   return (
     <section className="space-y-4">
       <Card
-        title="Configuración · reglas administrativas"
+        title={t("configuracion.titulo")}
         icon="🚦"
         action={
           sucia ? (
-            <Badge className="border-amber-300 bg-amber-100 text-amber-900">Cambios sin aplicar</Badge>
+            <Badge className="border-amber-300 bg-amber-100 text-amber-900">{t("configuracion.badgeSucia")}</Badge>
           ) : (
-            <Badge className="border-emerald-300 bg-emerald-100 text-emerald-900">Sincronizado</Badge>
+            <Badge className="border-emerald-300 bg-emerald-100 text-emerald-900">{t("configuracion.badgeOk")}</Badge>
           )
         }
       >
         <div className="mb-4 rounded-xl border-l-4 border-red-700 bg-red-50 p-3 text-sm text-red-950">
-          <strong>Regla dura:</strong> la herramienta registra y alerta; cambiar una regla no genera pagos, suspensiones ni derechos automáticos. Cualquier ajuste debe estar respaldado por la coordinación administrativa.
+          {t("configuracion.reglaDuraIntro")}
         </div>
 
-        {/* Cobertura — puestos que requieren Visit. diario */}
+        {/* Cobertura */}
         <section className="mb-4">
           <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-700">
-            Cobertura · puestos con atención rutinaria diaria
+            {t("configuracion.coberturaTitulo")}
           </h3>
-          <p className="mb-2 text-xs text-slate-500">
-            Si un día un puesto seleccionado no tiene a nadie asignado a "Atención rutinaria de visitantes", se marca como <strong>cobertura crítica</strong> (rojo) en el Dashboard.
-          </p>
+          <p className="mb-2 text-xs text-slate-500">{t("configuracion.coberturaSub")}</p>
           <div className="flex flex-wrap gap-2">
             {opcionesPuestoOperativo.map((p) => {
               const activo = draft.puestosRequierenVisitantesDiario.includes(p);
@@ -103,11 +95,11 @@ export default function Configuracion() {
         {/* Viáticos */}
         <section className="mb-4">
           <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-700">
-            Viáticos · corte administrativo
+            {t("configuracion.viaticosTitulo")}
           </h3>
           <div className="grid gap-3 md:grid-cols-3">
             <label className="block">
-              <span className="mb-1 block text-xs font-bold uppercase text-slate-500">Día de corte (1–28)</span>
+              <span className="mb-1 block text-xs font-bold uppercase text-slate-500">{t("configuracion.diaCorte")}</span>
               <input
                 type="number"
                 min="1"
@@ -118,7 +110,7 @@ export default function Configuracion() {
               />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs font-bold uppercase text-slate-500">Mes objetivo</span>
+              <span className="mb-1 block text-xs font-bold uppercase text-slate-500">{t("configuracion.mesObjetivo")}</span>
               <select
                 value={draft.mesObjetivoViaticos}
                 onChange={(e) => setCampo("mesObjetivoViaticos", e.target.value)}
@@ -135,18 +127,16 @@ export default function Configuracion() {
                 checked={draft.permitirConsultaDespuesCierre}
                 onChange={(e) => setCampo("permitirConsultaDespuesCierre", e.target.checked)}
               />
-              Permitir consulta tras cierre
+              {t("configuracion.permitirConsulta")}
             </label>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Si "Permitir consulta tras cierre" está desactivado, después del día de corte la vista de viáticos se oculta. Por defecto se mantiene visible (con banner rojo).
-          </p>
+          <p className="mt-2 text-xs text-slate-500">{t("configuracion.permitirConsultaSub")}</p>
         </section>
 
         {/* Feriados */}
         <section className="mb-4">
           <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-700">
-            Feriados · cálculo del primer día laboral
+            {t("configuracion.feriadosTitulo")}
           </h3>
           <label className="flex items-start gap-2 rounded-xl border border-slate-300 p-3 text-sm">
             <input
@@ -156,15 +146,13 @@ export default function Configuracion() {
               className="mt-1"
             />
             <span>
-              <strong className="block font-semibold">Excluir feriados oficiales al determinar el primer día laboral del mes.</strong>
-              <span className="block text-xs text-slate-500">
-                Si el 1er día hábil L–V cae en feriado, la rotación T/L se inicia el siguiente día laboral real. Aplica a partir del mes siguiente para no alterar registros ya guardados.
-              </span>
+              <strong className="block font-semibold">{t("configuracion.feriadosCheckTitle")}</strong>
+              <span className="block text-xs text-slate-500">{t("configuracion.feriadosCheckSub")}</span>
             </span>
           </label>
           <details className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs">
             <summary className="cursor-pointer font-semibold text-slate-700">
-              Ver feriados cargados ({aniosDisponibles.length} año{aniosDisponibles.length !== 1 ? "s" : ""})
+              {t("configuracion.feriadosVer", { n: aniosDisponibles.length, plural: plural(aniosDisponibles.length) })}
             </summary>
             <div className="mt-2 grid gap-3 sm:grid-cols-3">
               {aniosDisponibles.map((ano) => (
@@ -187,13 +175,13 @@ export default function Configuracion() {
         {/* Alertas adicionales */}
         <section className="mb-4">
           <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-700">
-            Alertas adicionales (Fase 6)
+            {t("configuracion.alertasTitulo")}
           </h3>
           <div className="grid gap-2 md:grid-cols-3">
             {[
-              ["alertaInactivoConActividad", "Persona inactiva con actividad futura"],
-              ["alertaIncapacitadoConActividad", "Incapacitado con actividad futura"],
-              ["alertaAcumulativaSinModalidad", "Acumulativa sin modalidad"],
+              ["alertaInactivoConActividad", t("configuracion.alertaInactivo")],
+              ["alertaIncapacitadoConActividad", t("configuracion.alertaIncapacitado")],
+              ["alertaAcumulativaSinModalidad", t("configuracion.alertaSinModalidad")],
             ].map(([k, label]) => (
               <label key={k} className="flex items-start gap-2 rounded-xl border border-slate-300 p-3 text-sm">
                 <input
@@ -206,14 +194,12 @@ export default function Configuracion() {
               </label>
             ))}
           </div>
-          <p className="mt-1 text-xs text-slate-500">
-            Cada checkbox controla si se evalúa esa familia de alertas. Si se detectan falsos positivos, puede desactivarse temporalmente sin tocar código.
-          </p>
+          <p className="mt-1 text-xs text-slate-500">{t("configuracion.alertasNota")}</p>
         </section>
 
         {advertencias.length > 0 && (
           <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950" role="alert">
-            <p className="font-semibold">Advertencias antes de aplicar:</p>
+            <p className="font-semibold">{t("configuracion.advertenciasTitulo")}</p>
             <ul className="mt-1 list-inside list-disc">
               {advertencias.map((m, i) => <li key={i}>{m}</li>)}
             </ul>
@@ -226,7 +212,7 @@ export default function Configuracion() {
             onClick={onResetTotal}
             className="min-h-touch rounded-xl border border-red-300 bg-white px-3 py-2 text-xs font-bold text-red-800 hover:bg-red-50"
           >
-            Restaurar valores predeterminados
+            {t("configuracion.restaurarPredet")}
           </button>
           <div className="flex gap-2">
             <button
@@ -235,7 +221,7 @@ export default function Configuracion() {
               disabled={!sucia}
               className="min-h-touch rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
             >
-              Descartar
+              {t("configuracion.descartar")}
             </button>
             {!confirmar ? (
               <button
@@ -244,7 +230,7 @@ export default function Configuracion() {
                 disabled={!sucia}
                 className="min-h-touch rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 hover:bg-emerald-700"
               >
-                Aplicar cambios…
+                {t("configuracion.aplicar")}
               </button>
             ) : (
               <button
@@ -252,7 +238,7 @@ export default function Configuracion() {
                 onClick={aplicar}
                 className="min-h-touch rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800"
               >
-                Confirmar y aplicar
+                {t("configuracion.confirmarAplicar")}
               </button>
             )}
           </div>

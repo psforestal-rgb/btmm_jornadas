@@ -1,22 +1,24 @@
 import { useState } from "react";
 import Icon from "../ui/Icon.jsx";
+import { useT } from "../i18n/useT.js";
 
 export default function BottomNav({ view, setView, nAlertas }) {
+  const t = useT();
   const [moreOpen, setMoreOpen] = useState(false);
   const main = [
-    ["dashboard", "Inicio", "home"],
-    ["funcionarios", "Personal", "users"],
-    ["planificacion", "Plan", "calendarDays"],
-    ["alertas", "Alertas", "bell"],
+    ["dashboard", t("bottomNav.inicio"), "home"],
+    ["funcionarios", t("bottomNav.personal"), "users"],
+    ["planificacion", t("bottomNav.plan"), "calendarDays"],
+    ["alertas", t("bottomNav.alertas"), "bell"],
   ];
   const more = [
-    ["dia", "Día", "calendar"],
-    ["roles", "Roles", "chart"],
-    ["planFuncionario", "Plan/Func.", "clipboard"],
-    ["adelantos", "Viáticos", "banknote"],
-    ["disponibilidad", "Disponib.", "shield"],
-    ["datos", "Datos", "shieldAlert"],
-    ["configuracion", "Config.", "traffic"],
+    ["dia", t("bottomNav.dia"), "calendar"],
+    ["roles", t("bottomNav.roles"), "chart"],
+    ["planFuncionario", t("bottomNav.planFunc"), "clipboard"],
+    ["adelantos", t("bottomNav.viaticos"), "banknote"],
+    ["disponibilidad", t("bottomNav.disponib"), "shield"],
+    ["datos", t("bottomNav.datos"), "shieldAlert"],
+    ["configuracion", t("bottomNav.config"), "traffic"],
   ];
   return (
     <>
@@ -43,7 +45,7 @@ export default function BottomNav({ view, setView, nAlertas }) {
           </div>
         </div>
       )}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white lg:hidden" aria-label="Navegación principal">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white lg:hidden" aria-label={t("bottomNav.navAria")}>
         <div className="grid grid-cols-5">
           {main.map(([id, label, icon]) => (
             <button
@@ -61,7 +63,7 @@ export default function BottomNav({ view, setView, nAlertas }) {
               {label}
               {id === "alertas" && nAlertas > 0 && (
                 <span
-                  aria-label={`${nAlertas} alertas pendientes`}
+                  aria-label={t("bottomNav.alertasAria", { n: nAlertas })}
                   className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white"
                 >
                   {nAlertas}
@@ -72,13 +74,13 @@ export default function BottomNav({ view, setView, nAlertas }) {
           <button
             onClick={() => setMoreOpen(!moreOpen)}
             aria-expanded={moreOpen}
-            aria-label="Más opciones"
+            aria-label={t("bottomNav.masAria")}
             className={`flex min-h-touch flex-col items-center justify-center gap-0.5 py-3 text-[11px] font-semibold ${
               moreOpen ? "text-emerald-800" : "text-slate-500"
             }`}
           >
             <Icon name="menu" size={22} />
-            Más
+            {t("bottomNav.mas")}
           </button>
         </div>
       </nav>

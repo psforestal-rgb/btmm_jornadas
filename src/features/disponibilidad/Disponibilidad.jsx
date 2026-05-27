@@ -2,8 +2,10 @@ import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import Avatar from "../../ui/Avatar.jsx";
 import { faltan, fecha } from "../../domain/fechas.js";
+import { useT } from "../../i18n/useT.js";
 
 export default function Disponibilidad({ personas }) {
+  const t = useT();
   const con = personas.filter((f) => f.disponibilidad);
   const sin = personas.filter((f) => !f.disponibilidad);
   const lista = (arr) => (
@@ -26,7 +28,7 @@ export default function Disponibilidad({ personas }) {
                   : "border-slate-200 bg-slate-100 text-slate-700"
               }
             >
-              {d === null ? "Sin contrato" : `${d} días`}
+              {d === null ? t("disponibilidad.sinContrato") : t("disponibilidad.nDias", { n: d })}
             </Badge>
           </div>
         );
@@ -36,17 +38,17 @@ export default function Disponibilidad({ personas }) {
   return (
     <section className="grid gap-4 xl:grid-cols-2">
       <Card
-        title="Contratos activos — disponibilidad"
+        title={t("disponibilidad.activosTitulo")}
         icon="🛡️"
         action={<Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{con.length}</Badge>}
       >
         {lista(con)}
         <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
-          <strong>Control:</strong> la herramienta alerta; no ejecuta suspensiones automáticamente.
+          <strong>Control:</strong> {t("disponibilidad.controlNota").replace(/^Control:\s*/, "")}
         </div>
       </Card>
       <Card
-        title="Sin disponibilidad asignada"
+        title={t("disponibilidad.sinActivosTitulo")}
         icon="🛡️"
         action={<Badge className="border-slate-200 bg-slate-100 text-slate-700">{sin.length}</Badge>}
       >

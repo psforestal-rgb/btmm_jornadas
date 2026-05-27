@@ -13,10 +13,12 @@ import { actividadesEnDia, esAtencionRutinaria } from "../../domain/actividades.
 import { puestoRequiereAtencionRutinaria } from "../../domain/cobertura.js";
 import { useApp } from "../../context/AppContext.jsx";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useT } from "../../i18n/useT.js";
 import CoberturaDetalleModal from "./CoberturaDetalleModal.jsx";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function Dashboard({ personas, alerts, setView, actividadesPlan, setActividadesPlan, roleData, month, year }) {
+  const t = useT();
   const [detalleCobertura, setDetalleCobertura] = useState(null);
   const [modalActividad, setModalActividad] = useState(null);
   const [puestoActivo, setPuestoActivo] = useState(opcionesPuestoOperativo[0]);
@@ -160,30 +162,30 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   // KPIs separados por horizonte temporal: "Hoy" vs "Este mes".
   const kpisHoy = [
     {
-      label: "Sin actividad",
+      label: t("kpi.sinActividad"),
       value: sinActividadHoy,
-      sub: "en turno hoy sin planificar",
+      sub: t("kpi.sinActividadSub"),
       color: sinActividadHoy > 0 ? "text-amber-600" : "text-slate-900",
-      cta: { label: "Ver detalle del día", action: () => setView("dia") },
+      cta: { label: t("dashboard.verDia"), action: () => setView("dia") },
     },
   ];
   const kpisMes = [
     {
-      label: "Cobertura crítica",
+      label: t("kpi.coberturaCritica"),
       value: diasSinVisit,
-      sub: "días sin Visit. asignada",
+      sub: t("kpi.coberturaCriticaSub"),
       color: diasSinVisit > 0 ? "text-red-600" : "text-slate-900",
     },
     {
-      label: "Por vencer",
+      label: t("kpi.porVencer"),
       value: porVencer,
-      sub: "disponibilidades ≤30 días",
+      sub: t("kpi.porVencerSub"),
       color: porVencer > 0 ? "text-amber-600" : "text-slate-900",
     },
     {
-      label: "Personal activo",
+      label: t("kpi.personalActivo"),
       value: totalActivos,
-      sub: `/ ${personas.length} total`,
+      sub: t("kpi.personalActivoSub", { total: personas.length }),
       color: "text-slate-900",
     },
   ];
@@ -225,7 +227,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
             ? "border-emerald-500 bg-emerald-50"
             : "border-slate-200 bg-white"
         }`}
-        title={faltaAtencion ? "ALERTA: sin atención rutinaria de visitantes asignada" : "Ver detalle"}
+        title={faltaAtencion ? t("dashboard.cell.alerta") : t("dashboard.cell.titulo")}
       >
         <div className="flex items-baseline justify-between">
           <span className="text-base font-semibold">{d}</span>
@@ -233,11 +235,11 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
         </div>
         <div className="mt-1 flex flex-col gap-0.5">
           <div className="flex justify-between rounded bg-white/60 px-1.5 py-0.5 text-[11px]">
-            <span>Turno</span>
+            <span>{t("dashboard.cell.turno")}</span>
             <span className="font-semibold">{rol}</span>
           </div>
           <div className="flex justify-between rounded bg-white/60 px-1.5 py-0.5 text-[11px]">
-            <span>Plan</span>
+            <span>{t("dashboard.cell.plan")}</span>
             <span className="font-semibold">{programados}</span>
           </div>
           <div
@@ -249,7 +251,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
                 : "bg-slate-100 text-slate-500"
             }`}
           >
-            <span>Visit.</span>
+            <span>{t("dashboard.cell.visit")}</span>
             <span className="font-semibold">{atencion}</span>
           </div>
         </div>
@@ -266,14 +268,14 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
         <header className="flex items-center justify-between gap-2">
           <h2 id="hoy-heading" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-700">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-            Hoy · día {diaRef}
+            {t("dashboard.bloqueHoy", { dia: diaRef })}
           </h2>
           <button
             type="button"
             onClick={() => setView("dia")}
             className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Ver detalle del día →
+            {t("dashboard.verDia")}
           </button>
         </header>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -281,7 +283,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
             <div key={label} className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm xl:col-span-2">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">Hoy</span>
+                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">{t("dashboard.badgeHoy")}</span>
               </div>
               <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
               <div className="mt-1 text-xs text-slate-400">{sub}</div>
@@ -300,7 +302,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
         <header>
           <h2 id="mes-heading" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-700">
             <span className="inline-block h-2 w-2 rounded-full bg-blue-500" aria-hidden="true" />
-            Este mes · {meses[month]} {year}
+            {t("dashboard.bloqueMes", { mes: meses[month], anio: year })}
           </h2>
         </header>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -308,7 +310,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
             <div key={label} className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
-                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-800">Mes</span>
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-800">{t("dashboard.badgeMes")}</span>
               </div>
               <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
               <div className="mt-1 text-xs text-slate-400">{sub}</div>
@@ -317,13 +319,13 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
         </div>
       </section>
       <Card
-        title={`Cobertura por puesto operativo — ${meses[month]} ${year}`}
+        title={t("dashboard.coberturaTitulo", { mes: meses[month], anio: year })}
         icon="📍"
         action={
           <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold">
-            <span className="rounded-lg border border-amber-300 bg-amber-100 px-2 py-1 text-amber-950">Turno = rol activo</span>
-            <span className="rounded-lg border border-emerald-300 bg-emerald-100 px-2 py-1 text-emerald-950">Plan = actividad</span>
-            <span className="rounded-lg border border-red-300 bg-red-100 px-2 py-1 text-red-950">Visit. = atención visitantes</span>
+            <span className="rounded-lg border border-amber-300 bg-amber-100 px-2 py-1 text-amber-950">{t("dashboard.leyendaTurno")}</span>
+            <span className="rounded-lg border border-emerald-300 bg-emerald-100 px-2 py-1 text-emerald-950">{t("dashboard.leyendaPlan")}</span>
+            <span className="rounded-lg border border-red-300 bg-red-100 px-2 py-1 text-red-950">{t("dashboard.leyendaVisit")}</span>
           </div>
         }
       >
@@ -355,12 +357,12 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
               <div>
                 <h3 className="text-base font-semibold text-slate-950">{puestoActivo}</h3>
                 <div className="text-xs text-slate-500">
-                  {sinVisit > 0 ? `${sinVisit} días sin Visit.` : "Visit. cubierta"} ·{" "}
-                  {sinPlan > 0 ? `${sinPlan} días sin Plan` : "Plan completo"}
+                  {sinVisit > 0 ? t("dashboard.sinVisit", { n: sinVisit }) : t("dashboard.visitCubierta")} ·{" "}
+                  {sinPlan > 0 ? t("dashboard.sinPlan", { n: sinPlan }) : t("dashboard.planCompleto")}
                 </div>
               </div>
               {puestoRequiereAtencionRutinaria(puestoActivo, puestosRequieren) && (
-                <Badge className="border-red-200 bg-red-50 text-red-900">Requiere Visit. diario</Badge>
+                <Badge className="border-red-200 bg-red-50 text-red-900">{t("dashboard.requiereVisitDiario")}</Badge>
               )}
             </div>
           );
@@ -384,7 +386,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
           </div>
         </div>
         <div className="mt-3 text-xs font-medium text-slate-500">
-          Cada casilla abre el detalle de funcionarios programados, en turno y asignación de atención rutinaria de visitantes. Orosi y Quetzales alertan en rojo cuando Visit. = 0.
+          {t("dashboard.coberturaNota")}
         </div>
       </Card>
       {detalleCobertura && (
@@ -407,11 +409,11 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
       )}
       <div className="grid gap-4 xl:grid-cols-2">
         <Card
-          title="Alertas activas"
+          title={t("dashboard.alertasActivasTitulo")}
           icon="🔔"
           action={
             <button onClick={() => setView("alertas")} className="text-sm font-semibold text-emerald-800">
-              Ver todas
+              {t("dashboard.verTodas")}
             </button>
           }
         >
@@ -422,11 +424,11 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
           </div>
         </Card>
         <Card
-          title="Estado del personal"
+          title={t("dashboard.estadoPersonalTitulo")}
           icon="👥"
           action={
             <button onClick={() => setView("funcionarios")} className="text-sm font-semibold text-emerald-800">
-              Abrir funcionarios
+              {t("dashboard.abrirFuncionarios")}
             </button>
           }
         >
@@ -451,7 +453,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
         >
           <div className="flex items-center gap-2 text-base font-semibold">
             <span>⚖️</span>
-            Marco normativo / control interno
+            {t("dashboard.marcoNormativo")}
           </div>
           <span className="text-slate-400">{normativaAbierta ? "▲" : "▼"}</span>
         </button>
@@ -465,7 +467,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
               ))}
             </div>
             <div className="mt-4 rounded-xl border-l-4 border-red-700 bg-red-50 p-3 text-sm text-red-950">
-              <strong>Regla dura:</strong> el sistema registra y alerta; no genera pago, reposición, suspensión o derecho automático.
+              {t("app.reglaDura")}
             </div>
           </div>
         )}

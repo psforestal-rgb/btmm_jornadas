@@ -6,8 +6,10 @@ import EmptyState from "../../ui/EmptyState.jsx";
 import { meses } from "../../data/calendario.js";
 import { dim, fecha, pad2 } from "../../domain/fechas.js";
 import { useApp } from "../../context/AppContext.jsx";
+import { useT } from "../../i18n/useT.js";
 
 export default function AdelantoViaticos({ actividadesPlan, personas }) {
+  const t = useT();
   const [vista, setVista] = useState("funcionario");
   const { reglas } = useApp();
   const diaCorte = reglas?.diaCorteViaticos ?? 15;
@@ -29,8 +31,6 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
     .filter((a) => a.viatico && a.inicio <= finMes && (a.fin || a.inicio) >= inicioMes)
     .sort((a, b) => a.inicio.localeCompare(b.inicio) || a.titulo.localeCompare(b.titulo));
   const nombreMes = `${meses[mesObjetivo]} ${anoObjetivo}`;
-  // Si el administrador desactivó "permitir consulta tras cierre" y ya pasó
-  // el plazo, ocultamos el listado y solo dejamos el banner informativo.
   const mostrarListado = plazoAbierto || permitirConsulta;
   const registrosFuncionario = personas
     .filter((p) => actividades.some((a) => a.funcionarios.includes(p.nombre)))
@@ -40,7 +40,7 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
   return (
     <section className="space-y-4">
       <Card
-        title={`Adelanto de viáticos — actividades de ${nombreMes}`}
+        title={t("viaticos.titulo", { nombreMes })}
         icon="💵"
         action={
           <div className="flex flex-wrap gap-2">
@@ -50,7 +50,7 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
                 vista === "funcionario" ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"
               }`}
             >
-              Por funcionario
+              {t("viaticos.porFuncionario")}
             </button>
             <button
               onClick={() => setVista("actividad")}
@@ -58,7 +58,7 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
                 vista === "actividad" ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"
               }`}
             >
-              Por actividad
+              {t("viaticos.porActividad")}
             </button>
           </div>
         }
@@ -70,29 +70,33 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
         >
           {plazoAbierto ? (
             <>
-              <strong>Plazo abierto.</strong> Este listado corresponde al mes siguiente y puede usarse para tramitar adelantos hasta el día 15 del mes anterior.
+              <strong>{t("viaticos.plazoAbierto")}</strong> {t("viaticos.plazoAbiertoSub", { dia: diaCorte })}
             </>
           ) : (
             <>
-              <strong>Clausurado el tiempo de trámite de adelantos del próximo mes.</strong> El listado queda disponible para consulta, pero el plazo ordinario de trámite venció el día 15 del mes anterior.
+              <strong>{t("viaticos.plazoCerrado")}</strong> {t("viaticos.plazoCerradoSub", { dia: diaCorte })}
             </>
           )}
           <div className="mt-1 text-xs font-bold opacity-80">
-            Mes a tramitar: {nombreMes}. Corte administrativo: día {diaCorte} del mes {enMesSiguiente ? "anterior" : "en curso"}.
+            {t("viaticos.pie", {
+              nombreMes,
+              dia: diaCorte,
+              referencia: enMesSiguiente ? t("viaticos.referenciaAnterior") : t("viaticos.referenciaEnCurso"),
+            })}
           </div>
         </div>
         {!mostrarListado ? (
           <EmptyState
             icon="banknote"
-            title="Listado oculto tras el cierre"
-            description={`Según la configuración administrativa, el listado se oculta cuando el plazo (día ${diaCorte}) ya venció. Puede reactivar la consulta en Configuración → Viáticos.`}
+            title={t("viaticos.ocultoTitulo")}
+            description={t("viaticos.ocultoDesc", { dia: diaCorte })}
             tone="warning"
           />
         ) : actividades.length === 0 ? (
           <EmptyState
             icon="banknote"
-            title="Sin actividades con viático para el próximo mes"
-            description={`Aún no hay actividades de ${nombreMes} marcadas como “requiere tramitar adelanto de viático”. Vaya a Planificación general o Plan/Funcionario para asignarlas.`}
+            title={t("viaticos.sinActividadesTitulo")}
+            description={t("viaticos.sinActividadesDesc", { nombreMes })}
             tone="neutral"
           />
         ) : vista === "funcionario" ? (
@@ -114,7 +118,7 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
                     <div key={a.id} className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-orange-950">
                       <div className="text-sm font-semibold">{a.titulo}</div>
                       <div className="mt-1 text-xs font-bold">
-                        {rango(a)} · {a.lugar || "Sin lugar"}
+                        {rango(a)} · {a.lugar || t("dia.sinLugar")}
                       </div>
                       {a.observaciones && <div className="mt-1 text-xs opacity-80">{a.observaciones}</div>}
                     </div>
@@ -131,10 +135,12 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
                   <div>
                     <div className="text-base font-semibold">{a.titulo}</div>
                     <div className="mt-1 text-sm font-bold">
-                      {rango(a)} · {a.lugar || "Sin lugar"}
+                      {rango(a)} · {a.lugar || t("dia.sinLugar")}
                     </div>
                   </div>
-                  <Badge className="border-orange-300 bg-orange-200 text-orange-950">{a.funcionarios.length} funcionarios</Badge>
+                  <Badge className="border-orange-300 bg-orange-200 text-orange-950">
+                    {t("viaticos.nFuncionarios", { n: a.funcionarios.length })}
+                  </Badge>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {a.funcionarios.map((n) => (

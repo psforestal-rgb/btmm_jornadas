@@ -9,6 +9,10 @@
  *   "Acumulativa" = jornada acumulativa por turno
  *   "ONG-Invest-Volunt" = personal de apoyo externo
  * - "Regla dura": la herramienta solo registra y alerta.
+ *
+ * Cobertura: cadenas visibles en UI (componentes React). Las cadenas que
+ * pertenecen al dominio (`alertas()`) viven en `src/domain/alertas.js` y
+ * se traducen ahí; este diccionario las re-expone para facilitar QA.
  */
 const dict = {
   app: {
@@ -17,6 +21,20 @@ const dict = {
     estado: "Activo",
     reglaDura:
       "Regla dura: el sistema registra y alerta; no genera pago, reposición, suspensión o derecho automático.",
+    sinacCR: "SINAC · Costa Rica",
+    accNombre: "Área de Conservación Central",
+    bloqueLinea1: "Bloque Tapantí",
+    bloqueLinea2: "Macizo de la Muerte",
+    bloqueSub: "Gestión de jornadas laborales",
+    perfilNombre: "P. Sánchez N.",
+    perfilCargo: "Guardaparques · ACC",
+    titulo: "Gestión de jornadas laborales",
+    breadcrumbBase: "PNLQ / {titulo}",
+  },
+  sidebar: {
+    grupoPrincipal: "Principal",
+    grupoJornadas: "Jornadas",
+    grupoControl: "Control",
   },
   view: {
     dashboard: "Dashboard",
@@ -38,6 +56,32 @@ const dict = {
     anio: "Año",
     vistaCompacta: "Vista compacta",
     vistaAmplia: "Vista amplia",
+    cargando: "Cargando vista…",
+  },
+  bottomNav: {
+    inicio: "Inicio",
+    personal: "Personal",
+    plan: "Plan",
+    alertas: "Alertas",
+    dia: "Día",
+    roles: "Roles",
+    planFunc: "Plan/Func.",
+    viaticos: "Viáticos",
+    disponib: "Disponib.",
+    datos: "Datos",
+    config: "Config.",
+    mas: "Más",
+    masAria: "Más opciones",
+    navAria: "Navegación principal",
+    alertasAria: "{n} alertas pendientes",
+  },
+  theme: {
+    light: "Claro",
+    dark: "Oscuro",
+    hc: "Alto contraste",
+    cambiarOscuro: "Cambiar a oscuro",
+    cambiarHC: "Cambiar a alto contraste",
+    cambiarClaro: "Cambiar a claro",
   },
   dashboard: {
     bloqueHoy: "Hoy · día {dia}",
@@ -54,6 +98,36 @@ const dict = {
     sinPlan: "{n} días sin Plan",
     planCompleto: "Plan completo",
     requiereVisitDiario: "Requiere Visit. diario",
+    coberturaNota:
+      "Cada casilla abre el detalle de funcionarios programados, en turno y asignación de atención rutinaria de visitantes. Orosi y Quetzales alertan en rojo cuando Visit. = 0.",
+    alertasActivasTitulo: "Alertas activas",
+    verTodas: "Ver todas",
+    estadoPersonalTitulo: "Estado del personal",
+    abrirFuncionarios: "Abrir funcionarios",
+    marcoNormativo: "Marco normativo / control interno",
+    cell: {
+      turno: "Turno",
+      plan: "Plan",
+      visit: "Visit.",
+      titulo: "Ver detalle",
+      alerta: "ALERTA: sin atención rutinaria de visitantes asignada",
+    },
+  },
+  cobertura: {
+    titulo: "Cobertura programada",
+    programados: "Programados en actividades",
+    enTurnoRol: "En turno según rol",
+    atencionVisit: "Atención rutinaria visitantes",
+    alertaSinAtencion: "ALERTA: debe haber al menos una persona asignada.",
+    asignadosVisit: "Asignados a atención rutinaria de visitantes",
+    enTurnoSegunRol: "Funcionarios en turno según rol",
+    sinTurno: "No hay funcionarios en turno según rol para este puesto operativo y día.",
+    programadosLugar: "Funcionarios programados en actividades con este lugar",
+    sinProgramados: "No hay funcionarios programados en actividades con este puesto operativo como lugar para este día.",
+    sinActividad: "Sin actividad programada para este día.",
+    rolPrefix: "Rol: {rol} · {puesto}",
+    agregarActividad: "Agregar actividad",
+    editarActividad: "Editar actividad",
   },
   kpi: {
     coberturaCritica: "Cobertura crítica",
@@ -63,15 +137,311 @@ const dict = {
     porVencer: "Por vencer",
     porVencerSub: "disponibilidades ≤30 días",
     personalActivo: "Personal activo",
+    personalActivoSub: "/ {total} total",
     enTurno: "En turno",
     conActividad: "Con actividad",
     fueraDeTurno: "Fuera de turno",
     conViatico: "Con viático",
   },
+  dia: {
+    anterior: "Anterior",
+    siguiente: "Siguiente",
+    diaAnterior: "Día anterior",
+    diaSiguiente: "Día siguiente",
+    seleccionarFecha: "Seleccionar fecha",
+    pistaSwipe: "Deslice ←/→ para cambiar día",
+    porPuesto: "Por puesto operativo",
+    turnoLabel: "turno",
+    planLabel: "plan.",
+    activosLabel: "activos",
+    actividadesTitulo: "Actividades planificadas ({n})",
+    nueva: "+ Nueva",
+    sinActividades: "Sin actividades planificadas para este día",
+    enTurnoConActTitulo: "En turno · con actividad ({n})",
+    enTurnoConActVacio: "Ningún funcionario en turno tiene actividad programada",
+    enTurnoSinActTitulo: "En turno · sin actividad ({n})",
+    enTurnoSinActVacio: "Todos los funcionarios en turno tienen actividad asignada",
+    asignar: "+ Asignar",
+    fueraDeTurnoTitulo: "Fuera de turno ({n})",
+    fueraDeTurnoVacio: "Todos los funcionarios activos están en turno",
+    conViaticoTitulo: "Con viático este día ({n})",
+    nFuncionarios: "{n} funcionario{plural}",
+    viaticoBadge: "💵 Viático",
+    conflictosBadge: "⚠ {n} conflicto{plural}",
+    sinLugar: "Sin lugar",
+  },
+  funcionarios: {
+    titulo: "Funcionarios",
+    agregar: "Agregar funcionario",
+    agregarCorto: "Agregar",
+    buscarPlaceholder: "Buscar por nombre, cédula, puesto u observación…",
+    filtroTodos: "Todos",
+    filtroGuardas: "Guardaparques",
+    filtroDisp: "Con disponibilidad",
+    filtroAcum: "Acumulativa",
+    filtroOng: "ONG-Invest-Volunt",
+    filtroSinRes: "Sin resolución",
+    vistaTabla: "Tabla",
+    vistaTarjetas: "Tarjetas",
+    vistaAria: "Vista",
+    sinResultadosTitulo: "Sin resultados",
+    sinResultadosDesc: "Ajuste la búsqueda o los filtros para encontrar funcionarios.",
+    th: {
+      funcionario: "Funcionario",
+      cargo: "Cargo / puesto operativo",
+      jornada: "Jornada",
+      disponibilidad: "Disponibilidad",
+      atributos: "Atributos",
+      estado: "Estado",
+      acciones: "Acciones",
+    },
+    sinPuesto: "Sin puesto operativo",
+    sinResolucion: "🔵 Sin resolución",
+    si: "Sí",
+    no: "No",
+    leyendaPolicia: "🛡️ Autoridad de policía",
+    leyendaBrigada: "🔥 Brigada forestal",
+    leyendaPendiente: "🔵 Dato operativo por completar",
+    eliminarTitulo: "Eliminar funcionario",
+    eliminarConfirma:
+      "Se eliminará el registro de {nombre} en esta propuesta visual.",
+    card: {
+      cargo: "Cargo",
+      jornada: "Jornada",
+      disponibilidad: "Disponibilidad",
+      atributos: "Atributos",
+      venceCorto: "Vence {fecha}",
+    },
+  },
+  modalFuncionario: {
+    editar: "Editar funcionario",
+    agregar: "Agregar funcionario",
+    nombre: "Nombre",
+    cedula: "Cédula",
+    correo: "Correo",
+    cargo: "Cargo institucional",
+    puesto: "Puesto operativo",
+    condicion: "Condición",
+    estado: "Estado",
+    jornada: "Jornada",
+    modalidad: "Modalidad",
+    resolucion: "Resolución",
+    contrato: "Contrato",
+    vencimiento: "Vencimiento",
+    ingreso: "Ingreso",
+    obs: "Observaciones",
+    attr: {
+      disponibilidad: "Disponibilidad",
+      policia: "Autoridad policía",
+      brigada: "Brigada",
+      ong: "ONG-Invest-Volunt",
+    },
+  },
+  modalActividad: {
+    titulo: "Actividad",
+    editar: "Editar actividad",
+    agregar: "Agregar actividad",
+    sub: "Registre actividad, periodo, lugar, funcionarios participantes y necesidad de adelanto de viático.",
+    fechaInicio: "Fecha inicio",
+    fechaFinal: "Fecha final",
+    unDia: "Actividad de un solo día",
+    requiereViatico: "Requiere tramitar adelanto de viático",
+    lugar: "Lugar",
+    placeholderTitulo: "O escriba otra actividad: patrullaje, inspección, reunión, mantenimiento...",
+    placeholderLugar: "Escriba otro lugar: sector, sendero, oficina, comunidad...",
+    placeholderObs: "Detalle operativo, coordinación, expediente, requerimientos, vehículo, equipo, etc.",
+    otra: "Otra actividad",
+    otro: "Otro",
+    participantes: "Funcionarios participantes",
+    seleccionados: "{n} seleccionados",
+    avisoTraslape: "Funcionario con actividad ya planificada",
+    agregarAunAsi: "Agregar de todos modos",
+    modificarActividad: "Modificar actividad",
+    obs: "Observaciones",
+    guardarActividad: "Guardar actividad",
+  },
+  roles: {
+    titulo: "Roles mensuales — {mes} {anio}",
+    vistaTabla: "Tabla mensual",
+    vistaSemana: "Por semana",
+    vistaAria: "Vista de Roles",
+    restaurar: "Restaurar mes",
+    edicionFila: "Edición por fila",
+    leyenda: {
+      turno: "T1 Turno",
+      libre: "L1 Libre",
+      vacaciones: "V1 Vacaciones",
+      incapacidad: "I1 Incapacidad",
+      otro: "O1 Otro",
+    },
+    funcionarioCol: "Funcionario / edición",
+    cantidadEnTurno: "CANTIDAD EN TURNO",
+    cantidadEnTurnoSemana: "Cantidad en turno · semana",
+    semanaResumen: "Sem {n} de {total}",
+    semanaAnterior: "Semana anterior",
+    semanaSiguiente: "Semana siguiente",
+    semanaAria: "Selección de semana",
+    semanaLabel: "Semana {n} (días {ini} al {fin})",
+    editarTipoRol: "Tipo de rol desde 1er día laboral",
+    aplicar: "Aplicar",
+    aplicarNota: "Rellena de forma automática; luego puede ajustar celda por celda.",
+    bloquear: "Bloquear edición de {nombre}",
+    permitir: "Permitir edición de {nombre}",
+    titleConflicto: "Clic para resolver: rol vs actividad planificada",
+    titleEditar: "Cambiar marca del día",
+    titleSinEdicion: "Active edición del funcionario para modificar",
+    initRing: "INICIO",
+  },
+  menuCelda: {
+    titulo: "Editar día {dia} · {persona}",
+    sub: "Seleccione únicamente la categoría. El número consecutivo se recalcula automáticamente en toda la fila.",
+    primerDia: "Primer día laboral del mes.",
+    primerDiaSub: "La modalidad del funcionario define el reinicio de los consecutivos de turno y libre.",
+    cat: {
+      T: "Turno",
+      L: "Libre",
+      V: "Vacaciones",
+      I: "Incapacidad",
+      O: "Otro",
+    },
+    sub2: "Se mostrará como {cat}1, {cat}2...",
+    limpiar: "Limpiar celda",
+  },
+  conflicto: {
+    titulo1: "Resolver incoherencia · paso 1 de 2",
+    titulo2: "Confirmar acción · paso 2 de 2",
+    sub1: "Seleccione cuál registro corregir. La herramienta solo actualiza el dato visible: no genera pagos ni decisiones administrativas.",
+    sub2Rol: "Se modificará el rol de este día y se recalcularán los consecutivos T/L/V/I/O de toda la fila respetando la modalidad.",
+    sub2Act: "Se abrirá el listado de {n} actividad{plural} de este día para que pueda quitar al funcionario o ajustar la planificación.",
+    detalle: "{persona} · día {dia}",
+    detalleSub: "Rol {valor} (no en turno) con {n} actividad{plural} planificada{plural}.",
+    cambiarRol: "Modificar rol del día",
+    cambiarRolSub: "Cambiar la categoría de turno para este funcionario.",
+    cambiarActividad: "Modificar actividad{plural}",
+    cambiarActividadSub: "Ver, editar o quitar al funcionario de las actividades del día.",
+    resumen: "Resumen del impacto",
+    antes: "Antes:",
+    despues: "Después:",
+    antesValor: "rol {valor} · {n} actividad{plural}.",
+    despuesRol: "elegirá una nueva categoría (T/L/V/I/O) y se renumerará toda la fila.",
+    despuesAct: "podrá quitar al funcionario o editar/eliminar la actividad.",
+    notaNoEjecuta: "La herramienta solo registra; no genera pago, reposición ni derecho automático.",
+    volver: "Volver",
+    continuar: "Continuar",
+  },
+  actividadesDia: {
+    titulo: "Actividades · {funcionario}",
+    sub: "{fecha} · {n} actividad{plural} planificada{plural}",
+    vacia: "Ya no hay actividades de {funcionario} en este día.",
+    quitarDe: "Quitar a {nombre}",
+    editar: "Editar actividad",
+    eliminar: "Eliminar",
+    eliminarConfirma: "¿Eliminar esta actividad?",
+    eliminarSub: "Desaparece para todos los funcionarios asignados.",
+    confirmar: "Confirmar",
+  },
+  modificarRol: {
+    titulo: "Modificar rol",
+    sub: "{funcionario} · {fecha} · rol actual: {rol}",
+    cat: {
+      T: "Turno",
+      L: "Libre",
+      V: "Vacaciones",
+      I: "Incapacidad",
+      O: "Otro",
+    },
+    catSub: "Recalcula consecutivos de la fila",
+    limpiar: "Limpiar rol del día",
+  },
+  asignarActividad: {
+    titulo: "Asignar actividad",
+    sub: "{funcionario} · {fecha}",
+    crear: "Crear actividad nueva para este funcionario",
+    agregar: "Agregar a actividad existente del mismo día",
+    sinExistentes: "No hay actividades existentes ese día para otros funcionarios.",
+  },
+  planificacion: {
+    titulo: "Planificación general — {mes} {anio}",
+    agregar: "+ Agregar actividad",
+    leyendaProgramada: "Actividad programada",
+    leyendaViatico: "Requiere adelanto de viático",
+    leyendaFinde: "Fin de semana",
+    leyendaTurno: "👥 = en turno",
+    sinFuncionarios: "Sin funcionarios",
+    masFuncionarios: "+{n}",
+    titleDetalleDia: "Ver detalle del día",
+    titleTurno: "{n} funcionarios en turno",
+    titleActs: "{n} actividades",
+    actsBadge: "{n} act.",
+    viaticoTag: "VIÁTICO",
+    rolBadge: "⚠ ROL: {nombres}",
+  },
+  planFuncionario: {
+    titulo: "Planificación/Funcionario — {mes} {anio}",
+    expandir: "Expandir",
+    colapsar: "Colapsar",
+    leyendaTurnoAct: "Turno con actividad",
+    leyendaFaltaAct: "Falta asignar actividad",
+    leyendaConflicto: "Actividad no coincide con rol",
+    diasVisibles: "{n} días visibles",
+    actividades: "{n} actividades",
+    sinAsignar: "{n} sin asignar",
+    conflictos: "{n} conflictos",
+    ocultar: "Ocultar",
+    ver: "Ver",
+    faltaAsignar: "Falta asignar actividad",
+    sinLugar: "Sin lugar",
+    noCoincideRol: "NO COINCIDE CON ROL",
+    modificarActividad: "Modificar actividad",
+    modificarRol: "Modificar rol",
+    asignar: "Asignar",
+    nueva: "Nueva",
+  },
+  viaticos: {
+    titulo: "Adelanto de viáticos — actividades de {nombreMes}",
+    porFuncionario: "Por funcionario",
+    porActividad: "Por actividad",
+    plazoAbierto: "Plazo abierto.",
+    plazoAbiertoSub:
+      "Este listado corresponde al mes siguiente y puede usarse para tramitar adelantos hasta el día {dia} del mes anterior.",
+    plazoCerrado: "Clausurado el tiempo de trámite de adelantos del próximo mes.",
+    plazoCerradoSub:
+      "El listado queda disponible para consulta, pero el plazo ordinario de trámite venció el día {dia} del mes anterior.",
+    pie: "Mes a tramitar: {nombreMes}. Corte administrativo: día {dia} del mes {referencia}.",
+    referenciaAnterior: "anterior",
+    referenciaEnCurso: "en curso",
+    sinActividadesTitulo: "Sin actividades con viático para el próximo mes",
+    sinActividadesDesc:
+      "Aún no hay actividades de {nombreMes} marcadas como “requiere tramitar adelanto de viático”. Vaya a Planificación general o Plan/Funcionario para asignarlas.",
+    ocultoTitulo: "Listado oculto tras el cierre",
+    ocultoDesc:
+      "Según la configuración administrativa, el listado se oculta cuando el plazo (día {dia}) ya venció. Puede reactivar la consulta en Configuración → Viáticos.",
+    nFuncionarios: "{n} funcionarios",
+  },
+  disponibilidad: {
+    activosTitulo: "Contratos activos — disponibilidad",
+    sinActivosTitulo: "Sin disponibilidad asignada",
+    sinContrato: "Sin contrato",
+    nDias: "{n} días",
+    controlNota:
+      "Control: la herramienta alerta; no ejecuta suspensiones automáticamente.",
+  },
   alertas: {
     requiereAtencion: "Requiere atención · {n}",
     sinCriticas: "Sin alertas críticas",
     sinCriticasSub: "No se observan vencimientos o bloqueos críticos en los datos visibles.",
+    titulo: "Alertas del sistema ({n})",
+    requiereRevision: "Requiere revisión",
+    semaforoTitulo: "Semáforo normativo",
+    semaforo: {
+      verde: "Verificado",
+      amarillo: "Confirmación interna",
+      naranja: "Criterio RH/Jurídico",
+      rojo: "No automatizar",
+      azul: "Dato pendiente",
+    },
+    // Mensajes que vienen del dominio (alertas.js); duplicados aquí para
+    // testear que coinciden y para facilitar traducción futura.
     venceHoy: "Disponibilidad vence HOY — {nombre}",
     vencida: "Disponibilidad vencida — {nombre}",
     porVencer: "Disponibilidad por vencer — {nombre}",
@@ -80,6 +450,72 @@ const dict = {
     incapaConDisp: "Revisar disponibilidad — {nombre}",
     incapaConActividad: "Incapacitado con actividad planificada — {nombre}",
     inactivoConActividad: "Inactivo con actividad planificada — {nombre}",
+  },
+  datos: {
+    titulo: "Datos · respaldo local",
+    esquema: "Esquema v{n}",
+    estadoOk: "Última copia local guardada el {fecha}",
+    estadoPendiente: "{n} cambio{plural} pendiente{plural} de guardar (debounce 500 ms)",
+    estadoVacio: "Sin copia local todavía: los cambios se guardarán automáticamente al editar.",
+    estadoNota:
+      "La copia vive en el navegador (localStorage). Sirve como respaldo entre sesiones; no sustituye al backend institucional.",
+    funcionarios: "Funcionarios",
+    actividadesPlanificadas: "Actividades planificadas",
+    celdasOverride: "Celdas de rol con override",
+    exportar: "Exportar JSON",
+    importar: "Importar JSON…",
+    reiniciar: "Reiniciar datos semilla",
+    archivoAria: "Archivo JSON a importar",
+    importadoTitulo: "Snapshot importado",
+    importadoDesc: "Archivo: {archivo}{exportadoEn}",
+    importadoExtra: " · exportado {fecha}",
+    importRechazado: "Importación rechazada",
+    reiniciarTitulo: "Reiniciar a datos semilla",
+    reiniciarSub:
+      "Se descartará la copia local y la app volverá a los datos de ejemplo. Esta acción no se puede deshacer a menos que hayas exportado primero un JSON de respaldo.",
+    reiniciarRec: "Recomendación: pulse Exportar JSON antes de reiniciar.",
+    confirmarReiniciar: "Reiniciar",
+    porQueTitulo: "¿Por qué hay copia local?",
+    porQue: [
+      "El navegador guarda automáticamente cada cambio con un retraso de 500 ms para evitar perder información al recargar la página o cerrar el navegador.",
+      "La copia NO sustituye al backend institucional: cuando exista la integración con el sistema central del SINAC, el respaldo local servirá como cola offline y se sincronizará automáticamente.",
+      "El esquema lleva versión (`v{n}`); si el formato cambia en una nueva versión de la app, se crea un backup automático antes de aplicar la migración.",
+      "Exporte un JSON periódicamente como seguro adicional, especialmente antes de cambios mayores o cuando termine la jornada en campo.",
+    ],
+  },
+  configuracion: {
+    titulo: "Configuración · reglas administrativas",
+    badgeSucia: "Cambios sin aplicar",
+    badgeOk: "Sincronizado",
+    reglaDuraIntro:
+      "Regla dura: la herramienta registra y alerta; cambiar una regla no genera pagos, suspensiones ni derechos automáticos. Cualquier ajuste debe estar respaldado por la coordinación administrativa.",
+    coberturaTitulo: "Cobertura · puestos con atención rutinaria diaria",
+    coberturaSub:
+      "Si un día un puesto seleccionado no tiene a nadie asignado a \"Atención rutinaria de visitantes\", se marca como cobertura crítica (rojo) en el Dashboard.",
+    viaticosTitulo: "Viáticos · corte administrativo",
+    diaCorte: "Día de corte (1–28)",
+    mesObjetivo: "Mes objetivo",
+    permitirConsulta: "Permitir consulta tras cierre",
+    permitirConsultaSub:
+      "Si \"Permitir consulta tras cierre\" está desactivado, después del día de corte la vista de viáticos se oculta. Por defecto se mantiene visible (con banner rojo).",
+    feriadosTitulo: "Feriados · cálculo del primer día laboral",
+    feriadosCheckTitle: "Excluir feriados oficiales al determinar el primer día laboral del mes.",
+    feriadosCheckSub:
+      "Si el 1er día hábil L–V cae en feriado, la rotación T/L se inicia el siguiente día laboral real. Aplica a partir del mes siguiente para no alterar registros ya guardados.",
+    feriadosVer: "Ver feriados cargados ({n} año{plural})",
+    alertasTitulo: "Alertas adicionales (Fase 6)",
+    alertaInactivo: "Persona inactiva con actividad futura",
+    alertaIncapacitado: "Incapacitado con actividad futura",
+    alertaSinModalidad: "Acumulativa sin modalidad",
+    alertasNota:
+      "Cada checkbox controla si se evalúa esa familia de alertas. Si se detectan falsos positivos, puede desactivarse temporalmente sin tocar código.",
+    advertenciasTitulo: "Advertencias antes de aplicar:",
+    restaurarPredet: "Restaurar valores predeterminados",
+    restaurarConfirm:
+      "¿Restaurar todas las reglas a sus valores predeterminados? Las alertas y cobertura volverán al estado inicial.",
+    descartar: "Descartar",
+    aplicar: "Aplicar cambios…",
+    confirmarAplicar: "Confirmar y aplicar",
   },
   acciones: {
     aceptar: "Aceptar",
@@ -97,6 +533,8 @@ const dict = {
     aplicarCambios: "Aplicar cambios…",
     actualizarAhora: "Actualizar ahora",
     verLuego: "Ver luego",
+    instalar: "Instalar",
+    ahoraNo: "Ahora no",
   },
   estados: {
     activo: "Activo",
@@ -104,13 +542,19 @@ const dict = {
     vacaciones: "De vacaciones",
     incapacitado: "Incapacitado",
   },
-  modal: {
-    nuevaVersion: "Nueva versión disponible",
-    versionDesactualizada: "Versión desactualizada",
+  pwa: {
     instalarTitulo: "Instalar PNLQ en este dispositivo",
     instalarSub: "Acceso sin internet · Pantalla completa · Sin navegador",
+    instalarAria: "Instalar aplicación PNLQ",
     sinConexion: "Sin conexión — mostrando datos en caché",
     ultimaCarga: "Última carga local: {fecha}",
+    nuevaVersion: "Nueva versión disponible",
+    versionDesactualizada: "Versión desactualizada",
+    versionActual: "Versión actual: v{actual}",
+    versionDisponible: " · disponible: v{remoto}",
+    urgente: " Actualice para evitar inconsistencias.",
+    sugerido: " Actualice para ver los últimos cambios.",
+    bannerAria: "Nueva versión de PNLQ disponible",
   },
 };
 
@@ -120,13 +564,15 @@ const dict = {
  */
 export function format(plantilla, vars) {
   if (!plantilla || !vars) return plantilla;
+  if (typeof plantilla !== "string") return plantilla;
   return plantilla.replace(/\{(\w+)\}/g, (m, key) => (vars[key] !== undefined ? String(vars[key]) : m));
 }
 
 /**
  * Busca la cadena por ruta punteada en el diccionario. Devuelve la
  * propia clave si no se encuentra, para que en pantalla quede visible
- * qué texto falta traducir.
+ * qué texto falta traducir. Acepta valores no-string (arreglos) y los
+ * devuelve sin format.
  */
 export function lookup(path) {
   const partes = String(path || "").split(".");
@@ -138,7 +584,7 @@ export function lookup(path) {
       return path;
     }
   }
-  return typeof cur === "string" ? cur : path;
+  return cur === undefined ? path : cur;
 }
 
 /**
@@ -146,7 +592,14 @@ export function lookup(path) {
  * Es función directa (no hook) para que pueda usarse en módulos no React.
  */
 export function t(path, vars) {
-  return format(lookup(path), vars);
+  const v = lookup(path);
+  if (Array.isArray(v)) return v.map((x) => format(x, vars));
+  return format(v, vars);
+}
+
+/** Helper de plural simple: devuelve "s" si n !== 1, sino "". */
+export function plural(n) {
+  return n === 1 ? "" : "s";
 }
 
 export const __DICT__ = dict;

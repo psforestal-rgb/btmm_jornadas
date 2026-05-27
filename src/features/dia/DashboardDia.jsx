@@ -12,9 +12,12 @@ import { actividadesEnDia } from "../../domain/actividades.js";
 import { conflictosActividadDia } from "../../domain/conflictos.js";
 import { useSwipe } from "../../lib/useSwipe.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useT } from "../../i18n/useT.js";
+import { plural } from "../../i18n/es-CR.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData }) {
+  const t = useT();
   const [modalActividad, setModalActividad] = useState(null);
   const [yearD, monthD, dayD] = diaVista.split("-").map(Number);
   const monthIdx = monthD - 1;
@@ -98,11 +101,11 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
       <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
         <button
           onClick={() => moveDay(-1)}
-          aria-label="Día anterior"
+          aria-label={t("dia.diaAnterior")}
           className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
         >
           <Icon name="chevronLeft" size={16} />
-          Anterior
+          {t("dia.anterior")}
         </button>
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -112,17 +115,17 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
             type="date"
             value={diaVista}
             onChange={(e) => e.target.value && setDiaVista(e.target.value)}
-            aria-label="Seleccionar fecha"
+            aria-label={t("dia.seleccionarFecha")}
             className="min-h-touch rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700"
           />
-          <span className="text-[10px] text-slate-400 lg:hidden">Deslice ←/→ para cambiar día</span>
+          <span className="text-[10px] text-slate-400 lg:hidden">{t("dia.pistaSwipe")}</span>
         </div>
         <button
           onClick={() => moveDay(1)}
-          aria-label="Día siguiente"
+          aria-label={t("dia.diaSiguiente")}
           className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
         >
-          Siguiente
+          {t("dia.siguiente")}
           <Icon name="chevronRight" size={16} />
         </button>
       </div>
@@ -130,17 +133,17 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
       {/* KPIs del día */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {[
-          { label: "En turno", value: enTurnoConAct.length + enTurnoSinAct.length, color: "text-emerald-700", bg: "border-emerald-200 bg-emerald-50" },
-          { label: "Con actividad", value: enTurnoConAct.length, color: "text-emerald-700", bg: "border-emerald-200 bg-emerald-50" },
+          { label: t("kpi.enTurno"), value: enTurnoConAct.length + enTurnoSinAct.length, color: "text-emerald-700", bg: "border-emerald-200 bg-emerald-50" },
+          { label: t("kpi.conActividad"), value: enTurnoConAct.length, color: "text-emerald-700", bg: "border-emerald-200 bg-emerald-50" },
           {
-            label: "Sin actividad",
+            label: t("kpi.sinActividad"),
             value: enTurnoSinAct.length,
             color: enTurnoSinAct.length > 0 ? "text-amber-600" : "text-slate-600",
             bg: enTurnoSinAct.length > 0 ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white",
           },
-          { label: "Fuera de turno", value: fueraDeTurno.length, color: "text-slate-600", bg: "border-slate-200 bg-white" },
+          { label: t("kpi.fueraDeTurno"), value: fueraDeTurno.length, color: "text-slate-600", bg: "border-slate-200 bg-white" },
           {
-            label: "Con viático",
+            label: t("kpi.conViatico"),
             value: conViatico.length,
             color: conViatico.length > 0 ? "text-orange-700" : "text-slate-600",
             bg: conViatico.length > 0 ? "border-orange-200 bg-orange-50" : "border-slate-200 bg-white",
@@ -154,7 +157,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
       </div>
 
       {/* Resumen por puesto */}
-      <Card title="Por puesto operativo" icon="📍">
+      <Card title={t("dia.porPuesto")} icon="📍">
         <div className="grid gap-3 md:grid-cols-3">
           {statsPuesto.map(({ puesto, turno, programados, total }) => (
             <div key={puesto} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -162,15 +165,15 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
               <div className="grid grid-cols-3 gap-1 text-center">
                 <div>
                   <div className="text-2xl font-black text-emerald-700">{turno}</div>
-                  <div className="text-[10px] text-slate-500">turno</div>
+                  <div className="text-[10px] text-slate-500">{t("dia.turnoLabel")}</div>
                 </div>
                 <div>
                   <div className="text-2xl font-black text-blue-700">{programados}</div>
-                  <div className="text-[10px] text-slate-500">plan.</div>
+                  <div className="text-[10px] text-slate-500">{t("dia.planLabel")}</div>
                 </div>
                 <div>
                   <div className="text-2xl font-black text-slate-500">{total}</div>
-                  <div className="text-[10px] text-slate-500">activos</div>
+                  <div className="text-[10px] text-slate-500">{t("dia.activosLabel")}</div>
                 </div>
               </div>
             </div>
@@ -180,16 +183,16 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
 
       {/* Actividades del día */}
       <Card
-        title={`Actividades planificadas (${actsDelDia.length})`}
+        title={t("dia.actividadesTitulo", { n: actsDelDia.length })}
         icon="🗓️"
         action={
           <button onClick={() => setModalActividad(nuevaAct())} className="rounded-xl bg-emerald-800 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700">
-            + Nueva
+            {t("dia.nueva")}
           </button>
         }
       >
         {actsDelDia.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">Sin actividades planificadas para este día</div>
+          <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400">{t("dia.sinActividades")}</div>
         ) : (
           <div className="space-y-3">
             {actsDelDia.map((act) => {
@@ -212,15 +215,15 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                       )}
                     </div>
                     <div className="flex shrink-0 flex-wrap items-start gap-1.5">
-                      {act.viatico && <Badge className="border-orange-300 bg-orange-100 text-orange-900">💵 Viático</Badge>}
+                      {act.viatico && <Badge className="border-orange-300 bg-orange-100 text-orange-900">{t("dia.viaticoBadge")}</Badge>}
                       {conf.length > 0 && (
-                        <Badge className="border-red-300 bg-red-100 text-red-900">⚠ {conf.length} conflicto{conf.length > 1 ? "s" : ""}</Badge>
+                        <Badge className="border-red-300 bg-red-100 text-red-900">{t("dia.conflictosBadge", { n: conf.length, plural: plural(conf.length) })}</Badge>
                       )}
                       <button
                         onClick={() => setModalActividad({ ...act })}
                         className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                       >
-                        Editar
+                        {t("acciones.editar")}
                       </button>
                     </div>
                   </div>
@@ -247,9 +250,9 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
       </Card>
 
       {/* En turno con actividad */}
-      <Card title={`En turno · con actividad (${enTurnoConAct.length})`} icon="✅">
+      <Card title={t("dia.enTurnoConActTitulo", { n: enTurnoConAct.length })} icon="✅">
         {enTurnoConAct.length === 0 ? (
-          <p className="text-sm text-slate-400">Ningún funcionario en turno tiene actividad programada</p>
+          <p className="text-sm text-slate-400">{t("dia.enTurnoConActVacio")}</p>
         ) : (
           <div className="divide-y divide-slate-100">
             {enTurnoConAct.map((p) => (
@@ -259,7 +262,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="font-semibold text-slate-950">{p.nombre}</span>
                     <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
-                    {p.tieneViatico && <Badge className="border-orange-200 bg-orange-100 text-orange-900">💵 Viático</Badge>}
+                    {p.tieneViatico && <Badge className="border-orange-200 bg-orange-100 text-orange-900">{t("dia.viaticoBadge")}</Badge>}
                   </div>
                   <div className="mt-0.5 text-xs text-slate-500">{p.puestoOperativo}</div>
                   <div className="mt-1.5 flex flex-wrap gap-1">
@@ -277,9 +280,9 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
       </Card>
 
       {/* En turno sin actividad */}
-      <Card title={`En turno · sin actividad (${enTurnoSinAct.length})`} icon={enTurnoSinAct.length > 0 ? "⚠️" : "✅"}>
+      <Card title={t("dia.enTurnoSinActTitulo", { n: enTurnoSinAct.length })} icon={enTurnoSinAct.length > 0 ? "⚠️" : "✅"}>
         {enTurnoSinAct.length === 0 ? (
-          <p className="text-sm text-slate-400">Todos los funcionarios en turno tienen actividad asignada</p>
+          <p className="text-sm text-slate-400">{t("dia.enTurnoSinActVacio")}</p>
         ) : (
           <div className="divide-y divide-slate-100">
             {enTurnoSinAct.map((p) => (
@@ -298,7 +301,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                   onClick={() => setModalActividad(nuevaAct([p.nombre], p.puestoOperativo || ""))}
                   className="shrink-0 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
                 >
-                  + Asignar
+                  {t("dia.asignar")}
                 </button>
               </div>
             ))}
@@ -307,9 +310,9 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
       </Card>
 
       {/* Fuera de turno */}
-      <Card title={`Fuera de turno (${fueraDeTurno.length})`} icon="📴">
+      <Card title={t("dia.fueraDeTurnoTitulo", { n: fueraDeTurno.length })} icon="📴">
         {fueraDeTurno.length === 0 ? (
-          <p className="text-sm text-slate-400">Todos los funcionarios activos están en turno</p>
+          <p className="text-sm text-slate-400">{t("dia.fueraDeTurnoVacio")}</p>
         ) : (
           <div className="space-y-4">
             {Object.entries(fueraPorCat)
@@ -319,7 +322,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                   <div className="mb-2 flex items-center gap-2">
                     <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${catCls[cat]}`}>{catLabel[cat] || "Sin marcar"}</span>
                     <span className="text-xs text-slate-400">
-                      {list.length} funcionario{list.length !== 1 ? "s" : ""}
+                      {t("dia.nFuncionarios", { n: list.length, plural: plural(list.length) })}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -341,7 +344,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
 
       {/* Con viático */}
       {conViatico.length > 0 && (
-        <Card title={`Con viático este día (${conViatico.length})`} icon="💵">
+        <Card title={t("dia.conViaticoTitulo", { n: conViatico.length })} icon="💵">
           <div className="divide-y divide-slate-100">
             {conViatico.map((p) => (
               <div key={p.id} className="flex items-start gap-3 py-2.5">

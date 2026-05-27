@@ -6,6 +6,7 @@ import { dim, pad2 } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo } from "../../domain/roles.js";
 import { conflictosActividadDia } from "../../domain/conflictos.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useT } from "../../i18n/useT.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function Planificacion({
@@ -18,6 +19,7 @@ export default function Planificacion({
   setView,
   setDiaVista,
 }) {
+  const t = useT();
   const [modal, setModal] = useState(null);
   const feriados = useFeriadosDelAno(year);
   const days = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
@@ -57,22 +59,22 @@ export default function Planificacion({
     personasActivas.filter((p) => esRolActivo(codigoRolFuncionario(personas, roleData, year, month, p.nombre, d, feriados))).length;
   return (
     <Card
-      title={`Planificación general — ${meses[month]} ${year}`}
+      title={t("planificacion.titulo", { mes: meses[month], anio: year })}
       icon="🗓️"
       action={
         <button
           onClick={() => setModal(nuevo(isoDia(Math.min(new Date().getDate(), dim(year, month)))))}
           className="rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
         >
-          + Agregar actividad
+          {t("planificacion.agregar")}
         </button>
       }
     >
       <div className="mb-4 flex flex-wrap gap-2">
-        <Badge className="border-emerald-300 bg-emerald-100 text-emerald-950">Actividad programada</Badge>
-        <Badge className="border-orange-300 bg-orange-100 text-orange-950">Requiere adelanto de viático</Badge>
-        <Badge className="border-slate-300 bg-slate-100 text-slate-900">Fin de semana</Badge>
-        <Badge className="border-slate-300 bg-slate-100 text-slate-600">👥 = en turno</Badge>
+        <Badge className="border-emerald-300 bg-emerald-100 text-emerald-950">{t("planificacion.leyendaProgramada")}</Badge>
+        <Badge className="border-orange-300 bg-orange-100 text-orange-950">{t("planificacion.leyendaViatico")}</Badge>
+        <Badge className="border-slate-300 bg-slate-100 text-slate-900">{t("planificacion.leyendaFinde")}</Badge>
+        <Badge className="border-slate-300 bg-slate-100 text-slate-600">{t("planificacion.leyendaTurno")}</Badge>
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
         <div className="grid grid-cols-7 bg-slate-900 text-white">
@@ -101,7 +103,7 @@ export default function Planificacion({
                       setDiaVista(isoDia(d));
                       setView("dia");
                     }}
-                    title="Ver detalle del día"
+                    title={t("planificacion.titleDetalleDia")}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
                   >
                     {d}
@@ -110,7 +112,7 @@ export default function Planificacion({
                     {turno > 0 && (
                       <span
                         className="rounded-full bg-slate-600 px-1.5 py-0.5 text-[9px] font-semibold text-white"
-                        title={`${turno} funcionarios en turno`}
+                        title={t("planificacion.titleTurno", { n: turno })}
                       >
                         👥 {turno}
                       </span>
@@ -118,9 +120,9 @@ export default function Planificacion({
                     {items.length > 0 && (
                       <span
                         className="rounded-full bg-emerald-800 px-1.5 py-0.5 text-[9px] font-bold text-white"
-                        title={`${items.length} actividades`}
+                        title={t("planificacion.titleActs", { n: items.length })}
                       >
-                        {items.length} act.
+                        {t("planificacion.actsBadge", { n: items.length })}
                       </span>
                     )}
                   </div>
@@ -142,18 +144,18 @@ export default function Planificacion({
                       >
                         <div className="line-clamp-2 text-[11px] font-semibold leading-tight">{a.titulo}</div>
                         <div className="mt-1 text-[10px] font-bold opacity-80">
-                          {a.funcionarios.length ? a.funcionarios.slice(0, 3).join(", ") : "Sin funcionarios"}
-                          {a.funcionarios.length > 3 ? ` +${a.funcionarios.length - 3}` : ""}
+                          {a.funcionarios.length ? a.funcionarios.slice(0, 3).join(", ") : t("planificacion.sinFuncionarios")}
+                          {a.funcionarios.length > 3 ? " " + t("planificacion.masFuncionarios", { n: a.funcionarios.length - 3 }) : ""}
                         </div>
                         {a.lugar && <div className="mt-0.5 text-[10px] font-bold opacity-70">📍 {a.lugar}</div>}
                         {a.viatico && (
                           <div className="mt-1 inline-flex rounded-md bg-orange-200 px-1.5 py-0.5 text-[9px] font-bold text-orange-950">
-                            VIÁTICO
+                            {t("planificacion.viaticoTag")}
                           </div>
                         )}
                         {conf.length > 0 && (
                           <div className="mt-1 rounded-md bg-red-700 px-1.5 py-0.5 text-[9px] font-bold text-white">
-                            ⚠ ROL: {conf.join(", ")}
+                            {t("planificacion.rolBadge", { nombres: conf.join(", ") })}
                           </div>
                         )}
                       </button>

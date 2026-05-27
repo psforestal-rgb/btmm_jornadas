@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { APP_VERSION, formatBuildTime } from './lib/appVersion.js'
 import { startVersionCheck } from './lib/versionCheck.js'
+import { t } from './i18n/es-CR.js'
 
 const LAST_LOADED_KEY = 'pnlq:lastLoadedAt'
 
@@ -10,7 +11,7 @@ function InstallBanner({ onInstall, onDismiss }) {
     <div
       className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-4 shadow-2xl ring-1 ring-emerald-100"
       role="alertdialog"
-      aria-label="Instalar aplicación PNLQ"
+      aria-label={t("pwa.instalarAria")}
     >
       <div className="flex items-start gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-800 text-2xl shadow-sm">
@@ -18,30 +19,30 @@ function InstallBanner({ onInstall, onDismiss }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-black text-slate-950">
-            Instalar PNLQ en este dispositivo
+            {t("pwa.instalarTitulo")}
           </p>
           <p className="mt-0.5 text-xs font-bold text-slate-500">
-            Acceso sin internet · Pantalla completa · Sin navegador
+            {t("pwa.instalarSub")}
           </p>
           <div className="mt-3 flex gap-2">
             <button
               onClick={onInstall}
               className="rounded-xl bg-emerald-800 px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-emerald-700 active:scale-95"
             >
-              Instalar
+              {t("acciones.instalar")}
             </button>
             <button
               onClick={onDismiss}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 active:scale-95"
             >
-              Ahora no
+              {t("acciones.ahoraNo")}
             </button>
           </div>
         </div>
         <button
           onClick={onDismiss}
           className="rounded-lg p-1 font-black text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          aria-label="Cerrar"
+          aria-label={t("acciones.cerrar")}
         >
           ✕
         </button>
@@ -59,11 +60,11 @@ function OfflineBanner({ lastLoadedAt }) {
       <div className="flex flex-col items-center gap-0.5 text-center">
         <div className="flex items-center gap-2 text-sm font-black text-amber-900">
           <span className="text-lg">📡</span>
-          Sin conexión — mostrando datos en caché
+          {t("pwa.sinConexion")}
         </div>
         {lastLoadedAt && (
           <div className="text-[11px] font-bold text-amber-800/80">
-            Última carga local: {lastLoadedAt}
+            {t("pwa.ultimaCarga", { fecha: lastLoadedAt })}
           </div>
         )}
       </div>
@@ -72,6 +73,9 @@ function OfflineBanner({ lastLoadedAt }) {
 }
 
 function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
+  const titulo = urgent ? t("pwa.versionDesactualizada") : t("pwa.nuevaVersion")
+  const detalleNota = urgent ? t("pwa.urgente") : t("pwa.sugerido")
+  const versionLine = `${t("pwa.versionActual", { actual: APP_VERSION })}${remoteVersion ? t("pwa.versionDisponible", { remoto: remoteVersion }) : ""}.${detalleNota}`
   return (
     <div
       className={`fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border p-4 shadow-2xl ${
@@ -79,7 +83,7 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
       }`}
       role="alertdialog"
       aria-live="assertive"
-      aria-label="Nueva versión de PNLQ disponible"
+      aria-label={t("pwa.bannerAria")}
     >
       <div className="flex items-start gap-3">
         <div
@@ -91,12 +95,10 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-black text-slate-950">
-            {urgent ? 'Versión desactualizada' : 'Nueva versión disponible'}
+            {titulo}
           </p>
           <p className="mt-0.5 text-xs font-bold text-slate-600">
-            Versión actual: v{APP_VERSION}
-            {remoteVersion ? ` · disponible: v${remoteVersion}` : ''}.
-            {urgent ? ' Actualice para evitar inconsistencias.' : ' Actualice para ver los últimos cambios.'}
+            {versionLine}
           </p>
           <div className="mt-3 flex gap-2">
             <button
@@ -105,13 +107,13 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
                 urgent ? 'bg-red-700 hover:bg-red-800' : 'bg-emerald-800 hover:bg-emerald-700'
               }`}
             >
-              Actualizar ahora
+              {t("acciones.actualizarAhora")}
             </button>
             <button
               onClick={onDismiss}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 active:scale-95"
             >
-              Ver luego
+              {t("acciones.verLuego")}
             </button>
           </div>
         </div>

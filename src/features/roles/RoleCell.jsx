@@ -1,10 +1,16 @@
 import { memo } from "react";
 import { codigoCls } from "../../ui/styles.js";
+import { t } from "../../i18n/es-CR.js";
 
 function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInicio, conflicto }) {
   const v = String(value || "").toUpperCase();
   const handleClick = conflicto ? onConflicto : editable ? onOpen : undefined;
   const clickable = conflicto || editable;
+  const title = conflicto
+    ? t("roles.titleConflicto")
+    : editable
+    ? t("roles.titleEditar")
+    : t("roles.titleSinEdicion");
   return (
     <td
       className={`border-b border-r border-slate-200 p-0 text-center font-semibold ${codigoCls(v, finde)} ${
@@ -22,13 +28,7 @@ function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInic
             ? "cursor-pointer hover:brightness-95 focus:ring-2 focus:ring-emerald-700"
             : "cursor-default"
         }`}
-        title={
-          conflicto
-            ? "Clic para resolver: rol vs actividad planificada"
-            : editable
-            ? "Cambiar marca del día"
-            : "Active edición del funcionario para modificar"
-        }
+        title={title}
       >
         <span className="inline-flex min-w-8 items-center justify-center rounded-md bg-white/45 px-1.5 py-0.5 shadow-sm ring-1 ring-black/5">
           {v || "—"}
@@ -40,7 +40,7 @@ function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInic
         )}
         {esInicio && (
           <span className="absolute bottom-0 left-1 right-1 rounded-t bg-emerald-900 px-1 text-[8px] font-bold tracking-wider text-white">
-            INICIO
+            {t("roles.initRing")}
           </span>
         )}
       </button>
@@ -48,9 +48,6 @@ function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInic
   );
 }
 
-// Comparación shallow personalizada: ignora cambios en `onOpen`/`onConflicto`
-// si su identidad cambia pero el valor visible no. Esto evita re-renders
-// cuando los handlers se re-crean en cada render del padre.
 function areEqual(prev, next) {
   return (
     prev.value === next.value &&

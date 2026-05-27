@@ -24,8 +24,8 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
     <header className="sticky top-0 z-30 border-b border-slate-300 bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:px-6">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-widest text-slate-500">PNLQ / {titulo}</div>
-          <h1 className="text-xl font-semibold tracking-tight">Gestión de jornadas laborales</h1>
+          <div className="text-xs font-semibold uppercase tracking-widest text-slate-500">{t("app.breadcrumbBase", { titulo })}</div>
+          <h1 className="text-xl font-semibold tracking-tight">{t("app.titulo")}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {(view === "dashboard" || view === "roles" || view === "planificacion" || view === "planFuncionario") && (
@@ -36,11 +36,11 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
                 className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
               >
                 <Icon name="chevronLeft" size={16} />
-                <span className="hidden sm:inline">Mes anterior</span>
-                <span className="sm:hidden">Mes</span>
+                <span className="hidden sm:inline">{t("topbar.mesAnterior")}</span>
+                <span className="sm:hidden">{t("topbar.mes")}</span>
               </button>
               <select
-                aria-label="Mes"
+                aria-label={t("topbar.mes")}
                 className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
@@ -52,7 +52,7 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
                 ))}
               </select>
               <select
-                aria-label="Año"
+                aria-label={t("topbar.anio")}
                 className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
@@ -66,8 +66,8 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
                 aria-label={t("topbar.mesSiguiente")}
                 className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
               >
-                <span className="hidden sm:inline">Mes siguiente</span>
-                <span className="sm:hidden">Mes</span>
+                <span className="hidden sm:inline">{t("topbar.mesSiguiente")}</span>
+                <span className="sm:hidden">{t("topbar.mes")}</span>
                 <Icon name="chevronRight" size={16} />
               </button>
               {view === "roles" && (
@@ -76,15 +76,15 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
                   className="inline-flex min-h-touch items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
                   aria-pressed={compact}
                 >
-                  {compact ? "Vista amplia" : "Vista compacta"}
+                  {compact ? t("topbar.vistaAmplia") : t("topbar.vistaCompacta")}
                 </button>
               )}
             </>
           )}
           <ThemeToggle />
-          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500" aria-label="Estado: activo">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500" aria-label={`Estado: ${t("app.estado").toLowerCase()}`}>
             <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-            Activo
+            {t("app.estado")}
           </span>
         </div>
       </div>
