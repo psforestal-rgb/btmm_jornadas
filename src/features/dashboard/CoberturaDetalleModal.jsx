@@ -1,34 +1,36 @@
 import { fecha } from "../../domain/fechas.js";
 import { useEscapeClose } from "../../lib/a11y.js";
+import { useT } from "../../i18n/useT.js";
 
 export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, onEditarActividad }) {
   useEscapeClose(cerrar);
+  const t = useT();
   const agrupadosTurno = data.turno.reduce((acc, f) => {
-    const puesto = f.puestoOperativo || "Sin puesto operativo";
+    const puesto = f.puestoOperativo || t("funcionarios.sinPuesto");
     if (!acc[puesto]) acc[puesto] = [];
     acc[puesto].push(f);
     return acc;
   }, {});
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
-      <div role="dialog" aria-modal="true" aria-label={`Cobertura ${data.puesto} ${fecha(data.fecha)}`} className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+      <div role="dialog" aria-modal="true" aria-label={`${t("cobertura.titulo")} ${data.puesto} ${fecha(data.fecha)}`} className="max-h-[92vh] w-full max-w-4xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
-            <h3 className="text-lg font-semibold">Cobertura programada</h3>
+            <h3 className="text-lg font-semibold">{t("cobertura.titulo")}</h3>
             <p className="text-sm font-bold text-slate-600">
               {data.puesto} · {fecha(data.fecha)}
             </p>
           </div>
-          <button onClick={cerrar} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
         </div>
         <div className="max-h-[76vh] overflow-y-auto p-5">
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
-              <div className="text-xs font-bold uppercase tracking-wider opacity-70">Programados en actividades</div>
+              <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.programados")}</div>
               <div className="mt-1 text-3xl font-bold">{data.programados.length}</div>
             </div>
             <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-950">
-              <div className="text-xs font-bold uppercase tracking-wider opacity-70">En turno según rol</div>
+              <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.enTurnoRol")}</div>
               <div className="mt-1 text-3xl font-bold">{data.rol}</div>
             </div>
             <div
@@ -38,16 +40,16 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
                   : "border-blue-200 bg-blue-50 text-blue-950"
               }`}
             >
-              <div className="text-xs font-bold uppercase tracking-wider opacity-70">Atención rutinaria visitantes</div>
+              <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.atencionVisit")}</div>
               <div className="mt-1 text-3xl font-bold">{data.atencionRutinaria.length}</div>
               {data.requiereAtencionRutinaria && !data.atencionRutinaria.length && (
-                <div className="mt-1 text-xs font-bold">ALERTA: debe haber al menos una persona asignada.</div>
+                <div className="mt-1 text-xs font-bold">{t("cobertura.alertaSinAtencion")}</div>
               )}
             </div>
           </div>
           {data.atencionRutinaria.length > 0 && (
             <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-3 text-blue-950">
-              <div className="text-xs font-bold uppercase tracking-wider opacity-70">Asignados a atención rutinaria de visitantes</div>
+              <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.asignadosVisit")}</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {data.atencionRutinaria.map((n) => (
                   <span key={n} className="rounded-full border border-blue-300 bg-white px-3 py-1 text-xs font-bold">
@@ -58,7 +60,7 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
             </div>
           )}
           <div className="mt-5">
-            <div className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">Funcionarios en turno según rol</div>
+            <div className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{t("cobertura.enTurnoSegunRol")}</div>
             {data.turno.length ? (
               <div className="space-y-4">
                 {Object.entries(agrupadosTurno).map(([puesto, items]) => (
@@ -80,7 +82,7 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
                               <div>
                                 <div className="font-semibold">{f.nombre}</div>
                                 <div className="text-xs font-bold opacity-80">
-                                  Rol: {f.rol} · {f.puesto}
+                                  {t("cobertura.rolPrefix", { rol: f.rol, puesto: f.puesto })}
                                 </div>
                               </div>
                               {sinActividad ? (
@@ -88,20 +90,20 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
                                   onClick={() => onNuevaActividad(f.nombre, data.fecha, data.puesto)}
                                   className="rounded-xl bg-yellow-700 px-3 py-2 text-xs font-bold text-white hover:bg-yellow-800"
                                 >
-                                  Agregar actividad
+                                  {t("cobertura.agregarActividad")}
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => onEditarActividad(f.actividades[0])}
                                   className="rounded-xl bg-emerald-800 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700"
                                 >
-                                  Editar actividad
+                                  {t("cobertura.editarActividad")}
                                 </button>
                               )}
                             </div>
                             {sinActividad ? (
                               <div className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs font-bold">
-                                Sin actividad programada para este día.
+                                {t("cobertura.sinActividad")}
                               </div>
                             ) : (
                               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -111,7 +113,7 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
                                     onClick={() => onEditarActividad(a)}
                                     className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-900 hover:bg-emerald-100"
                                   >
-                                    {a.titulo} · {a.lugar || "Sin lugar"}
+                                    {a.titulo} · {a.lugar || t("dia.sinLugar")}
                                   </button>
                                 ))}
                               </div>
@@ -125,13 +127,13 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
               </div>
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-500">
-                No hay funcionarios en turno según rol para este puesto operativo y día.
+                {t("cobertura.sinTurno")}
               </div>
             )}
           </div>
           <div className="mt-5">
             <div className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-              Funcionarios programados en actividades con este lugar
+              {t("cobertura.programadosLugar")}
             </div>
             {data.programados.length ? (
               <div className="space-y-2">
@@ -153,14 +155,14 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
               </div>
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-500">
-                No hay funcionarios programados en actividades con este puesto operativo como lugar para este día.
+                {t("cobertura.sinProgramados")}
               </div>
             )}
           </div>
         </div>
         <div className="flex justify-end border-t border-slate-200 bg-slate-50 p-4">
           <button onClick={cerrar} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-            Cerrar
+            {t("acciones.cerrar")}
           </button>
         </div>
       </div>

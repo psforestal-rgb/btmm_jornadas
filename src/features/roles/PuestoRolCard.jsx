@@ -13,6 +13,7 @@ import {
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useT } from "../../i18n/useT.js";
 import RoleCell from "./RoleCell.jsx";
 import MenuCelda from "./MenuCelda.jsx";
 import ConflictoModal from "./ConflictoModal.jsx";
@@ -31,6 +32,7 @@ export default function PuestoRolCard({
   actividadesPlan,
   setActividadesPlan,
 }) {
+  const t = useT();
   const [editRows, setEditRows] = useState({});
   const [menu, setMenu] = useState(null);
   const [conflictoActivo, setConflictoActivo] = useState(null);
@@ -107,7 +109,7 @@ export default function PuestoRolCard({
           <thead>
             <tr>
               <th className="sticky left-0 z-20 w-72 border-b border-r border-slate-200 bg-white p-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Funcionario / edición
+                {t("roles.funcionarioCol")}
               </th>
               {days.map((d) => {
                 const dow = new Date(year, month, d).getDay();
@@ -152,7 +154,7 @@ export default function PuestoRolCard({
                       {editing && (
                         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-2 shadow-inner">
                           <label className="mb-1 block text-[10px] font-bold uppercase text-emerald-900">
-                            Tipo de rol desde 1er día laboral
+                            {t("roles.editarTipoRol")}
                           </label>
                           <div className="flex gap-2">
                             <select
@@ -168,11 +170,11 @@ export default function PuestoRolCard({
                               onClick={() => aplicarPatron(nombre)}
                               className="rounded-lg bg-emerald-800 px-2 py-1 text-[11px] font-semibold text-white"
                             >
-                              Aplicar
+                              {t("roles.aplicar")}
                             </button>
                           </div>
                           <div className="mt-1 text-[10px] font-bold text-emerald-900">
-                            Rellena de forma automática; luego puede ajustar celda por celda.
+                            {t("roles.aplicarNota")}
                           </div>
                         </div>
                       )}
@@ -204,7 +206,7 @@ export default function PuestoRolCard({
             })}
             <tr>
               <td className="sticky left-0 z-10 border-b border-r border-slate-200 bg-slate-100 p-3 text-xs font-bold uppercase tracking-wider text-slate-600">
-                CANTIDAD EN TURNO
+                {t("roles.cantidadEnTurno")}
               </td>
               {days.map((d) => {
                 const count = grupo.funcionarios.reduce(

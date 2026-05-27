@@ -2,10 +2,13 @@ import { useState } from "react";
 import { fecha } from "../../domain/fechas.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { useEscapeClose } from "../../lib/a11y.js";
+import { useT } from "../../i18n/useT.js";
+import { plural } from "../../i18n/es-CR.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
 export default function ActividadesDiaModal({ funcionario, iso, allActividadesPlan, personas, setActividadesPlan, cerrar }) {
   useEscapeClose(cerrar);
+  const t = useT();
   const [editando, setEditando] = useState(null);
   const [confirmarEliminar, setConfirmarEliminar] = useState(null);
   const personasActivas = personas.filter((p) => p.estado !== "Inactivo");
@@ -39,30 +42,33 @@ export default function ActividadesDiaModal({ funcionario, iso, allActividadesPl
         actividadesPlan={allActividadesPlan}
       />
     );
-  if (!actividades.length)
+  if (!actividades.length) {
+    const vaciaParts = t("actividadesDia.vacia", { funcionario }).split(funcionario);
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
           <p className="text-sm text-slate-600">
-            Ya no hay actividades de <strong>{funcionario}</strong> en este día.
+            {vaciaParts[0]}<strong>{funcionario}</strong>{vaciaParts[1]}
           </p>
           <button onClick={cerrar} className="mt-4 w-full rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-            Cerrar
+            {t("acciones.cerrar")}
           </button>
         </div>
       </div>
     );
+  }
+  const pl = plural(actividades.length);
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
-      <div role="dialog" aria-modal="true" aria-label={`Actividades de ${funcionario} en ${fecha(iso)}`} className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
+      <div role="dialog" aria-modal="true" aria-label={t("actividadesDia.titulo", { funcionario })} className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
-            <h3 className="text-lg font-semibold">Actividades · {funcionario}</h3>
+            <h3 className="text-lg font-semibold">{t("actividadesDia.titulo", { funcionario })}</h3>
             <p className="text-sm text-slate-600">
-              {fecha(iso)} · {actividades.length} actividad{actividades.length !== 1 ? "es" : ""} planificada{actividades.length !== 1 ? "s" : ""}
+              {t("actividadesDia.sub", { fecha: fecha(iso), n: actividades.length, plural: pl })}
             </p>
           </div>
-          <button onClick={cerrar} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
         </div>
         <div className="max-h-[72vh] space-y-3 overflow-y-auto p-5">
           {actividades.map((act) => (
@@ -72,7 +78,7 @@ export default function ActividadesDiaModal({ funcionario, iso, allActividadesPl
                 <div className="mt-0.5 text-xs text-slate-500">
                   {act.inicio === (act.fin || act.inicio) ? fecha(act.inicio) : `${fecha(act.inicio)} → ${fecha(act.fin || act.inicio)}`}
                   {act.lugar ? ` · 📍 ${act.lugar}` : ""}
-                  {act.viatico ? " · 💵 Viático" : ""}
+                  {act.viatico ? ` · ${t("dia.viaticoBadge")}` : ""}
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {(act.funcionarios || []).map((n) => (
@@ -95,38 +101,38 @@ export default function ActividadesDiaModal({ funcionario, iso, allActividadesPl
                     onClick={() => quitarFuncionario(act.id)}
                     className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100"
                   >
-                    Quitar a {funcionario.split(" ")[0]}
+                    {t("actividadesDia.quitarDe", { nombre: funcionario.split(" ")[0] })}
                   </button>
                 )}
                 <button
                   onClick={() => setEditando({ ...act })}
                   className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  Editar actividad
+                  {t("actividadesDia.editar")}
                 </button>
                 <button
                   onClick={() => setConfirmarEliminar(act.id)}
                   className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-100"
                 >
-                  Eliminar
+                  {t("actividadesDia.eliminar")}
                 </button>
               </div>
               {confirmarEliminar === act.id && (
                 <div className="mt-3 rounded-xl border border-red-300 bg-red-50 p-3">
-                  <p className="text-sm font-semibold text-red-950">¿Eliminar esta actividad?</p>
-                  <p className="mt-0.5 text-xs text-red-700">Desaparece para todos los funcionarios asignados.</p>
+                  <p className="text-sm font-semibold text-red-950">{t("actividadesDia.eliminarConfirma")}</p>
+                  <p className="mt-0.5 text-xs text-red-700">{t("actividadesDia.eliminarSub")}</p>
                   <div className="mt-2 flex gap-2">
                     <button
                       onClick={() => eliminar(act.id)}
                       className="rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-800"
                     >
-                      Confirmar
+                      {t("actividadesDia.confirmar")}
                     </button>
                     <button
                       onClick={() => setConfirmarEliminar(null)}
                       className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
                     >
-                      Cancelar
+                      {t("acciones.cancelar")}
                     </button>
                   </div>
                 </div>
@@ -136,7 +142,7 @@ export default function ActividadesDiaModal({ funcionario, iso, allActividadesPl
         </div>
         <div className="flex justify-end border-t border-slate-200 bg-slate-50 p-4">
           <button onClick={cerrar} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800">
-            Cerrar
+            {t("acciones.cerrar")}
           </button>
         </div>
       </div>

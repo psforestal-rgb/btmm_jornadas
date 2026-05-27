@@ -1,4 +1,5 @@
 import { useModalA11y } from '../lib/a11y.js'
+import { t } from '../i18n/es-CR.js'
 import Icon from './Icon.jsx'
 
 /**
@@ -71,10 +72,10 @@ export default function Modal({
             <button
               type="button"
               onClick={onClose}
-              aria-label="Cerrar"
+              aria-label={t("acciones.cerrar")}
               className="inline-flex h-touch w-touch shrink-0 items-center justify-center rounded-xl text-ink-muted hover:bg-surface-alt hover:text-ink"
             >
-              <Icon name="x" size={20} label="Cerrar" />
+              <Icon name="x" size={20} label={t("acciones.cerrar")} />
             </button>
           </header>
         )}

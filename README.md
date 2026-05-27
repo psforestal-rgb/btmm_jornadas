@@ -209,15 +209,24 @@ Detalle por carpeta en `docs/TESTING.md`. Plan de E2E con
 Playwright también documentado allí (instalación diferida hasta
 release oficial).
 
-### Internacionalización liviana
-- Diccionario es-CR en `src/i18n/es-CR.js` con notación punteada
-  (`dashboard.bloqueHoy`).
-- Helper puro `t(path, vars)` con interpolación `{nombre}`.
-- Hook `useT()` para componentes React.
+### Internacionalización completa (es-CR)
+- Diccionario en `src/i18n/es-CR.js` con notación punteada
+  (`dashboard.bloqueHoy`), valores escalares + arreglos (para
+  listas) + plantillas `{nombre}` interpoladas.
+- Helper puro `t(path, vars)` usable dentro y fuera de React.
+- Hook `useT()` para componentes con `useCallback` memoizado.
+- Helper `plural(n)` para concordancia simple (s / sin sufijo).
+- **Migración 100 %** de cadenas visibles: layout (Sidebar,
+  BottomNav, Topbar, ThemeToggle), banners PWA (Install, Offline,
+  Update), AlertStrip + AlertItem, Modal wrapper, las 11 vistas
+  (Dashboard, Detalle del día, Funcionarios, Roles, Planificación,
+  Plan/Funcionario, Viáticos, Disponibilidad, Alertas, Datos,
+  Configuración) y los 8 modales (ModalActividad, ModalFuncionario,
+  MenuCelda, ConflictoModal, ActividadesDiaModal,
+  CoberturaDetalleModal, ModificarRolModal, AsignarActividadModal).
 - Si una clave falta, se renderiza la propia clave (`view.xxx`)
-  para detectarlo en QA.
-- Cobertura inicial: títulos de vistas, KPIs, alertas, acciones,
-  estados, modales. Topbar ya migrado como demostración.
+  como sentinela visible en QA. Tests automatizados de cobertura
+  mínima del diccionario en `src/i18n/__tests__/es-CR.test.js`.
 
 ### Documentación operativa
 - `docs/GLOSARIO.md` — términos institucionales (Visit., Turno,

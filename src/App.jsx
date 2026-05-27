@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo } from "react";
 import { AppProvider, useApp } from "./context/AppContext.jsx";
 import { alertas } from "./domain/alertas.js";
+import { useT } from "./i18n/useT.js";
 import Sidebar from "./layout/Sidebar.jsx";
 import Topbar from "./layout/Topbar.jsx";
 import BottomNav from "./layout/BottomNav.jsx";
@@ -21,6 +22,7 @@ const Datos = lazy(() => import("./features/datos/Datos.jsx"));
 const Configuracion = lazy(() => import("./features/configuracion/Configuracion.jsx"));
 
 function FallbackVista() {
+  const t = useT();
   return (
     <div
       role="status"
@@ -29,7 +31,7 @@ function FallbackVista() {
     >
       <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
         <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
-        Cargando vista…
+        {t("topbar.cargando")}
       </div>
     </div>
   );

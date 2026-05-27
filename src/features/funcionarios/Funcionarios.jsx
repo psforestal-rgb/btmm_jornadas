@@ -7,17 +7,17 @@ import EmptyState from "../../ui/EmptyState.jsx";
 import { estadoCls } from "../../ui/styles.js";
 import { fecha } from "../../domain/fechas.js";
 import { useIsMobile } from "../../lib/responsive.js";
+import { useT } from "../../i18n/useT.js";
 import ModalFuncionario from "./ModalFuncionario.jsx";
 import FuncionarioCard from "./FuncionarioCard.jsx";
 
 export default function Funcionarios({ personas, setPersonas }) {
+  const t = useT();
   const [q, setQ] = useState("");
   const [filtro, setFiltro] = useState("todos");
   const [modal, setModal] = useState(null);
   const isMobile = useIsMobile();
-  // En móvil el default son tarjetas; en escritorio, tabla. El usuario puede
-  // alternar manualmente. Persistimos sólo durante la sesión.
-  const [vista, setVista] = useState(null); // null = auto (depende de isMobile)
+  const [vista, setVista] = useState(null);
   const vistaEfectiva = vista ?? (isMobile ? "tarjetas" : "tabla");
   const [borrar, setBorrar] = useState(null);
   const filtrados = useMemo(
@@ -61,14 +61,24 @@ export default function Funcionarios({ personas, setPersonas }) {
     setPersonas((prev) => (prev.some((x) => x.id === obj.id) ? prev.map((x) => (x.id === obj.id ? obj : x)) : [obj, ...prev]));
     setModal(null);
   };
+
+  const filtros = [
+    ["todos", t("funcionarios.filtroTodos")],
+    ["guardas", t("funcionarios.filtroGuardas")],
+    ["disp", t("funcionarios.filtroDisp")],
+    ["acum", t("funcionarios.filtroAcum")],
+    ["ong", t("funcionarios.filtroOng")],
+    ["sin-res", t("funcionarios.filtroSinRes")],
+  ];
+
   return (
     <section>
       <Card
-        title="Funcionarios"
+        title={t("funcionarios.titulo")}
         icon="👥"
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <div role="group" aria-label="Vista" className="inline-flex overflow-hidden rounded-xl border border-slate-300 bg-white">
+            <div role="group" aria-label={t("funcionarios.vistaAria")} className="inline-flex overflow-hidden rounded-xl border border-slate-300 bg-white">
               <button
                 type="button"
                 onClick={() => setVista("tabla")}
@@ -77,7 +87,7 @@ export default function Funcionarios({ personas, setPersonas }) {
                   vistaEfectiva === "tabla" ? "bg-emerald-800 text-white" : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                Tabla
+                {t("funcionarios.vistaTabla")}
               </button>
               <button
                 type="button"
@@ -87,7 +97,7 @@ export default function Funcionarios({ personas, setPersonas }) {
                   vistaEfectiva === "tarjetas" ? "bg-emerald-800 text-white" : "text-slate-700 hover:bg-slate-50"
                 }`}
               >
-                Tarjetas
+                {t("funcionarios.vistaTarjetas")}
               </button>
             </div>
             <button
@@ -95,8 +105,8 @@ export default function Funcionarios({ personas, setPersonas }) {
               className="inline-flex min-h-touch items-center gap-1 rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
             >
               <Icon name="plus" size={16} />
-              <span className="hidden sm:inline">Agregar funcionario</span>
-              <span className="sm:hidden">Agregar</span>
+              <span className="hidden sm:inline">{t("funcionarios.agregar")}</span>
+              <span className="sm:hidden">{t("funcionarios.agregarCorto")}</span>
             </button>
           </div>
         }
@@ -106,17 +116,10 @@ export default function Funcionarios({ personas, setPersonas }) {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-700 xl:max-w-md"
-            placeholder="Buscar por nombre, cédula, puesto u observación…"
+            placeholder={t("funcionarios.buscarPlaceholder")}
           />
           <div className="flex flex-wrap gap-2">
-            {[
-              ["todos", "Todos"],
-              ["guardas", "Guardaparques"],
-              ["disp", "Con disponibilidad"],
-              ["acum", "Acumulativa"],
-              ["ong", "ONG-Invest-Volunt"],
-              ["sin-res", "Sin resolución"],
-            ].map(([id, label]) => (
+            {filtros.map(([id, label]) => (
               <button
                 key={id}
                 onClick={() => setFiltro(id)}
@@ -135,8 +138,8 @@ export default function Funcionarios({ personas, setPersonas }) {
         {filtrados.length === 0 && (
           <EmptyState
             icon="search"
-            title="Sin resultados"
-            description="Ajuste la búsqueda o los filtros para encontrar funcionarios."
+            title={t("funcionarios.sinResultadosTitulo")}
+            description={t("funcionarios.sinResultadosDesc")}
           />
         )}
         {filtrados.length > 0 && vistaEfectiva === "tarjetas" && (
@@ -156,13 +159,13 @@ export default function Funcionarios({ personas, setPersonas }) {
           <table className="min-w-[1040px] w-full border-collapse text-sm">
             <thead className="bg-slate-100 text-left text-[11px] uppercase tracking-wider text-slate-500">
               <tr>
-                <th className="p-3">Funcionario</th>
-                <th className="p-3">Cargo / puesto operativo</th>
-                <th className="p-3">Jornada</th>
-                <th className="p-3">Disponibilidad</th>
-                <th className="p-3">Atributos</th>
-                <th className="p-3">Estado</th>
-                <th className="p-3 text-right">Acciones</th>
+                <th className="p-3">{t("funcionarios.th.funcionario")}</th>
+                <th className="p-3">{t("funcionarios.th.cargo")}</th>
+                <th className="p-3">{t("funcionarios.th.jornada")}</th>
+                <th className="p-3">{t("funcionarios.th.disponibilidad")}</th>
+                <th className="p-3">{t("funcionarios.th.atributos")}</th>
+                <th className="p-3">{t("funcionarios.th.estado")}</th>
+                <th className="p-3 text-right">{t("funcionarios.th.acciones")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -179,10 +182,10 @@ export default function Funcionarios({ personas, setPersonas }) {
                   </td>
                   <td className="p-3">
                     <div className="font-bold">{f.puesto}</div>
-                    <div className="mt-1 text-xs font-bold text-emerald-800">{f.puestoOperativo || "Sin puesto operativo"}</div>
+                    <div className="mt-1 text-xs font-bold text-emerald-800">{f.puestoOperativo || t("funcionarios.sinPuesto")}</div>
                     <div className="mt-1 flex gap-1">
                       <Badge className="border-slate-200 bg-slate-50 text-slate-700">{f.condicion}</Badge>
-                      {f.ong && <Badge className="border-orange-200 bg-orange-100 text-orange-900">ONG-Invest-Volunt</Badge>}
+                      {f.ong && <Badge className="border-orange-200 bg-orange-100 text-orange-900">{t("funcionarios.filtroOng")}</Badge>}
                     </div>
                   </td>
                   <td className="p-3">
@@ -197,18 +200,18 @@ export default function Funcionarios({ personas, setPersonas }) {
                     </Badge>
                     {f.jornada === "Acumulativa" && !f.resolucion && !f.ong && (
                       <div className="mt-1">
-                        <Badge className="border-yellow-300 bg-yellow-100 text-yellow-900">🔵 Sin resolución</Badge>
+                        <Badge className="border-yellow-300 bg-yellow-100 text-yellow-900">{t("funcionarios.sinResolucion")}</Badge>
                       </div>
                     )}
                   </td>
                   <td className="p-3">
                     {f.disponibilidad ? (
                       <>
-                        <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">Sí</Badge>
+                        <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{t("funcionarios.si")}</Badge>
                         <div className="mt-1 text-xs text-slate-500">{fecha(f.vencimiento)}</div>
                       </>
                     ) : (
-                      <Badge className="border-slate-200 bg-slate-100 text-slate-600">No</Badge>
+                      <Badge className="border-slate-200 bg-slate-100 text-slate-600">{t("funcionarios.no")}</Badge>
                     )}
                   </td>
                   <td className="p-3">
@@ -223,10 +226,10 @@ export default function Funcionarios({ personas, setPersonas }) {
                   </td>
                   <td className="p-3 text-right">
                     <button onClick={() => setModal({ ...f })} className="rounded-lg px-2 py-1 font-semibold text-blue-800 hover:bg-blue-50">
-                      Editar
+                      {t("acciones.editar")}
                     </button>
                     <button onClick={() => setBorrar(f.id)} className="rounded-lg px-2 py-1 font-semibold text-red-800 hover:bg-red-50">
-                      Eliminar
+                      {t("acciones.eliminar")}
                     </button>
                   </td>
                 </tr>
@@ -236,22 +239,24 @@ export default function Funcionarios({ personas, setPersonas }) {
         </div>
         )}
         <div className="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
-          <span>🛡️ Autoridad de policía</span>
-          <span>🔥 Brigada forestal</span>
-          <span>🔵 Dato operativo por completar</span>
+          <span>{t("funcionarios.leyendaPolicia")}</span>
+          <span>{t("funcionarios.leyendaBrigada")}</span>
+          <span>{t("funcionarios.leyendaPendiente")}</span>
         </div>
       </Card>
       {modal && <ModalFuncionario valor={modal} cerrar={() => setModal(null)} guardar={guardar} />}
       {borrar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-3xl bg-white p-6">
-            <h3 className="text-lg font-semibold text-red-900">Eliminar funcionario</h3>
+            <h3 className="text-lg font-semibold text-red-900">{t("funcionarios.eliminarTitulo")}</h3>
             <p className="mt-2 text-sm">
-              Se eliminará el registro de <strong>{personas.find((x) => x.id === borrar)?.nombre}</strong> en esta propuesta visual.
+              {t("funcionarios.eliminarConfirma", { nombre: personas.find((x) => x.id === borrar)?.nombre || "" }).split(personas.find((x) => x.id === borrar)?.nombre || "—")[0]}
+              <strong>{personas.find((x) => x.id === borrar)?.nombre}</strong>
+              {t("funcionarios.eliminarConfirma", { nombre: personas.find((x) => x.id === borrar)?.nombre || "" }).split(personas.find((x) => x.id === borrar)?.nombre || "—")[1]}
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button onClick={() => setBorrar(null)} className="rounded-xl border px-4 py-2 text-sm font-semibold">
-                Cancelar
+                {t("acciones.cancelar")}
               </button>
               <button
                 onClick={() => {
@@ -260,7 +265,7 @@ export default function Funcionarios({ personas, setPersonas }) {
                 }}
                 className="rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white"
               >
-                Eliminar
+                {t("acciones.eliminar")}
               </button>
             </div>
           </div>

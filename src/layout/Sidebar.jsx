@@ -1,28 +1,28 @@
 import { APP_VERSION, APP_BUILD_TIME, APP_COMMIT, formatBuildTime } from "../lib/appVersion.js";
 import Icon from "../ui/Icon.jsx";
+import { useT } from "../i18n/useT.js";
 
 export default function Sidebar({ view, setView, nAlertas }) {
+  const t = useT();
+  // Cada item: [viewId, claveDelDiccionario, iconName].
   const grupos = [
-    ["Principal", [["dashboard", "Dashboard", "home"], ["funcionarios", "Funcionarios", "users"]]],
-    [
-      "Jornadas",
-      [
-        ["dia", "Detalle del día", "calendar"],
-        ["roles", "Roles", "chart"],
-        ["planificacion", "Planificación general", "calendarDays"],
-        ["planFuncionario", "Planificación/Funcionario", "clipboard"],
-        ["adelantos", "Adelanto de viáticos", "banknote"],
-        ["disponibilidad", "Disponibilidad", "shield"],
-      ],
-    ],
-    [
-      "Control",
-      [
-        ["alertas", "Alertas", "bell"],
-        ["datos", "Datos · respaldo", "shieldAlert"],
-        ["configuracion", "Configuración", "traffic"],
-      ],
-    ],
+    [t("sidebar.grupoPrincipal"), [
+      ["dashboard", t("view.dashboard"), "home"],
+      ["funcionarios", t("view.funcionarios"), "users"],
+    ]],
+    [t("sidebar.grupoJornadas"), [
+      ["dia", t("view.dia"), "calendar"],
+      ["roles", t("view.roles"), "chart"],
+      ["planificacion", t("view.planificacion"), "calendarDays"],
+      ["planFuncionario", t("view.planFuncionario"), "clipboard"],
+      ["adelantos", t("view.adelantos"), "banknote"],
+      ["disponibilidad", t("view.disponibilidad"), "shield"],
+    ]],
+    [t("sidebar.grupoControl"), [
+      ["alertas", t("view.alertas"), "bell"],
+      ["datos", t("view.datos"), "shieldAlert"],
+      ["configuracion", t("view.configuracion"), "traffic"],
+    ]],
   ];
   return (
     <aside className="hidden w-60 shrink-0 flex-col bg-emerald-900 text-white lg:flex">
@@ -30,16 +30,16 @@ export default function Sidebar({ view, setView, nAlertas }) {
         <div className="mb-3 flex items-center gap-3">
           <img src="/acc-logo.svg" alt="ACC" className="h-12 w-12 shrink-0 rounded-xl bg-white p-1" />
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">SINAC · Costa Rica</div>
-            <div className="mt-0.5 text-xs font-semibold text-white/50">Área de Conservación Central</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">{t("app.sinacCR")}</div>
+            <div className="mt-0.5 text-xs font-semibold text-white/50">{t("app.accNombre")}</div>
           </div>
         </div>
         <div className="text-base font-semibold leading-snug">
-          Bloque Tapantí
+          {t("app.bloqueLinea1")}
           <br />
-          Macizo de la Muerte
+          {t("app.bloqueLinea2")}
         </div>
-        <div className="mt-1.5 text-xs text-white/65">Gestión de jornadas laborales</div>
+        <div className="mt-1.5 text-xs text-white/65">{t("app.bloqueSub")}</div>
       </div>
       <nav className="flex-1 p-3">
         {grupos.map(([g, items]) => (
@@ -57,7 +57,7 @@ export default function Sidebar({ view, setView, nAlertas }) {
                 <Icon name={icon} size={18} />
                 {label}
                 {id === "alertas" && nAlertas > 0 && (
-                  <span aria-label={`${nAlertas} alertas pendientes`} className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{nAlertas}</span>
+                  <span aria-label={t("bottomNav.alertasAria", { n: nAlertas })} className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">{nAlertas}</span>
                 )}
               </button>
             ))}
@@ -65,8 +65,8 @@ export default function Sidebar({ view, setView, nAlertas }) {
         ))}
       </nav>
       <div className="border-t border-white/10 p-4 text-xs">
-        <strong className="font-semibold">P. Sánchez N.</strong>
-        <div className="text-white/60">Guardaparques · ACC</div>
+        <strong className="font-semibold">{t("app.perfilNombre")}</strong>
+        <div className="text-white/60">{t("app.perfilCargo")}</div>
         <div
           className="mt-3 border-t border-white/10 pt-3 text-[10px] font-mono leading-tight text-white/40"
           title={`Versión ${APP_VERSION} · build ${APP_BUILD_TIME} · commit ${APP_COMMIT}`}

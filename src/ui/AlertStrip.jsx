@@ -1,16 +1,19 @@
 import Icon from "./Icon.jsx";
+import { useT } from "../i18n/useT.js";
 
 export default function AlertStrip({ alerts, setView }) {
+  const t = useT();
   const criticas = alerts.filter((a) => a.t === "danger" || a.t === "warn");
   if (!criticas.length) return null;
+  const titulo = t("alertas.requiereAtencion", { n: criticas.length });
   return (
     <section
-      aria-label={`${criticas.length} alertas requieren atención`}
+      aria-label={titulo}
       className="rounded-2xl border border-red-200 bg-red-50 p-3"
     >
       <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-red-800">
         <Icon name="danger" size={14} className="text-red-700" />
-        Requiere atención · {criticas.length}
+        {titulo}
       </p>
       <div className="flex gap-2 overflow-x-auto pb-1">
         {criticas.slice(0, 5).map((a, i) => (

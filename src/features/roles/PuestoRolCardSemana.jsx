@@ -15,6 +15,7 @@ import {
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useT } from "../../i18n/useT.js";
 import MenuCelda from "./MenuCelda.jsx";
 import ConflictoModal from "./ConflictoModal.jsx";
 import ActividadesDiaModal from "./ActividadesDiaModal.jsx";
@@ -60,6 +61,7 @@ export default function PuestoRolCardSemana({
   actividadesPlan,
   setActividadesPlan,
 }) {
+  const t = useT();
   const semanas = useMemo(() => semanasDelMes(year, month), [year, month]);
   const totalSemanas = semanas.length;
   const [semIdx, setSemIdx] = useState(0);
@@ -149,12 +151,12 @@ export default function PuestoRolCardSemana({
           </Badge>
         </div>
         {/* Selector de semana */}
-        <nav aria-label="Selección de semana" className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-white/70 p-1.5">
+        <nav aria-label={t("roles.semanaAria")} className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-white/70 p-1.5">
           <button
             type="button"
             onClick={() => setSemIdx((i) => Math.max(0, i - 1))}
             disabled={semIdx === 0}
-            aria-label="Semana anterior"
+            aria-label={t("roles.semanaAnterior")}
             className="inline-flex min-h-touch min-w-touch items-center justify-center rounded-xl bg-white px-2 disabled:opacity-40"
           >
             <Icon name="chevronLeft" size={18} />
@@ -166,7 +168,7 @@ export default function PuestoRolCardSemana({
                 type="button"
                 onClick={() => setSemIdx(i)}
                 aria-pressed={i === semIdx}
-                aria-label={`Semana ${i + 1} (días ${s[0]} al ${s[s.length - 1]})`}
+                aria-label={t("roles.semanaLabel", { n: i + 1, ini: s[0], fin: s[s.length - 1] })}
                 className={`min-h-touch rounded-xl px-3 text-xs font-bold ${
                   i === semIdx ? "bg-emerald-800 text-white" : "bg-white text-slate-700"
                 }`}
@@ -180,7 +182,7 @@ export default function PuestoRolCardSemana({
             type="button"
             onClick={() => setSemIdx((i) => Math.min(totalSemanas - 1, i + 1))}
             disabled={semIdx === totalSemanas - 1}
-            aria-label="Semana siguiente"
+            aria-label={t("roles.semanaSiguiente")}
             className="inline-flex min-h-touch min-w-touch items-center justify-center rounded-xl bg-white px-2 disabled:opacity-40"
           >
             <Icon name="chevronRight" size={18} />
@@ -203,7 +205,7 @@ export default function PuestoRolCardSemana({
                   type="button"
                   onClick={() => toggleEdit(nombre)}
                   aria-pressed={editing}
-                  aria-label={editing ? `Bloquear edición de ${nombre}` : `Permitir edición de ${nombre}`}
+                  aria-label={editing ? t("roles.bloquear", { nombre }) : t("roles.permitir", { nombre })}
                   className="inline-flex min-h-touch min-w-touch items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-slate-700"
                 >
                   <Icon name={editing ? "unlock" : "lock"} size={18} />
@@ -212,7 +214,7 @@ export default function PuestoRolCardSemana({
 
               {editing && (
                 <div className="mb-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2">
-                  <label className="block text-[10px] font-bold uppercase text-emerald-900">Tipo de rol desde 1er día laboral</label>
+                  <label className="block text-[10px] font-bold uppercase text-emerald-900">{t("roles.editarTipoRol")}</label>
                   <div className="mt-1 flex gap-2">
                     <select
                       value={modalidad}
@@ -228,7 +230,7 @@ export default function PuestoRolCardSemana({
                       onClick={() => aplicarPatron(nombre)}
                       className="min-h-touch rounded-lg bg-emerald-800 px-3 text-[11px] font-semibold text-white"
                     >
-                      Aplicar
+                      {t("roles.aplicar")}
                     </button>
                   </div>
                 </div>
@@ -256,7 +258,7 @@ export default function PuestoRolCardSemana({
                       key={`${nombre}-${d}`}
                       disabled={!clickable}
                       onClick={onClick}
-                      title={conflicto ? "Clic para resolver: rol vs actividad" : editing ? "Cambiar marca del día" : "Active edición para modificar"}
+                      title={conflicto ? t("roles.titleConflicto") : editing ? t("roles.titleEditar") : t("roles.titleSinEdicion")}
                       className={`relative flex min-h-touch flex-col items-center justify-center rounded-xl border-2 px-1 py-1.5 text-[11px] font-semibold ${cls} ${
                         esInicio ? "ring-2 ring-inset ring-emerald-700" : ""
                       } ${conflicto ? "ring-4 ring-inset ring-red-600" : ""} ${
@@ -275,7 +277,7 @@ export default function PuestoRolCardSemana({
                       )}
                       {esInicio && (
                         <span className="absolute bottom-0 left-0 right-0 rounded-b-md bg-emerald-900 text-center text-[8px] font-bold tracking-wider text-white">
-                          INICIO
+                          {t("roles.initRing")}
                         </span>
                       )}
                     </button>
@@ -289,9 +291,9 @@ export default function PuestoRolCardSemana({
         {/* Resumen: CANTIDAD EN TURNO por día de la semana visible */}
         <article className="rounded-2xl border border-slate-300 bg-white p-3 shadow-sm">
           <header className="mb-2 flex items-center justify-between">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-600">Cantidad en turno · semana</h4>
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-600">{t("roles.cantidadEnTurnoSemana")}</h4>
             <span className="text-[10px] font-bold text-slate-500">
-              Sem {semIdx + 1} de {totalSemanas}
+              {t("roles.semanaResumen", { n: semIdx + 1, total: totalSemanas })}
             </span>
           </header>
           <div className="grid grid-cols-7 gap-1.5">
