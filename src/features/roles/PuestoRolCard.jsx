@@ -143,7 +143,9 @@ export default function PuestoRolCard({
               return (
                 <tr key={nombre} className={editing ? "bg-emerald-50/60" : "bg-white"}>
                   <td className="sticky left-0 z-10 border-b border-r border-slate-200 bg-white p-2 align-top shadow-[2px_0_8px_rgba(15,23,42,0.04)]">
-                    <div className="space-y-2">
+                    {/* Texto fijo del nombre, solo visible al imprimir. */}
+                    <span className="pnlq-print-only font-semibold text-black">{nombre}</span>
+                    <div className="pnlq-no-print space-y-2">
                       <button
                         onClick={() => toggleEdit(nombre)}
                         className="flex w-full items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left font-semibold shadow-sm hover:bg-slate-50"

@@ -198,3 +198,69 @@ body {
     animation: none !important;
   }
 }
+
+/* =====================================================================
+   Impresión / Guardar como PDF
+   Pensado para imprimir el rol mensual con firma administrativa. El
+   navegador ofrece "Guardar como PDF" desde el diálogo de impresión.
+   ===================================================================== */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 1.2cm;
+  }
+
+  body, html {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Forzar contraste fiel: muchos elementos usan fondos de color que el
+     navegador imprime en blanco/negro por defecto. */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Oculta cualquier elemento marcado como solo-pantalla. */
+  .pnlq-no-print { display: none !important; }
+
+  /* Quita las sombras y animaciones que ensucian la salida impresa. */
+  .pnlq-pulse,
+  .animate-pulse {
+    animation: none !important;
+  }
+  .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Tablas más compactas para que quepan 31 días en horizontal. */
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+
+  /* Cada tarjeta de puesto en su propia hoja. */
+  .pnlq-print-break-before {
+    page-break-before: always;
+  }
+  .pnlq-print-page {
+    page-break-inside: avoid;
+  }
+
+  /* Padding de hojas; quita el fondo gris general. */
+  .pnlq-print-root {
+    background: white !important;
+    padding: 0 !important;
+  }
+}
+
+/* Solo visible al imprimir (helper inverso del print:hidden de Tailwind). */
+.pnlq-print-only { display: none; }
+@media print {
+  .pnlq-print-only { display: block !important; }
+}
