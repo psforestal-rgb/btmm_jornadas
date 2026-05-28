@@ -9,7 +9,7 @@ const LAST_LOADED_KEY = 'pnlq:lastLoadedAt'
 function InstallBanner({ onInstall, onDismiss }) {
   return (
     <div
-      className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-4 shadow-2xl ring-1 ring-emerald-100"
+      className="pnlq-no-print fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-emerald-200 bg-white p-4 shadow-2xl ring-1 ring-emerald-100"
       role="alertdialog"
       aria-label={t("pwa.instalarAria")}
     >
@@ -54,7 +54,7 @@ function InstallBanner({ onInstall, onDismiss }) {
 function OfflineBanner({ lastLoadedAt }) {
   return (
     <div
-      className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 shadow-xl ring-1 ring-amber-200"
+      className="pnlq-no-print fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 shadow-xl ring-1 ring-amber-200"
       role="alert"
     >
       <div className="flex flex-col items-center gap-0.5 text-center">
@@ -78,7 +78,7 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
   const versionLine = `${t("pwa.versionActual", { actual: APP_VERSION })}${remoteVersion ? t("pwa.versionDisponible", { remoto: remoteVersion }) : ""}.${detalleNota}`
   return (
     <div
-      className={`fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border p-4 shadow-2xl ${
+      className={`pnlq-no-print fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border p-4 shadow-2xl ${
         urgent ? 'border-red-300 bg-red-50 ring-1 ring-red-200' : 'border-emerald-300 bg-emerald-50 ring-1 ring-emerald-200'
       }`}
       role="alertdialog"

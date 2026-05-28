@@ -22,9 +22,9 @@ export default function BottomNav({ view, setView, nAlertas }) {
   ];
   return (
     <>
-      {moreOpen && <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setMoreOpen(false)} />}
+      {moreOpen && <div className="pnlq-no-print fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setMoreOpen(false)} />}
       {moreOpen && (
-        <div className="fixed bottom-20 left-4 right-4 z-50 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl lg:hidden">
+        <div className="pnlq-no-print fixed bottom-20 left-4 right-4 z-50 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl lg:hidden">
           <div className="grid grid-cols-2 gap-2">
             {more.map(([id, label, icon]) => (
               <button
@@ -45,7 +45,7 @@ export default function BottomNav({ view, setView, nAlertas }) {
           </div>
         </div>
       )}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white lg:hidden" aria-label={t("bottomNav.navAria")}>
+      <nav className="pnlq-no-print fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white lg:hidden" aria-label={t("bottomNav.navAria")}>
         <div className="grid grid-cols-5">
           {main.map(([id, label, icon]) => (
             <button

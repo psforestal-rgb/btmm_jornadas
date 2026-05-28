@@ -68,7 +68,7 @@ function AppShell() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950">
+    <div className="pnlq-print-root min-h-screen bg-slate-100 text-slate-950">
       <div className="flex min-h-screen">
         <Sidebar view={view} setView={setView} nAlertas={nAlertas} />
         <main className="min-w-0 flex-1">

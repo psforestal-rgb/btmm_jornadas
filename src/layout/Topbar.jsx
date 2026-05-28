@@ -21,7 +21,7 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
     setYear(nuevoAno);
   };
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-300 bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:px-6">
+    <header className="pnlq-no-print sticky top-0 z-30 border-b border-slate-300 bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:px-6">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-slate-500">{t("app.breadcrumbBase", { titulo })}</div>

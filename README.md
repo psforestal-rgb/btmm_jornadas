@@ -256,6 +256,37 @@ release oficial).
   de conflicto usa la clase `pnlq-pulse` que es no-op si el usuario
   lo solicita.
 
+## Impresión / Guardar como PDF
+
+La vista **Roles** incluye un botón "Imprimir / Guardar PDF" que abre
+el diálogo de impresión del navegador. Desde ahí cualquier navegador
+moderno (Chrome, Firefox, Safari, Edge) permite **"Guardar como PDF"**
+sin instalar nada adicional.
+
+El documento impreso incluye:
+
+- Encabezado institucional (SINAC · ACC · PNLQ · BTMM).
+- Título "ROL MENSUAL DE TRABAJO" + período + puesto operativo.
+- Tabla mensual con códigos T/L/V/I/O por funcionario y día.
+- Fila "Cantidad en turno" por día.
+- Leyenda de códigos.
+- Tres espacios para firmas: Administrador(a) de ASP, Coordinación
+  administrativa ACC, Jefatura BTMM.
+- Línea para lugar y fecha.
+- Pie con versión, fecha de impresión y recordatorio normativo.
+
+Diseño:
+
+- Tamaño A4 horizontal (landscape) con márgenes de 1.2 cm — necesario
+  para que entren los 31 días en una sola hoja.
+- Un puesto por hoja (corte automático con `page-break-before`).
+- En impresión se ocultan: sidebar, topbar, bottomnav, banners PWA,
+  candados de edición, botones de acción. Solo queda el documento
+  administrativo.
+
+Cero dependencias nuevas: implementado con CSS `@media print`. No
+añade peso al bundle.
+
 ## Reglas configurables (Fase 6)
 
 Las reglas duras que antes vivían en código ahora se editan desde la
