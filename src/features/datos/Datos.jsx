@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Card from "../../ui/Card.jsx";
 import Badge from "../../ui/Badge.jsx";
 import Icon from "../../ui/Icon.jsx";
 import { useApp } from "../../context/AppContext.jsx";
 import { exportSnapshot, parseSnapshot, SCHEMA_VERSION } from "../../lib/storage.js";
+import { contarPendientes } from "../../lib/db.js";
 import { formatBuildTime } from "../../lib/appVersion.js";
 import { useT } from "../../i18n/useT.js";
 import { plural } from "../../i18n/es-CR.js";
@@ -32,6 +33,17 @@ export default function Datos() {
   const [importError, setImportError] = useState(null);
   const [importOk, setImportOk] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pendientes, setPendientes] = useState(0);
+
+  // Refresca el contador de pendientes al montar (placeholder Fase 5
+  // paso 2; hoy siempre será 0 hasta que se conecte el backend SINAC).
+  useEffect(() => {
+    let cancelado = false;
+    contarPendientes().then((n) => {
+      if (!cancelado) setPendientes(n);
+    });
+    return () => { cancelado = true; };
+  }, []);
 
   const totalPersonas = (ctx.personas || []).length;
   const totalActividades = (ctx.actividadesPlan || []).length;
@@ -104,6 +116,48 @@ export default function Datos() {
           </Badge>
         }
       >
+        {/* Tarjeta: backend de almacenamiento durable (Fase 5 paso 1). */}
+        <div className="mb-4 flex items-start gap-3 rounded-2xl border border-slate-300 bg-slate-50 p-4">
+          <Icon name="shield" size={20} className="text-slate-700" />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-sm font-semibold text-slate-900">{t("datos.backendTitulo")}</p>
+              <Badge
+                className={
+                  ctx.storageBackend?.kind === "indexeddb"
+                    ? "border-emerald-300 bg-emerald-100 text-emerald-900"
+                    : ctx.storageBackend?.kind === "localStorage"
+                    ? "border-amber-300 bg-amber-100 text-amber-900"
+                    : "border-red-300 bg-red-100 text-red-900"
+                }
+              >
+                {ctx.storageBackend?.kind === "indexeddb"
+                  ? t("datos.backendBadgeIDB")
+                  : ctx.storageBackend?.kind === "localStorage"
+                  ? t("datos.backendBadgeLS")
+                  : t("datos.backendBadgeNone")}
+              </Badge>
+            </div>
+            <p className="mt-1 text-xs text-slate-600">
+              {ctx.storageBackend?.kind === "indexeddb"
+                ? t("datos.backendIDB")
+                : ctx.storageBackend?.kind === "localStorage"
+                ? t("datos.backendLS")
+                : t("datos.backendNone")}
+            </p>
+            {ctx.migracionLs && (
+              <p className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-900">
+                {t("datos.migradoLS")}
+              </p>
+            )}
+            <p className="mt-2 text-[11px] text-slate-500">
+              <strong>{t("datos.pendientesTitulo")}:</strong>{" "}
+              {pendientes === 0 ? t("datos.pendientesCero") : t("datos.pendientesN", { n: pendientes })}{" "}
+              {t("datos.pendientesSub")}
+            </p>
+          </div>
+        </div>
+
         <div
           className={`mb-4 flex items-start gap-3 rounded-2xl border p-4 ${
             estado.tono === "warning"

@@ -1,7 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { baseFuncionarios } from "../data/seedFuncionarios.js";
 import { baseActividadesPlan } from "../data/seedActividades.js";
-import { loadState, saveState, clearState, getLastSavedAt, SCHEMA_VERSION } from "../lib/storage.js";
+import {
+  loadState,
+  loadStateAsync,
+  saveState,
+  clearState,
+  getLastSavedAt,
+  getBackendInfo,
+  SCHEMA_VERSION,
+} from "../lib/storage.js";
 import { REGLAS_DEFAULT, mergeReglas } from "../config/reglas.js";
 
 const AppContext = createContext(null);
@@ -91,11 +99,43 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [lastSavedAt, setLastSavedAt] = useState(() => getLastSavedAt());
   const [pendingChanges, setPendingChanges] = useState(0);
+  const [storageBackend, setStorageBackend] = useState(() => getBackendInfo());
+  const [migracionLs, setMigracionLs] = useState(false);
   const saveTimerRef = useRef(null);
   const firstRunRef = useRef(true);
+  const hydratedFromIDBRef = useRef(false);
+
+  // Hidratación asíncrona desde IndexedDB tras el primer render. Si Dexie
+  // tiene datos distintos o más nuevos que los de localStorage, los aplica
+  // con REPLACE_STATE. Si Dexie estaba vacío, migra desde localStorage
+  // automáticamente (idempotente).
+  useEffect(() => {
+    let cancelado = false;
+    (async () => {
+      const { state: dbState, source, migrated } = await loadStateAsync();
+      if (cancelado) return;
+      if (migrated) setMigracionLs(true);
+      if (dbState && source === "indexeddb") {
+        // Solo reemplazar si el snapshot es realmente distinto al de LS,
+        // para evitar un render extra cuando ya coinciden (caso común).
+        const lsSerialized = JSON.stringify(pickPersistable(state));
+        const dbSerialized = JSON.stringify(dbState);
+        if (lsSerialized !== dbSerialized) {
+          dispatch({ type: "REPLACE_STATE", payload: dbState });
+        }
+      }
+      hydratedFromIDBRef.current = true;
+    })();
+    return () => {
+      cancelado = true;
+    };
+    // Solo se ejecuta una vez al montar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persistencia con debounce. El primer render no dispara guardado para no
-  // sobrescribir storage con el seed si la app cargó sin datos.
+  // sobrescribir storage con el seed si la app cargó sin datos. saveState
+  // ahora escribe a localStorage Y a IndexedDB (fire-and-forget).
   useEffect(() => {
     if (firstRunRef.current) {
       firstRunRef.current = false;
@@ -157,9 +197,29 @@ export function AppProvider({ children }) {
       lastSavedAt,
       pendingChanges,
       schemaVersion: SCHEMA_VERSION,
+      storageBackend,
+      migracionLs,
       dispatch,
     }),
-    [state, setView, setMonth, setYear, setCompact, setDiaVista, setPersonas, setActividadesPlan, setRoleData, setReglas, resetReglas, replaceState, resetToSeed, lastSavedAt, pendingChanges]
+    [
+      state,
+      setView,
+      setMonth,
+      setYear,
+      setCompact,
+      setDiaVista,
+      setPersonas,
+      setActividadesPlan,
+      setRoleData,
+      setReglas,
+      resetReglas,
+      replaceState,
+      resetToSeed,
+      lastSavedAt,
+      pendingChanges,
+      storageBackend,
+      migracionLs,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
