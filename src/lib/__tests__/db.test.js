@@ -86,6 +86,32 @@ describe("db — migración desde localStorage", () => {
     expect(r.migrated).toBe(false);
     expect(await loadFromDexie()).toBeNull();
   });
+
+  it("rechaza snapshot de LS con schemaVersion distinta", async () => {
+    // Sembrar LS con un schemaVersion antiguo (e.g. 0).
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        schemaVersion: 0,
+        savedAt: "2020-01-01T00:00:00Z",
+        state: { personas: [{ id: "viejo" }] },
+      }),
+    );
+    const r = await migrateFromLocalStorageIfNeeded();
+    expect(r.migrated).toBe(false);
+    // Dexie NO debe contener el payload incompatible.
+    expect(await loadFromDexie()).toBeNull();
+  });
+
+  it("rechaza snapshot de LS sin schemaVersion (payload corrupto)", async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ state: { personas: [{ id: "sin-version" }] } }),
+    );
+    const r = await migrateFromLocalStorageIfNeeded();
+    expect(r.migrated).toBe(false);
+    expect(await loadFromDexie()).toBeNull();
+  });
 });
 
 describe("db — cola de pendientes", () => {

@@ -105,10 +105,24 @@ export function AppProvider({ children }) {
   const firstRunRef = useRef(true);
   const hydratedFromIDBRef = useRef(false);
 
+  // Ref al estado actual para que el effect async pueda compararlo en el
+  // momento del resolve (no en el momento del mount). Se actualiza en cada
+  // render con el nuevo state.
+  const currentStateRef = useRef(state);
+  useEffect(() => {
+    currentStateRef.current = state;
+  });
+
+  // Firma del estado inicial (post-localStorage), capturada UNA vez al
+  // montar. Si la hidratación async tarda y el usuario edita algo en el
+  // medio, el state actual ya no coincidirá con esta firma y se respetará
+  // la edición sin sobrescribirla con el snapshot de Dexie.
+  const initialSignatureRef = useRef(JSON.stringify(pickPersistable(state)));
+
   // Hidratación asíncrona desde IndexedDB tras el primer render. Si Dexie
   // tiene datos distintos o más nuevos que los de localStorage, los aplica
-  // con REPLACE_STATE. Si Dexie estaba vacío, migra desde localStorage
-  // automáticamente (idempotente).
+  // con REPLACE_STATE — pero SOLO si el usuario no editó nada en el
+  // intervalo entre el mount y el resolve. Si editó, su cambio gana.
   useEffect(() => {
     let cancelado = false;
     (async () => {
@@ -116,11 +130,19 @@ export function AppProvider({ children }) {
       if (cancelado) return;
       if (migrated) setMigracionLs(true);
       if (dbState && source === "indexeddb") {
-        // Solo reemplazar si el snapshot es realmente distinto al de LS,
-        // para evitar un render extra cuando ya coinciden (caso común).
-        const lsSerialized = JSON.stringify(pickPersistable(state));
         const dbSerialized = JSON.stringify(dbState);
-        if (lsSerialized !== dbSerialized) {
+        const initialSerialized = initialSignatureRef.current;
+        const currentSerialized = JSON.stringify(pickPersistable(currentStateRef.current));
+
+        // Si el estado actual cambió respecto al inicial, hubo edición
+        // del usuario durante la hidratación: NO sobrescribir.
+        if (currentSerialized !== initialSerialized) {
+          hydratedFromIDBRef.current = true;
+          return;
+        }
+        // Si LS y Dexie ya coinciden, no hace falta despachar (evita
+        // render extra en el caso normal del segundo arranque).
+        if (initialSerialized !== dbSerialized) {
           dispatch({ type: "REPLACE_STATE", payload: dbState });
         }
       }

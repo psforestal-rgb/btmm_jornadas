@@ -118,6 +118,11 @@ export async function clearDexie() {
  * paso 0), lo copia a IndexedDB. Sin efecto si IndexedDB ya tiene datos
  * o si localStorage no tiene nada. Idempotente.
  *
+ * Valida que el `schemaVersion` del snapshot de localStorage coincida con
+ * el de Dexie ANTES de copiarlo. Si no coincide (versiones antiguas o
+ * payload corrupto), el snapshot se descarta para evitar que Dexie quede
+ * con datos incompatibles que luego serían leídos como current schema.
+ *
  * Devuelve `{ migrated: boolean, source: 'localStorage' | null }`.
  */
 export async function migrateFromLocalStorageIfNeeded() {
@@ -131,6 +136,12 @@ export async function migrateFromLocalStorageIfNeeded() {
     if (!raw) return { migrated: false, source: null };
     const parsed = JSON.parse(raw);
     if (!parsed?.state) return { migrated: false, source: null };
+    // Guard de schemaVersion: NO migrar payloads incompatibles. Si la
+    // versión es distinta o ausente, se ignora silenciosamente; loadState()
+    // ya creará un backup la próxima vez que se invoque.
+    if (parsed.schemaVersion !== SCHEMA_VERSION_DB) {
+      return { migrated: false, source: null };
+    }
     await db.state.put({
       id: SNAPSHOT_ID,
       schemaVersion: SCHEMA_VERSION_DB,
