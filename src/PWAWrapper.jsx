@@ -18,7 +18,7 @@ function InstallBanner({ onInstall, onDismiss }) {
           🌲
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-black text-slate-950">
+          <p className="text-sm font-semibold text-slate-950">
             {t("pwa.instalarTitulo")}
           </p>
           <p className="mt-0.5 text-xs font-bold text-slate-500">
@@ -27,13 +27,13 @@ function InstallBanner({ onInstall, onDismiss }) {
           <div className="mt-3 flex gap-2">
             <button
               onClick={onInstall}
-              className="rounded-xl bg-emerald-800 px-4 py-2 text-xs font-black text-white shadow-sm hover:bg-emerald-700 active:scale-95"
+              className="rounded-xl bg-emerald-800 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 active:scale-95"
             >
               {t("acciones.instalar")}
             </button>
             <button
               onClick={onDismiss}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 active:scale-95"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 active:scale-95"
             >
               {t("acciones.ahoraNo")}
             </button>
@@ -41,7 +41,7 @@ function InstallBanner({ onInstall, onDismiss }) {
         </div>
         <button
           onClick={onDismiss}
-          className="rounded-lg p-1 font-black text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+          className="rounded-lg p-1 font-semibold text-slate-400 hover:bg-slate-100 hover:text-slate-700"
           aria-label={t("acciones.cerrar")}
         >
           ✕
@@ -58,7 +58,7 @@ function OfflineBanner({ lastLoadedAt }) {
       role="alert"
     >
       <div className="flex flex-col items-center gap-0.5 text-center">
-        <div className="flex items-center gap-2 text-sm font-black text-amber-900">
+        <div className="flex items-center gap-2 text-sm font-semibold text-amber-900">
           <span className="text-lg">📡</span>
           {t("pwa.sinConexion")}
         </div>
@@ -94,7 +94,7 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
           ⟳
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-black text-slate-950">
+          <p className="text-sm font-semibold text-slate-950">
             {titulo}
           </p>
           <p className="mt-0.5 text-xs font-bold text-slate-600">
@@ -103,7 +103,7 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
           <div className="mt-3 flex gap-2">
             <button
               onClick={onUpdate}
-              className={`rounded-xl px-4 py-2 text-xs font-black text-white shadow-sm active:scale-95 ${
+              className={`rounded-xl px-4 py-2 text-xs font-semibold text-white shadow-sm active:scale-95 ${
                 urgent ? 'bg-red-700 hover:bg-red-800' : 'bg-emerald-800 hover:bg-emerald-700'
               }`}
             >
@@ -111,7 +111,7 @@ function UpdateBanner({ onUpdate, onDismiss, urgent = false, remoteVersion }) {
             </button>
             <button
               onClick={onDismiss}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50 active:scale-95"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 active:scale-95"
             >
               {t("acciones.verLuego")}
             </button>

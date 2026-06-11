@@ -1,7 +1,11 @@
 import { meses } from "../data/calendario.js";
 import Icon from "../ui/Icon.jsx";
 import ThemeToggle from "../ui/ThemeToggle.jsx";
+import SyncStatus from "../ui/SyncStatus.jsx";
 import { useT } from "../i18n/useT.js";
+
+/** Vistas que muestran navegación de mes/año en la barra superior. */
+const VISTAS_CON_PERIODO = ["dashboard", "roles", "planificacion", "planFuncionario"];
 
 export default function Topbar({ view, setView, month, setMonth, year, setYear, compact, setCompact }) {
   const t = useT();
@@ -21,27 +25,35 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
     setYear(nuevoAno);
   };
   return (
-    <header className="pnlq-no-print sticky top-0 z-30 border-b border-slate-300 bg-white/95 px-4 py-3 shadow-sm backdrop-blur lg:px-6">
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-widest text-slate-500">{t("app.breadcrumbBase", { titulo })}</div>
-          <h1 className="text-xl font-semibold tracking-tight">{t("app.titulo")}</h1>
+    <header className="pnlq-no-print sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-2.5 shadow-sm backdrop-blur lg:px-6 lg:py-3">
+      <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="truncate text-xs font-semibold uppercase tracking-widest text-slate-500">
+              {t("app.breadcrumbBase", { titulo })}
+            </div>
+            {/* El título largo solo aporta en pantallas amplias. */}
+            <h1 className="hidden text-xl font-semibold tracking-tight sm:block">{t("app.titulo")}</h1>
+          </div>
+          {/* En móvil, estado de respaldo junto al breadcrumb para no crecer en alto. */}
+          <div className="flex shrink-0 items-center gap-2 xl:hidden">
+            <SyncStatus />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {(view === "dashboard" || view === "roles" || view === "planificacion" || view === "planFuncionario") && (
+          {VISTAS_CON_PERIODO.includes(view) && (
             <>
               <button
                 onClick={() => moverMes(-1)}
                 aria-label={t("topbar.mesAnterior")}
-                className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:px-3"
               >
                 <Icon name="chevronLeft" size={16} />
-                <span className="hidden sm:inline">{t("topbar.mesAnterior")}</span>
-                <span className="sm:hidden">{t("topbar.mes")}</span>
+                <span className="hidden md:inline">{t("topbar.mesAnterior")}</span>
               </button>
               <select
                 aria-label={t("topbar.mes")}
-                className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
+                className="min-h-touch rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 sm:px-3"
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
               >
@@ -53,7 +65,7 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
               </select>
               <select
                 aria-label={t("topbar.anio")}
-                className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold"
+                className="min-h-touch rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 sm:px-3"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
               >
@@ -64,16 +76,15 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
               <button
                 onClick={() => moverMes(1)}
                 aria-label={t("topbar.mesSiguiente")}
-                className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:px-3"
               >
-                <span className="hidden sm:inline">{t("topbar.mesSiguiente")}</span>
-                <span className="sm:hidden">{t("topbar.mes")}</span>
+                <span className="hidden md:inline">{t("topbar.mesSiguiente")}</span>
                 <Icon name="chevronRight" size={16} />
               </button>
               {view === "roles" && (
                 <button
                   onClick={() => setCompact(!compact)}
-                  className="inline-flex min-h-touch items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                  className="inline-flex min-h-touch items-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   aria-pressed={compact}
                 >
                   {compact ? t("topbar.vistaAmplia") : t("topbar.vistaCompacta")}
@@ -82,9 +93,9 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
             </>
           )}
           <ThemeToggle />
-          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500" aria-label={`Estado: ${t("app.estado").toLowerCase()}`}>
-            <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-            {t("app.estado")}
+          {/* En escritorio, estado de respaldo al final de la barra de acciones. */}
+          <span className="hidden xl:inline-flex">
+            <SyncStatus />
           </span>
         </div>
       </div>

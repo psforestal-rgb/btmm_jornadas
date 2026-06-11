@@ -22,7 +22,7 @@ export default function ModalFuncionario({ valor, cerrar, guardar }) {
       <div role="dialog" aria-modal="true" aria-label={titulo} className="max-h-[94vh] w-full max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex justify-between border-b p-5">
           <h3 className="text-lg font-semibold">{titulo}</h3>
-          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="font-black">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
         </div>
         <div className="max-h-[70vh] overflow-y-auto p-5">
           <div className="grid gap-4 md:grid-cols-2">

@@ -127,7 +127,7 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                           </label>
                           {avisos.length > 0 && (
                             <div className="mt-2 rounded-lg border border-yellow-300 bg-yellow-100 p-2 text-[11px] leading-snug text-yellow-950">
-                              <div className="font-black">{t("modalActividad.avisoTraslape")}</div>
+                              <div className="font-bold">{t("modalActividad.avisoTraslape")}</div>
                               <div className="mt-1 font-bold">{avisos.map((x) => x.titulo).join(" · ")}</div>
                               <div className="mt-2 flex flex-wrap gap-1.5">
                                 <button

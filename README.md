@@ -466,12 +466,32 @@ debe acompañarse de un checklist explícito de los 30.
 
 ---
 
+## Indicador global de respaldo (SyncStatus)
+
+La barra superior muestra en todo momento un indicador compacto con:
+
+- **Punto de estado**: verde (en línea), ámbar (sin conexión),
+  azul pulsante (guardando).
+- **Hora del último respaldo local** ("Respaldo HH:mm").
+- "Guardando…" mientras hay cambios en la cola de debounce.
+
+En móvil se compacta a punto + hora; el detalle completo (backend
+activo, migraciones, export/import) vive en **Datos · respaldo**.
+Este indicador evoluciona al antiguo "Activo" estático de la Topbar
+(indicador #28): conserva el punto verde pero ahora transmite
+información real.
+
 ## Documentación complementaria
 
 - `PROMPT_REVISION.md` — prompt de revisión integral con los 30
   indicadores obligatorios.
 - `PLAN_IMPLEMENTACION.md` — plan por fases (8 fases, 10 semanas
   estimadas).
+- `docs/ARQUITECTURA.md` — mapa de capas, decisiones de diseño,
+  flujos de datos, reglas responsive y convenciones de código.
+- `docs/GLOSARIO.md` — terminología institucional.
+- `docs/MANUAL.md` — manual por perfil de usuario.
+- `docs/TESTING.md` — estructura de pruebas y plan E2E.
 
 ---
 

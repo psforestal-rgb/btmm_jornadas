@@ -1,4 +1,14 @@
-import { dim, primerDiaLaboral } from "./fechas.js";
+import { primerDiaLaboral } from "./fechas.js";
+
+/**
+ * Dominio de roles mensuales (códigos T/L/V/I/O por funcionario y día).
+ *
+ * Convenciones de claves en `roleData` (objeto plano persistido):
+ *  - `rolKey(...)`    → override puntual de la celda de un día.
+ *  - `rolCfgKey(...)` → modalidad configurada para el mes (p. ej. "10x5").
+ * Si no hay override, la celda se deriva con `generarValorPatron` a partir
+ * de la modalidad y el primer día laboral del mes.
+ */
 
 export function rolKey(year, month, puesto, persona, dia) {
   return `${year}-${month + 1}-${puesto}-${persona}-${dia}`;
@@ -13,20 +23,6 @@ export function parseModalidad(modalidad) {
   if (texto.includes("administrativo")) return { trabajo: 5, libre: 2, administrativo: true };
   const p = texto.split("x");
   return { trabajo: Number(p[0]) || 10, libre: Number(p[1]) || 5, administrativo: false };
-}
-
-export function codigo(pi, d, gi) {
-  const s = (pi * 5 + d + gi * 7) % 36;
-  if (s === 0) return "I1";
-  if (s === 1) return "O1";
-  if (s === 2) return "O2";
-  if (s >= 3 && s <= 7) return `L${s - 2}`;
-  if (s >= 28 && s <= 34) return `V${s - 27}`;
-  return `T${((s + pi) % 20) + 1}`;
-}
-
-export function defaultRolValue(year, month, gi, pi, dia) {
-  return codigo(gi * 10 + pi + month + year, dia, gi);
 }
 
 export function generarValorPatron(modalidad, dia, inicio, year, month) {
@@ -124,6 +120,3 @@ export function renumerarFila({ days, categorias, modalidad }) {
   });
   return resultado;
 }
-
-// Asegura el uso de `dim` por referencia (validación de import).
-export { dim };
