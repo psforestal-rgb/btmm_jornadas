@@ -1,7 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { baseFuncionarios } from "../data/seedFuncionarios.js";
 import { baseActividadesPlan } from "../data/seedActividades.js";
-import { loadState, saveState, clearState, getLastSavedAt, SCHEMA_VERSION } from "../lib/storage.js";
+import {
+  loadState,
+  loadStateAsync,
+  saveState,
+  clearState,
+  getLastSavedAt,
+  getBackendInfo,
+  SCHEMA_VERSION,
+} from "../lib/storage.js";
 import { REGLAS_DEFAULT, mergeReglas } from "../config/reglas.js";
 
 const AppContext = createContext(null);
@@ -91,11 +99,65 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [lastSavedAt, setLastSavedAt] = useState(() => getLastSavedAt());
   const [pendingChanges, setPendingChanges] = useState(0);
+  const [storageBackend, setStorageBackend] = useState(() => getBackendInfo());
+  const [migracionLs, setMigracionLs] = useState(false);
   const saveTimerRef = useRef(null);
   const firstRunRef = useRef(true);
+  const hydratedFromIDBRef = useRef(false);
+
+  // Ref al estado actual para que el effect async pueda compararlo en el
+  // momento del resolve (no en el momento del mount). Se actualiza en cada
+  // render con el nuevo state.
+  const currentStateRef = useRef(state);
+  useEffect(() => {
+    currentStateRef.current = state;
+  });
+
+  // Firma del estado inicial (post-localStorage), capturada UNA vez al
+  // montar. Si la hidratación async tarda y el usuario edita algo en el
+  // medio, el state actual ya no coincidirá con esta firma y se respetará
+  // la edición sin sobrescribirla con el snapshot de Dexie.
+  const initialSignatureRef = useRef(JSON.stringify(pickPersistable(state)));
+
+  // Hidratación asíncrona desde IndexedDB tras el primer render. Si Dexie
+  // tiene datos distintos o más nuevos que los de localStorage, los aplica
+  // con REPLACE_STATE — pero SOLO si el usuario no editó nada en el
+  // intervalo entre el mount y el resolve. Si editó, su cambio gana.
+  useEffect(() => {
+    let cancelado = false;
+    (async () => {
+      const { state: dbState, source, migrated } = await loadStateAsync();
+      if (cancelado) return;
+      if (migrated) setMigracionLs(true);
+      if (dbState && source === "indexeddb") {
+        const dbSerialized = JSON.stringify(dbState);
+        const initialSerialized = initialSignatureRef.current;
+        const currentSerialized = JSON.stringify(pickPersistable(currentStateRef.current));
+
+        // Si el estado actual cambió respecto al inicial, hubo edición
+        // del usuario durante la hidratación: NO sobrescribir.
+        if (currentSerialized !== initialSerialized) {
+          hydratedFromIDBRef.current = true;
+          return;
+        }
+        // Si LS y Dexie ya coinciden, no hace falta despachar (evita
+        // render extra en el caso normal del segundo arranque).
+        if (initialSerialized !== dbSerialized) {
+          dispatch({ type: "REPLACE_STATE", payload: dbState });
+        }
+      }
+      hydratedFromIDBRef.current = true;
+    })();
+    return () => {
+      cancelado = true;
+    };
+    // Solo se ejecuta una vez al montar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persistencia con debounce. El primer render no dispara guardado para no
-  // sobrescribir storage con el seed si la app cargó sin datos.
+  // sobrescribir storage con el seed si la app cargó sin datos. saveState
+  // ahora escribe a localStorage Y a IndexedDB (fire-and-forget).
   useEffect(() => {
     if (firstRunRef.current) {
       firstRunRef.current = false;
@@ -157,9 +219,29 @@ export function AppProvider({ children }) {
       lastSavedAt,
       pendingChanges,
       schemaVersion: SCHEMA_VERSION,
+      storageBackend,
+      migracionLs,
       dispatch,
     }),
-    [state, setView, setMonth, setYear, setCompact, setDiaVista, setPersonas, setActividadesPlan, setRoleData, setReglas, resetReglas, replaceState, resetToSeed, lastSavedAt, pendingChanges]
+    [
+      state,
+      setView,
+      setMonth,
+      setYear,
+      setCompact,
+      setDiaVista,
+      setPersonas,
+      setActividadesPlan,
+      setRoleData,
+      setReglas,
+      resetReglas,
+      replaceState,
+      resetToSeed,
+      lastSavedAt,
+      pendingChanges,
+      storageBackend,
+      migracionLs,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -318,6 +318,41 @@ Alertas ampliadas en Fase 6:
 | Incapacitado con actividad futura | 🩺 danger | `estado === "Incapacitado"` + actividad ≥ hoy |
 | Acumulativa sin modalidad | 📄 warn | `jornada === "Acumulativa"` + `!modalidad` |
 
+## Persistencia local (Fase 5 · Paso 1)
+
+A partir de v1.11.0 la persistencia es **dual**:
+
+- **localStorage** sigue siendo el caché síncrono que arranca la app sin
+  esperar a IndexedDB.
+- **IndexedDB con Dexie** (`src/lib/db.js`) es el almacenamiento durable
+  primario: capacidad amplia, almacenamiento asíncrono, queries por
+  índice y stores adicionales para auditoría y cola de pendientes.
+
+Estrategia:
+
+1. `loadState()` síncrono lee de localStorage → primer render inmediato.
+2. Tras montar, `loadStateAsync()` lee de IndexedDB y, si difiere,
+   despacha `REPLACE_STATE` para reconciliar.
+3. `saveState()` escribe a **ambos** backends (localStorage instantáneo
+   + Dexie `fire-and-forget`).
+4. La primera vez que se ejecuta, `migrateFromLocalStorageIfNeeded()`
+   copia el snapshot existente a IndexedDB de forma idempotente.
+
+### Optimización de bundle
+Dexie se carga **dinámicamente** (`import("dexie")`) la primera vez que
+algún consumidor pide la base. Resultado: chunk separado de ~32 KB gzip
+que no afecta el arranque inicial (~79 KB gzip).
+
+### Cola de cambios pendientes
+El store `pendientes` (Dexie) está preparado para Fase 5 paso 2: cuando
+exista la API REST del SINAC, los cambios offline se registrarán aquí y
+se sincronizarán al reconectar. Hoy el contador siempre es 0.
+
+### Vista "Datos · respaldo"
+Ahora muestra el backend activo (badge **IndexedDB ✓** / **localStorage**
+/ **Sin durable**), si hubo migración automática desde localStorage y el
+contador de cambios pendientes de sincronizar.
+
 ## Persistencia local (Fase 5 · Paso 0)
 
 La aplicación guarda automáticamente el estado en `localStorage` con
