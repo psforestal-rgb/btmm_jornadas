@@ -184,8 +184,22 @@ Workflows en `.github/workflows/`:
 
 | Workflow | Disparador | Qué hace |
 |---|---|---|
-| **`ci.yml`** · CI · tests + build | `pull_request` a `main`, `push` a `main`, manual | Corre `npm test` (126 tests). Si pasa, ejecuta `npm run build` con `GIT_SHA` real. Sube `dist/` como artefacto por 3 días. |
+| **`ci.yml`** · CI · tests + build | `pull_request` a `main`, `push` a `main`, manual | Corre `npm test` (143 tests). Si pasa, ejecuta `npm run build` con `GIT_SHA` real. Sube `dist/` como artefacto por 3 días. |
 | **`deploy.yml`** · GitHub Pages | `workflow_run` de CI exitoso sobre `main`, manual | Solo despliega si CI terminó OK. Genera build con `GIT_SHA` real para `version.json` (mecanismo anti-cache Fase 1). |
+| **`lighthouse.yml`** · Auditoría | `pull_request` cuando cambian `src/`, `index.html`, `vite.config.js`, etc., manual | Corre Lighthouse CI sobre el build de producción. Asserts mínimos: a11y ≥ 90 (error), perf/SEO/best-practices ≥ 85 (warn). Resumen del puntaje en el summary del PR + reporte completo subido a almacenamiento temporal. |
+
+### Lighthouse — configuración
+
+Archivo `lighthouserc.json` define los thresholds y excepciones:
+
+- **A11y ≥ 90** como _error_ — bloquea si baja. Es la métrica más
+  crítica para una herramienta usada en campo.
+- Performance / SEO / Best-Practices ≥ 85 como _warning_.
+- PWA category excluida (`preset: lighthouse:no-pwa`) porque el
+  preset de PWA está deprecado en Lighthouse 12.
+- Excepciones activas: `color-contrast` (los tokens semánticos ya
+  garantizan AA), `unused-javascript`/`-css-rules` (Tailwind purga
+  pero deja residual normal), `is-on-https` (test corre local).
 
 Resultado: ningún merge a `main` queda con tests rojos, ningún
 despliegue a producción sucede si el build falla.
