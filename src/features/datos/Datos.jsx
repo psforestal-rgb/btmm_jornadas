@@ -177,15 +177,15 @@ export default function Datos() {
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.funcionarios")}</p>
-            <p className="mt-1 text-3xl font-black text-slate-900">{totalPersonas}</p>
+            <p className="mt-1 text-3xl font-semibold text-slate-900">{totalPersonas}</p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.actividadesPlanificadas")}</p>
-            <p className="mt-1 text-3xl font-black text-slate-900">{totalActividades}</p>
+            <p className="mt-1 text-3xl font-semibold text-slate-900">{totalActividades}</p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.celdasOverride")}</p>
-            <p className="mt-1 text-3xl font-black text-slate-900">{totalRoleEntries}</p>
+            <p className="mt-1 text-3xl font-semibold text-slate-900">{totalRoleEntries}</p>
           </div>
         </div>
 

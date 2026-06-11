@@ -151,7 +151,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={`rounded-2xl border p-4 ${bg}`}>
             <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
-            <div className={`mt-1 text-4xl font-black ${color}`}>{value}</div>
+            <div className={`mt-1 text-4xl font-semibold ${color}`}>{value}</div>
           </div>
         ))}
       </div>
@@ -164,15 +164,15 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
               <div className="mb-3 text-sm font-semibold text-slate-800">{puesto.replace("Puesto ", "")}</div>
               <div className="grid grid-cols-3 gap-1 text-center">
                 <div>
-                  <div className="text-2xl font-black text-emerald-700">{turno}</div>
+                  <div className="text-2xl font-semibold text-emerald-700">{turno}</div>
                   <div className="text-[10px] text-slate-500">{t("dia.turnoLabel")}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-blue-700">{programados}</div>
+                  <div className="text-2xl font-semibold text-blue-700">{programados}</div>
                   <div className="text-[10px] text-slate-500">{t("dia.planLabel")}</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-slate-500">{total}</div>
+                  <div className="text-2xl font-semibold text-slate-500">{total}</div>
                   <div className="text-[10px] text-slate-500">{t("dia.activosLabel")}</div>
                 </div>
               </div>

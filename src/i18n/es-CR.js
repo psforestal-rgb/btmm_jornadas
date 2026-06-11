@@ -554,6 +554,13 @@ const dict = {
     vacaciones: "De vacaciones",
     incapacitado: "Incapacitado",
   },
+  sync: {
+    enLinea: "En línea",
+    sinConexion: "Sin conexión",
+    guardando: "Guardando…",
+    guardado: "Respaldo {hora}",
+    sinRespaldo: "Sin respaldo aún",
+  },
   print: {
     imprimir: "Imprimir / Guardar PDF",
     imprimirCorto: "Imprimir",

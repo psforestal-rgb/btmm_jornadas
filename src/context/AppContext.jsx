@@ -99,7 +99,7 @@ export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [lastSavedAt, setLastSavedAt] = useState(() => getLastSavedAt());
   const [pendingChanges, setPendingChanges] = useState(0);
-  const [storageBackend, setStorageBackend] = useState(() => getBackendInfo());
+  const [storageBackend] = useState(() => getBackendInfo());
   const [migracionLs, setMigracionLs] = useState(false);
   const saveTimerRef = useRef(null);
   const firstRunRef = useRef(true);

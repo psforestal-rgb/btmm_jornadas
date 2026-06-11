@@ -233,17 +233,19 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
           <span className="text-base font-semibold">{d}</span>
           <span className="text-[9px] uppercase text-slate-400">{dias[dow]}</span>
         </div>
+        {/* Etiquetas abreviadas en móvil (T/P/V) para que la casilla quepa
+            en columnas de ~45 px; palabra completa desde `sm`. */}
         <div className="mt-1 flex flex-col gap-0.5">
-          <div className="flex justify-between rounded bg-white/60 px-1.5 py-0.5 text-[11px]">
-            <span>{t("dashboard.cell.turno")}</span>
+          <div className="flex justify-between rounded bg-white/60 px-1 py-0.5 text-[10px] sm:px-1.5 sm:text-[11px]">
+            <span><span className="sm:hidden">T</span><span className="hidden sm:inline">{t("dashboard.cell.turno")}</span></span>
             <span className="font-semibold">{rol}</span>
           </div>
-          <div className="flex justify-between rounded bg-white/60 px-1.5 py-0.5 text-[11px]">
-            <span>{t("dashboard.cell.plan")}</span>
+          <div className="flex justify-between rounded bg-white/60 px-1 py-0.5 text-[10px] sm:px-1.5 sm:text-[11px]">
+            <span><span className="sm:hidden">P</span><span className="hidden sm:inline">{t("dashboard.cell.plan")}</span></span>
             <span className="font-semibold">{programados}</span>
           </div>
           <div
-            className={`flex justify-between rounded px-1.5 py-0.5 text-[11px] ${
+            className={`flex justify-between rounded px-1 py-0.5 text-[10px] sm:px-1.5 sm:text-[11px] ${
               atencion
                 ? "bg-emerald-100 text-emerald-900"
                 : faltaAtencion
@@ -251,7 +253,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
                 : "bg-slate-100 text-slate-500"
             }`}
           >
-            <span>{t("dashboard.cell.visit")}</span>
+            <span><span className="sm:hidden">V</span><span className="hidden sm:inline">{t("dashboard.cell.visit")}</span></span>
             <span className="font-semibold">{atencion}</span>
           </div>
         </div>
@@ -285,7 +287,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">{t("dashboard.badgeHoy")}</span>
               </div>
-              <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
+              <div className={`mt-2 text-4xl font-semibold ${color}`}>{value}</div>
               <div className="mt-1 text-xs text-slate-400">{sub}</div>
               {cta && value > 0 && (
                 <button onClick={cta.action} className="mt-3 inline-flex min-h-touch items-center gap-1 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700">
@@ -312,7 +314,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
                 <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-800">{t("dashboard.badgeMes")}</span>
               </div>
-              <div className={`mt-2 text-4xl font-black ${color}`}>{value}</div>
+              <div className={`mt-2 text-4xl font-semibold ${color}`}>{value}</div>
               <div className="mt-1 text-xs text-slate-400">{sub}</div>
             </div>
           ))}
@@ -372,9 +374,11 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
             {diasCalendario.map((dia) => (
               <div
                 key={`hdr-${dia}`}
-                className="rounded-xl bg-slate-900 px-1.5 py-2 text-center text-[10px] font-semibold tracking-wide text-white shadow-sm"
+                className="rounded-xl bg-slate-900 px-1 py-2 text-center text-[10px] font-semibold tracking-wide text-white shadow-sm sm:px-1.5"
               >
-                {dia}
+                {/* Abreviado a 3 letras en móvil; nombre completo desde `sm`. */}
+                <span className="sm:hidden">{dia.slice(0, 3)}</span>
+                <span className="hidden sm:inline">{dia}</span>
               </div>
             ))}
             {blancosInicioMes.map((b) => (
