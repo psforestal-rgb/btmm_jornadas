@@ -1,0 +1,77 @@
+name: Lighthouse · auditoría a11y/performance/SEO
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.js'
+      - 'tailwind.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'lighthouserc.json'
+      - '.github/workflows/lighthouse.yml'
+  workflow_dispatch:
+
+# Cancela ejecuciones anteriores cuando se hace push rápido en el mismo PR.
+concurrency:
+  group: lighthouse-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Lighthouse audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build
+        env:
+          GIT_SHA: ${{ github.sha }}
+        run: npm run build
+
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        continue-on-error: true
+
+      - name: Resumen del audit
+        if: always()
+        run: |
+          echo "## Lighthouse audit — resumen" >> $GITHUB_STEP_SUMMARY
+          if [ -d ".lighthouseci" ]; then
+            for f in .lighthouseci/lhr-*.json; do
+              if [ -f "$f" ]; then
+                node -e "
+                  const r = require('./$f');
+                  console.log('### ' + r.requestedUrl);
+                  console.log('| Categoría | Puntaje |');
+                  console.log('|---|---|');
+                  for (const k of ['performance','accessibility','best-practices','seo']) {
+                    const c = r.categories[k];
+                    if (c) console.log('| ' + c.title + ' | ' + Math.round(c.score * 100) + ' |');
+                  }
+                " >> $GITHUB_STEP_SUMMARY || true
+              fi
+            done
+          else
+            echo "No se generaron reportes de Lighthouse." >> $GITHUB_STEP_SUMMARY
+          fi

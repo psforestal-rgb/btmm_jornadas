@@ -9,6 +9,9 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
+    <!-- Evita que iOS/Android conviertan números en enlaces telefónicos -->
+    <meta name="format-detection" content="telephone=no" />
+
     <!-- PWA / theme -->
     <meta name="theme-color" content="#064e3b" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -29,6 +32,18 @@
     <title>PNLQ — Gestión de Jornadas Laborales</title>
   </head>
   <body>
+    <noscript>
+      <div style="padding:2rem;font-family:system-ui,sans-serif;color:#0f172a;background:#f1f5f9;min-height:100vh;">
+        <h1 style="margin:0 0 1rem;color:#064e3b;">PNLQ — Gestión de Jornadas</h1>
+        <p style="font-size:1rem;line-height:1.5;max-width:36rem;">
+          Esta aplicación requiere <strong>JavaScript</strong> habilitado para funcionar.
+          Por favor active JavaScript en su navegador y recargue la página.
+        </p>
+        <p style="margin-top:1.5rem;font-size:0.85rem;color:#475569;">
+          SINAC · Área de Conservación Central · Bloque Tapantí–Macizo de la Muerte.
+        </p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
