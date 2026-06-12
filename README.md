@@ -122,7 +122,7 @@ src/
 | Detalle del día | `dia` | KPIs y actividades de un día específico. |
 | Funcionarios | `funcionarios` | CRUD del personal con filtros y búsqueda. |
 | Roles | `roles` | Tabla mensual T/L/V/I/O por funcionario. |
-| Planificación general | `planificacion` | Calendario mensual de actividades. |
+| Planificación general | `planificacion` | Calendario mensual de actividades (cuadrícula o agenda). |
 | Planificación/Funcionario | `planFuncionario` | Vista por persona con sus días/actividades. |
 | Adelanto de viáticos | `adelantos` | Listado del mes siguiente con corte día 15. |
 | Disponibilidad | `disponibilidad` | Control de contratos y vencimientos. |
@@ -397,9 +397,9 @@ La vista **Datos · respaldo** (sidebar grupo "Control") expone:
 > siguiente prevé migrar a IndexedDB (Dexie) con cola de cambios
 > preparada para sincronización con el sistema central del SINAC.
 
-## Ergonomía móvil (Fase 4)
+## Ergonomía móvil (Fase 4 + mejoras móviles)
 
-Tres vistas alternas optimizadas para uso en campo, sin remover
+Vistas alternas optimizadas para uso en campo, sin remover
 ninguna funcionalidad de escritorio:
 
 - **Funcionarios** — toggle "Tabla / Tarjetas". Default automático
@@ -417,6 +417,21 @@ ninguna funcionalidad de escritorio:
 - **Detalle del día** — swipe horizontal (← →) entre días en
   dispositivos táctiles. Los botones Anterior/Siguiente y el
   selector de fecha siguen siendo la ruta principal (a11y).
+- **Planificación** — toggle "Agenda / Cuadrícula". Default
+  automático por viewport (`< 1024 px` → agenda). La agenda lista
+  cada día con sus actividades (mismos colores de viático y
+  conflicto de rol), conteo 👥 en turno y alta rápida `+` con la
+  fecha del día prellenada. La cuadrícula de 7 columnas sigue
+  íntegra y es el default de escritorio.
+- **Dashboard (cobertura)** — bajo 640 px la grilla de 7 columnas
+  se presenta como lista apilada: una fila por día con etiquetas
+  completas Turno/Plan/Visit., la misma clasificación semafórica
+  y el mismo modal de detalle al tocar.
+- **Modales de formulario** — `ModalFuncionario` agrupa sus campos
+  en cinco secciones tituladas (Identificación, Puesto y condición,
+  Jornada y modalidad, Contratación y fechas, Atributos); campos y
+  botones cumplen el mínimo táctil de 48 px. La Topbar agrupa
+  ‹ mes año › en un único control segmentado.
 
 Toda nueva vista respeta la condición rectora: ningún indicador,
 alerta o registro de las anteriores se pierde — solo cambia de

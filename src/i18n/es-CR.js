@@ -50,6 +50,7 @@ const dict = {
     configuracion: "Configuración",
   },
   topbar: {
+    periodo: "Periodo",
     mesAnterior: "Mes anterior",
     mesSiguiente: "Mes siguiente",
     mes: "Mes",
@@ -216,6 +217,13 @@ const dict = {
   modalFuncionario: {
     editar: "Editar funcionario",
     agregar: "Agregar funcionario",
+    sec: {
+      identificacion: "Identificación",
+      puesto: "Puesto y condición",
+      jornada: "Jornada y modalidad",
+      contratacion: "Contratación y fechas",
+      atributos: "Atributos",
+    },
     nombre: "Nombre",
     cedula: "Cédula",
     correo: "Correo",
@@ -363,6 +371,11 @@ const dict = {
   planificacion: {
     titulo: "Planificación general — {mes} {anio}",
     agregar: "+ Agregar actividad",
+    vistaAgenda: "Agenda",
+    vistaCuadricula: "Cuadrícula",
+    vistaAria: "Modo de vista del calendario",
+    agendaVacia: "Sin actividades",
+    agregarEnDia: "Agregar actividad el día {dia}",
     leyendaProgramada: "Actividad programada",
     leyendaViatico: "Requiere adelanto de viático",
     leyendaFinde: "Fin de semana",

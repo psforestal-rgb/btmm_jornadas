@@ -5,7 +5,7 @@ import Avatar from "../../ui/Avatar.jsx";
 import AlertItem from "../../ui/AlertItem.jsx";
 import AlertStrip from "../../ui/AlertStrip.jsx";
 import { estadoCls } from "../../ui/styles.js";
-import { meses, dias } from "../../data/calendario.js";
+import { meses, dias, diasLargos } from "../../data/calendario.js";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
 import { dim, faltan, isoFecha } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo } from "../../domain/roles.js";
@@ -13,6 +13,7 @@ import { actividadesEnDia, esAtencionRutinaria } from "../../domain/actividades.
 import { puestoRequiereAtencionRutinaria } from "../../domain/cobertura.js";
 import { useApp } from "../../context/AppContext.jsx";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { useMediaQuery } from "../../lib/responsive.js";
 import { useT } from "../../i18n/useT.js";
 import CoberturaDetalleModal from "./CoberturaDetalleModal.jsx";
 import ModalActividad from "../actividades/ModalActividad.jsx";
@@ -26,6 +27,9 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const { reglas } = useApp();
   const puestosRequieren = reglas?.puestosRequierenVisitantesDiario;
   const feriados = useFeriadosDelAno(year);
+  // Bajo el breakpoint `sm` la grilla de 7 columnas deja casillas de ~45 px;
+  // ahí la cobertura se presenta como lista apilada (misma información).
+  const esAngosto = useMediaQuery("(max-width: 639px)");
   const personasActivas = useMemo(() => personas.filter((p) => p.estado !== "Inactivo"), [personas]);
   const diasMes = useMemo(() => Array.from({ length: dim(year, month) }, (_, i) => i + 1), [year, month]);
   const diasCalendario = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"];
@@ -86,6 +90,23 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const atencionRutinariaPuestoDia = (puesto, d) => coberturaCache[puesto]?.[d]?.atencion || [];
   const conteoPorPuestoDia = (puesto, d) => funcionariosProgramadosPuestoDia(puesto, d).length;
   const totalRolPuestoDia = (puesto, d) => funcionariosEnTurnoPuestoDia(puesto, d).length;
+  // Clasificación semafórica de un día, compartida por la casilla (grilla)
+  // y la fila (lista apilada) para que ambas digan exactamente lo mismo.
+  const estadoDia = (puesto, d) => {
+    const programados = conteoPorPuestoDia(puesto, d);
+    const rol = totalRolPuestoDia(puesto, d);
+    const atencion = atencionRutinariaPuestoDia(puesto, d).length;
+    const faltaAtencion = puestoRequiereAtencionRutinaria(puesto, puestosRequieren) && atencion === 0;
+    const faltaActividad = rol > 0 && programados === 0;
+    const marco = faltaAtencion
+      ? "border-red-500 bg-red-50"
+      : faltaActividad
+      ? "border-amber-400 bg-amber-50"
+      : programados
+      ? "border-emerald-500 bg-emerald-50"
+      : "border-slate-200 bg-white";
+    return { programados, rol, atencion, faltaAtencion, faltaActividad, marco };
+  };
   const abrirDetalle = (puesto, d) => {
     const iso = isoFecha(year, month, d);
     setDetalleCobertura({
@@ -208,44 +229,32 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const resumenPuesto = (puesto) => resumenesPorPuesto[puesto] || { sinVisit: 0, sinPlan: 0 };
 
   const DiaCobertura = ({ puesto, d }) => {
-    const programados = conteoPorPuestoDia(puesto, d);
-    const rol = totalRolPuestoDia(puesto, d);
-    const atencion = atencionRutinariaPuestoDia(puesto, d).length;
-    const faltaAtencion = puestoRequiereAtencionRutinaria(puesto, puestosRequieren) && atencion === 0;
-    const faltaActividad = rol > 0 && programados === 0;
+    const { programados, rol, atencion, faltaAtencion, marco } = estadoDia(puesto, d);
     const dow = new Date(year, month, d).getDay();
     return (
       <button
         type="button"
         onClick={() => abrirDetalle(puesto, d)}
-        className={`relative min-h-[88px] rounded-2xl border-2 p-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:ring-2 focus:ring-emerald-700 ${
-          faltaAtencion
-            ? "border-red-500 bg-red-50"
-            : faltaActividad
-            ? "border-amber-400 bg-amber-50"
-            : programados
-            ? "border-emerald-500 bg-emerald-50"
-            : "border-slate-200 bg-white"
-        }`}
+        className={`relative min-h-[88px] rounded-2xl border-2 p-2 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:ring-2 focus:ring-emerald-700 ${marco}`}
         title={faltaAtencion ? t("dashboard.cell.alerta") : t("dashboard.cell.titulo")}
       >
         <div className="flex items-baseline justify-between">
           <span className="text-base font-semibold">{d}</span>
           <span className="text-[9px] uppercase text-slate-400">{dias[dow]}</span>
         </div>
-        {/* Etiquetas abreviadas en móvil (T/P/V) para que la casilla quepa
-            en columnas de ~45 px; palabra completa desde `sm`. */}
+        {/* La grilla solo se muestra desde `sm` (abajo rige la lista
+            apilada), así que las etiquetas van siempre completas. */}
         <div className="mt-1 flex flex-col gap-0.5">
-          <div className="flex justify-between rounded bg-white/60 px-1 py-0.5 text-[10px] sm:px-1.5 sm:text-[11px]">
-            <span><span className="sm:hidden">T</span><span className="hidden sm:inline">{t("dashboard.cell.turno")}</span></span>
+          <div className="flex justify-between rounded bg-white/60 px-1.5 py-0.5 text-[11px]">
+            <span>{t("dashboard.cell.turno")}</span>
             <span className="font-semibold">{rol}</span>
           </div>
-          <div className="flex justify-between rounded bg-white/60 px-1 py-0.5 text-[10px] sm:px-1.5 sm:text-[11px]">
-            <span><span className="sm:hidden">P</span><span className="hidden sm:inline">{t("dashboard.cell.plan")}</span></span>
+          <div className="flex justify-between rounded bg-white/60 px-1.5 py-0.5 text-[11px]">
+            <span>{t("dashboard.cell.plan")}</span>
             <span className="font-semibold">{programados}</span>
           </div>
           <div
-            className={`flex justify-between rounded px-1 py-0.5 text-[10px] sm:px-1.5 sm:text-[11px] ${
+            className={`flex justify-between rounded px-1.5 py-0.5 text-[11px] ${
               atencion
                 ? "bg-emerald-100 text-emerald-900"
                 : faltaAtencion
@@ -253,10 +262,46 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
                 : "bg-slate-100 text-slate-500"
             }`}
           >
-            <span><span className="sm:hidden">V</span><span className="hidden sm:inline">{t("dashboard.cell.visit")}</span></span>
+            <span>{t("dashboard.cell.visit")}</span>
             <span className="font-semibold">{atencion}</span>
           </div>
         </div>
+      </button>
+    );
+  };
+
+  // Variante apilada para pantallas angostas: una fila por día con las
+  // etiquetas completas (Turno/Plan/Visit.) que en la grilla no caben.
+  const DiaCoberturaFila = ({ puesto, d }) => {
+    const { programados, rol, atencion, faltaAtencion, marco } = estadoDia(puesto, d);
+    const dow = new Date(year, month, d).getDay();
+    const chip = "flex items-center gap-1 rounded-lg bg-white/70 px-1.5 py-1 text-[11px]";
+    return (
+      <button
+        type="button"
+        onClick={() => abrirDetalle(puesto, d)}
+        className={`flex min-h-touch w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left shadow-sm transition focus:ring-2 focus:ring-emerald-700 ${marco}`}
+        title={faltaAtencion ? t("dashboard.cell.alerta") : t("dashboard.cell.titulo")}
+      >
+        <span className="flex w-10 shrink-0 flex-col items-center leading-none">
+          <span className="text-base font-semibold">{d}</span>
+          <span className="mt-0.5 text-[9px] uppercase text-slate-400">{diasLargos[dow].slice(0, 3)}</span>
+        </span>
+        <span className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5">
+          <span className={chip}>
+            {t("dashboard.cell.turno")} <span className="font-semibold">{rol}</span>
+          </span>
+          <span className={chip}>
+            {t("dashboard.cell.plan")} <span className="font-semibold">{programados}</span>
+          </span>
+          <span
+            className={`flex items-center gap-1 rounded-lg px-1.5 py-1 text-[11px] ${
+              atencion ? "bg-emerald-100 text-emerald-900" : faltaAtencion ? "bg-red-600 font-semibold text-white" : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {t("dashboard.cell.visit")} <span className="font-semibold">{atencion}</span>
+          </span>
+        </span>
       </button>
     );
   };
@@ -370,24 +415,32 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
           );
         })()}
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
-          <div className="grid grid-cols-7 gap-1.5">
-            {diasCalendario.map((dia) => (
-              <div
-                key={`hdr-${dia}`}
-                className="rounded-xl bg-slate-900 px-1 py-2 text-center text-[10px] font-semibold tracking-wide text-white shadow-sm sm:px-1.5"
-              >
-                {/* Abreviado a 3 letras en móvil; nombre completo desde `sm`. */}
-                <span className="sm:hidden">{dia.slice(0, 3)}</span>
-                <span className="hidden sm:inline">{dia}</span>
-              </div>
-            ))}
-            {blancosInicioMes.map((b) => (
-              <div key={`blank-${b}`} className="min-h-[88px] rounded-2xl border border-dashed border-slate-200 bg-slate-100/60" />
-            ))}
-            {diasMes.map((d) => (
-              <DiaCobertura key={`${puestoActivo}-${d}`} puesto={puestoActivo} d={d} />
-            ))}
-          </div>
+          {esAngosto ? (
+            <ol className="space-y-1.5">
+              {diasMes.map((d) => (
+                <li key={`${puestoActivo}-fila-${d}`}>
+                  <DiaCoberturaFila puesto={puestoActivo} d={d} />
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="grid grid-cols-7 gap-1.5">
+              {diasCalendario.map((dia) => (
+                <div
+                  key={`hdr-${dia}`}
+                  className="rounded-xl bg-slate-900 px-1 py-2 text-center text-[10px] font-semibold tracking-wide text-white shadow-sm sm:px-1.5"
+                >
+                  {dia}
+                </div>
+              ))}
+              {blancosInicioMes.map((b) => (
+                <div key={`blank-${b}`} className="min-h-[88px] rounded-2xl border border-dashed border-slate-200 bg-slate-100/60" />
+              ))}
+              {diasMes.map((d) => (
+                <DiaCobertura key={`${puestoActivo}-${d}`} puesto={puestoActivo} d={d} />
+              ))}
+            </div>
+          )}
         </div>
         <div className="mt-3 text-xs font-medium text-slate-500">
           {t("dashboard.coberturaNota")}
