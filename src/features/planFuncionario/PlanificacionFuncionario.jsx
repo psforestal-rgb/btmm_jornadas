@@ -23,8 +23,6 @@ import AsignarActividadModal from "./AsignarActividadModal.jsx";
 export default function PlanificacionFuncionario({
   year,
   month,
-  setMonth,
-  setYear,
   personas,
   actividadesPlan,
   setActividadesPlan,
@@ -73,20 +71,6 @@ export default function PlanificacionFuncionario({
       )
     );
     setAsignar(null);
-  };
-  const moverMesLocal = (paso) => {
-    let nuevoMes = month + paso;
-    let nuevoAno = year;
-    if (nuevoMes < 0) {
-      nuevoMes = 11;
-      nuevoAno -= 1;
-    }
-    if (nuevoMes > 11) {
-      nuevoMes = 0;
-      nuevoAno += 1;
-    }
-    setMonth(nuevoMes);
-    setYear(nuevoAno);
   };
   const expandirTodo = () => setAbiertos(Object.fromEntries(personasActivas.map((p) => [p.id, true])));
   const colapsarTodo = () => setAbiertos({});
@@ -140,46 +124,18 @@ export default function PlanificacionFuncionario({
         title={t("planFuncionario.titulo", { mes: meses[month], anio: year })}
         icon="📋"
         action={
+          /* El periodo (mes/año) se controla desde la Topbar fija, que
+             cubre esta vista; evitamos duplicar esa navegación aquí. */
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => moverMesLocal(-1)}
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-            >
-              ←
-            </button>
-            <select
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold"
-              value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
-            >
-              {meses.map((m, i) => (
-                <option key={m} value={i}>{m}</option>
-              ))}
-            </select>
-            <select
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold"
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-            >
-              {[2025, 2026, 2027, 2028, 2029].map((y) => (
-                <option key={y}>{y}</option>
-              ))}
-            </select>
-            <button
-              onClick={() => moverMesLocal(1)}
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-            >
-              →
-            </button>
-            <button
               onClick={expandirTodo}
-              className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900"
+              className="min-h-touch rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-900 hover:bg-emerald-100"
             >
               {t("planFuncionario.expandir")}
             </button>
             <button
               onClick={colapsarTodo}
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700"
+              className="min-h-touch rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
             >
               {t("planFuncionario.colapsar")}
             </button>

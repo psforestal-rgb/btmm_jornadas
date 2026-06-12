@@ -140,8 +140,6 @@ function AppShell() {
                 <PlanificacionFuncionario
                   year={year}
                   month={month}
-                  setMonth={setMonth}
-                  setYear={setYear}
                   personas={personas}
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
