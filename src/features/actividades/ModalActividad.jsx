@@ -32,7 +32,7 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
             <h3 className="text-lg font-semibold">{titulo}</h3>
             <p className="text-sm text-slate-600">{t("modalActividad.sub")}</p>
           </div>
-          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="-mr-1 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-lg font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
         <div className="max-h-[72vh] overflow-y-auto p-5">
           <div className="grid gap-4 md:grid-cols-2">
@@ -165,7 +165,7 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
             />
           </label>
         </div>
-        <div className="flex flex-wrap justify-between gap-2 border-t border-slate-200 bg-slate-50 p-4">
+        <div className="flex flex-wrap justify-between gap-2 border-t border-slate-200 bg-slate-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div>
             {esExistente && (
               <button

@@ -33,8 +33,28 @@ export default function ConflictoModal({ data, cerrar, onModificarRol, onModific
     else if (via === "actividad") onModificarActividad();
   };
 
+  const acciones =
+    paso === 2 ? (
+      <>
+        <button
+          type="button"
+          onClick={() => setPaso(1)}
+          className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          <Icon name="chevronLeft" size={16} /> {t("conflicto.volver")}
+        </button>
+        <button
+          type="button"
+          onClick={confirmar}
+          className="inline-flex min-h-touch items-center gap-1 rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+        >
+          {t("conflicto.continuar")} <Icon name="chevronRight" size={16} />
+        </button>
+      </>
+    ) : null;
+
   return (
-    <Modal open onClose={cerrar} title={titulos[paso]} description={descripciones[paso]} size="md">
+    <Modal open onClose={cerrar} title={titulos[paso]} description={descripciones[paso]} size="md" actions={acciones}>
       <div className="rounded-xl border-l-4 border-red-700 bg-red-50 p-3 text-sm text-red-950">
         <div className="flex items-start gap-2">
           <span className="mt-0.5 text-red-700"><Icon name="danger" size={18} /></span>
@@ -93,25 +113,6 @@ export default function ConflictoModal({ data, cerrar, onModificarRol, onModific
             )}
             <li className="text-slate-500">{t("conflicto.notaNoEjecuta")}</li>
           </ul>
-        </div>
-      )}
-
-      {paso === 2 && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => setPaso(1)}
-            className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            <Icon name="chevronLeft" size={16} /> {t("conflicto.volver")}
-          </button>
-          <button
-            type="button"
-            onClick={confirmar}
-            className="inline-flex min-h-touch items-center gap-1 rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            {t("conflicto.continuar")} <Icon name="chevronRight" size={16} />
-          </button>
         </div>
       )}
     </Modal>

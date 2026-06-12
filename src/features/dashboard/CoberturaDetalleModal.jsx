@@ -21,17 +21,17 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
               {data.puesto} · {fecha(data.fecha)}
             </p>
           </div>
-          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="-mr-1 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-lg font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
-        <div className="max-h-[76vh] overflow-y-auto p-5">
+        <div className="max-h-[76vh] overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
               <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.programados")}</div>
-              <div className="mt-1 text-3xl font-bold">{data.programados.length}</div>
+              <div className="mt-1 text-2xl font-bold sm:text-3xl">{data.programados.length}</div>
             </div>
             <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-950">
               <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.enTurnoRol")}</div>
-              <div className="mt-1 text-3xl font-bold">{data.rol}</div>
+              <div className="mt-1 text-2xl font-bold sm:text-3xl">{data.rol}</div>
             </div>
             <div
               className={`rounded-2xl border p-4 ${
@@ -41,7 +41,7 @@ export default function CoberturaDetalleModal({ data, cerrar, onNuevaActividad, 
               }`}
             >
               <div className="text-xs font-bold uppercase tracking-wider opacity-70">{t("cobertura.atencionVisit")}</div>
-              <div className="mt-1 text-3xl font-bold">{data.atencionRutinaria.length}</div>
+              <div className="mt-1 text-2xl font-bold sm:text-3xl">{data.atencionRutinaria.length}</div>
               {data.requiereAtencionRutinaria && !data.atencionRutinaria.length && (
                 <div className="mt-1 text-xs font-bold">{t("cobertura.alertaSinAtencion")}</div>
               )}
