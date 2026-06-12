@@ -32,8 +32,10 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
             <div className="truncate text-xs font-semibold uppercase tracking-widest text-slate-500">
               {t("app.breadcrumbBase", { titulo })}
             </div>
-            {/* El título largo solo aporta en pantallas amplias. */}
-            <h1 className="hidden text-xl font-semibold tracking-tight sm:block">{t("app.titulo")}</h1>
+            {/* El título largo solo aporta en escritorio; en móvil/tablet
+                el breadcrumb superior ya da contexto y el h1 ocupaba
+                demasiada altura por encima de la primera tarjeta. */}
+            <h1 className="hidden text-xl font-semibold tracking-tight lg:block">{t("app.titulo")}</h1>
           </div>
           {/* En móvil, estado de respaldo junto al breadcrumb para no crecer en alto. */}
           <div className="flex shrink-0 items-center gap-2 xl:hidden">
