@@ -84,7 +84,7 @@ alineado con el breakpoint `lg` de Tailwind).
 | Funcionarios | Tabla (overflow-x) | Tarjetas |
 | Roles | Tabla mensual (overflow-x) | Tarjetas por semana |
 | Planificación | Cuadrícula 7 col (toggle a Agenda) | Agenda vertical por día + alta rápida `+` (toggle a cuadrícula con scroll-x) |
-| Dashboard (cobertura) | Grilla 7 col, etiquetas completas | Lista apilada por día (<640 px), etiquetas completas, mismo modal |
+| Dashboard (cobertura) | Grilla 7 col, etiquetas completas | Mini-calendario semafórico (día+color) + panel del día tocado + swipe ←/→ entre puestos (<1024 px); mismo modal de detalle |
 | Detalle del día | Botones | Botones + swipe (`lib/useSwipe.js`) |
 | Modales de formulario | Secciones tituladas a 2 col | Mismas secciones a 1 col; campos y botones `min-h-touch` |
 | Navegación | Sidebar | BottomNav + menú "Más" |

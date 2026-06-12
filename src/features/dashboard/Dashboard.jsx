@@ -14,6 +14,7 @@ import { puestoRequiereAtencionRutinaria } from "../../domain/cobertura.js";
 import { useApp } from "../../context/AppContext.jsx";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import { useIsMobile } from "../../lib/responsive.js";
+import { useSwipe } from "../../lib/useSwipe.js";
 import { useT } from "../../i18n/useT.js";
 import CoberturaDetalleModal from "./CoberturaDetalleModal.jsx";
 import ModalActividad from "../actividades/ModalActividad.jsx";
@@ -24,6 +25,9 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const [modalActividad, setModalActividad] = useState(null);
   const [puestoActivo, setPuestoActivo] = useState(opcionesPuestoOperativo[0]);
   const [normativaAbierta, setNormativaAbierta] = useState(false);
+  // Día resaltado en el mini-calendario móvil (patrón "mes + agenda" de
+  // Google/Outlook: grilla mínima arriba, resumen del día tocado debajo).
+  const [diaSel, setDiaSel] = useState(null);
   const { reglas } = useApp();
   const puestosRequieren = reglas?.puestosRequierenVisitantesDiario;
   const feriados = useFeriadosDelAno(year);
@@ -121,6 +125,17 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
       requiereAtencionRutinaria: puestoRequiereAtencionRutinaria(puesto, puestosRequieren),
     });
   };
+  // En móvil cada puesto operativo funciona como una "página" del bloque de
+  // cobertura: deslizar ←/→ rota entre puestos (los pills siguen disponibles).
+  const cambiarPuesto = (paso) => {
+    const i = opcionesPuestoOperativo.indexOf(puestoActivo);
+    const n = opcionesPuestoOperativo.length;
+    setPuestoActivo(opcionesPuestoOperativo[(i + paso + n) % n]);
+  };
+  const swipeCobertura = useSwipe({
+    onSwipeLeft: () => cambiarPuesto(1),
+    onSwipeRight: () => cambiarPuesto(-1),
+  });
   const nuevaActividadPara = (nombre, iso, lugar) => ({
     id: `a${Date.now()}`,
     titulo: "",
@@ -271,39 +286,95 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     );
   };
 
-  // Variante apilada para pantallas angostas: una fila por día con las
-  // etiquetas completas (Turno/Plan/Visit.) que en la grilla no caben.
-  const DiaCoberturaFila = ({ puesto, d }) => {
-    const { programados, rol, atencion, faltaAtencion, marco } = estadoDia(puesto, d);
-    const dow = new Date(year, month, d).getDay();
-    const chip = "flex items-center gap-1 rounded-lg bg-white/70 px-1.5 py-1 text-[11px]";
+  // Mini-calendario para pantallas angostas (patrón heatmap mensual, como
+  // Google Calendar/Outlook móvil): celdas mínimas día+color semafórico que
+  // sí caben en 7 columnas de 360 px. El resumen Turno/Plan/Visit. del día
+  // tocado aparece en un panel debajo, y desde ahí se abre el detalle
+  // completo (mismo modal de siempre). Información íntegra, en dos niveles.
+  const CoberturaMiniMes = ({ puesto }) => {
+    const diaPanel = diaSel && diaSel <= diasMes.length ? diaSel : null;
+    const ordenLunesPrimero = [1, 2, 3, 4, 5, 6, 0];
     return (
-      <button
-        type="button"
-        onClick={() => abrirDetalle(puesto, d)}
-        className={`flex min-h-touch w-full items-center gap-3 rounded-2xl border-2 px-3 py-2 text-left shadow-sm transition focus:ring-2 focus:ring-emerald-700 ${marco}`}
-        title={faltaAtencion ? t("dashboard.cell.alerta") : t("dashboard.cell.titulo")}
-      >
-        <span className="flex w-10 shrink-0 flex-col items-center leading-none">
-          <span className="text-base font-semibold">{d}</span>
-          <span className="mt-0.5 text-[9px] uppercase text-slate-400">{diasLargos[dow].slice(0, 3)}</span>
-        </span>
-        <span className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5">
-          <span className={chip}>
-            {t("dashboard.cell.turno")} <span className="font-semibold">{rol}</span>
-          </span>
-          <span className={chip}>
-            {t("dashboard.cell.plan")} <span className="font-semibold">{programados}</span>
-          </span>
-          <span
-            className={`flex items-center gap-1 rounded-lg px-1.5 py-1 text-[11px] ${
-              atencion ? "bg-emerald-100 text-emerald-900" : faltaAtencion ? "bg-red-600 font-semibold text-white" : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {t("dashboard.cell.visit")} <span className="font-semibold">{atencion}</span>
-          </span>
-        </span>
-      </button>
+      <div>
+        <div className="grid grid-cols-7 gap-1">
+          {ordenLunesPrimero.map((i) => (
+            <div key={`mh-${i}`} className="py-1 text-center text-[10px] font-bold uppercase text-slate-500">
+              {dias[i]}
+            </div>
+          ))}
+          {blancosInicioMes.map((b) => (
+            <div key={`mb-${b}`} aria-hidden="true" />
+          ))}
+          {diasMes.map((d) => {
+            const { faltaAtencion, marco } = estadoDia(puesto, d);
+            const sel = diaPanel === d;
+            return (
+              <button
+                key={`mini-${puesto}-${d}`}
+                type="button"
+                onClick={() => setDiaSel(d)}
+                aria-pressed={sel}
+                aria-label={t("dashboard.mini.diaAria", { dia: d })}
+                title={faltaAtencion ? t("dashboard.cell.alerta") : t("dashboard.cell.titulo")}
+                className={`relative flex min-h-touch items-center justify-center rounded-xl border-2 text-sm font-semibold transition ${marco} ${
+                  sel ? "ring-2 ring-emerald-700 ring-offset-1" : ""
+                }`}
+              >
+                {d}
+                {faltaAtencion && (
+                  <span aria-hidden="true" className="absolute right-1 top-0.5 text-[10px] font-bold text-red-700">
+                    !
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {diaPanel ? (
+          (() => {
+            const { programados, rol, atencion, faltaAtencion, marco } = estadoDia(puesto, diaPanel);
+            const dow = new Date(year, month, diaPanel).getDay();
+            const chip = "flex items-center gap-1 rounded-lg bg-white/70 px-2 py-1 text-[11px]";
+            return (
+              <div className={`mt-2 rounded-2xl border-2 p-3 ${marco}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-semibold">
+                    {diasLargos[dow]} {diaPanel}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <span className={chip}>
+                      {t("dashboard.cell.turno")} <span className="font-semibold">{rol}</span>
+                    </span>
+                    <span className={chip}>
+                      {t("dashboard.cell.plan")} <span className="font-semibold">{programados}</span>
+                    </span>
+                    <span
+                      className={`flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] ${
+                        atencion
+                          ? "bg-emerald-100 text-emerald-900"
+                          : faltaAtencion
+                          ? "bg-red-600 font-semibold text-white"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {t("dashboard.cell.visit")} <span className="font-semibold">{atencion}</span>
+                    </span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => abrirDetalle(puesto, diaPanel)}
+                  className="mt-2 inline-flex min-h-touch w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                  {t("dashboard.mini.verDetalle")}
+                </button>
+              </div>
+            );
+          })()
+        ) : (
+          <p className="mt-2 text-center text-xs text-slate-400">{t("dashboard.mini.hint")}</p>
+        )}
+      </div>
     );
   };
 
@@ -415,15 +486,9 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
             </div>
           );
         })()}
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
+        <div ref={swipeCobertura} className="rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
           {esAngosto ? (
-            <ol className="space-y-1.5">
-              {diasMes.map((d) => (
-                <li key={`${puestoActivo}-fila-${d}`}>
-                  <DiaCoberturaFila puesto={puestoActivo} d={d} />
-                </li>
-              ))}
-            </ol>
+            <CoberturaMiniMes puesto={puestoActivo} />
           ) : (
             <div className="grid grid-cols-7 gap-1.5">
               {diasCalendario.map((dia) => (
