@@ -53,8 +53,10 @@ export default function Modal({
         aria-labelledby={title ? titleId : undefined}
         aria-describedby={description ? descId : undefined}
         tabIndex={-1}
-        className={`max-h-[94vh] w-full ${maxW} overflow-hidden rounded-t-3xl bg-surface text-ink shadow-2xl outline-none md:rounded-3xl`}
+        className={`flex max-h-[94vh] w-full ${maxW} flex-col overflow-hidden rounded-t-3xl bg-surface text-ink shadow-2xl outline-none md:rounded-3xl`}
       >
+        {/* Asidero de hoja (bottom-sheet) — afordancia táctil en móvil. */}
+        <div aria-hidden="true" className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-line md:hidden" />
         {(title || description) && (
           <header className="flex items-start justify-between gap-3 border-b border-line p-5">
             <div className="min-w-0">
@@ -73,15 +75,15 @@ export default function Modal({
               type="button"
               onClick={onClose}
               aria-label={t("acciones.cerrar")}
-              className="inline-flex h-touch w-touch shrink-0 items-center justify-center rounded-xl text-ink-muted hover:bg-surface-alt hover:text-ink"
+              className="-mr-1 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-ink-muted hover:bg-surface-alt hover:text-ink"
             >
               <Icon name="x" size={20} label={t("acciones.cerrar")} />
             </button>
           </header>
         )}
-        <div className={`max-h-[72vh] overflow-y-auto p-5 ${contentClassName}`}>{children}</div>
+        <div className={`flex-1 overflow-y-auto p-5 ${contentClassName}`}>{children}</div>
         {actions && (
-          <footer className="flex flex-wrap justify-between gap-2 border-t border-line bg-surface-alt p-4">
+          <footer className="flex flex-wrap justify-between gap-2 border-t border-line bg-surface-alt p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {actions}
           </footer>
         )}

@@ -46,7 +46,7 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setVista("funcionario")}
-              className={`rounded-xl border px-3 py-2 text-xs font-bold ${
+              className={`min-h-touch rounded-xl border px-3 py-2 text-xs font-bold ${
                 vista === "funcionario" ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"
               }`}
             >
@@ -54,7 +54,7 @@ export default function AdelantoViaticos({ actividadesPlan, personas }) {
             </button>
             <button
               onClick={() => setVista("actividad")}
-              className={`rounded-xl border px-3 py-2 text-xs font-bold ${
+              className={`min-h-touch rounded-xl border px-3 py-2 text-xs font-bold ${
                 vista === "actividad" ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700"
               }`}
             >

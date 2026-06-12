@@ -90,8 +90,21 @@ alineado con el breakpoint `lg` de Tailwind).
 | Navegación | Sidebar | BottomNav + menú "Más" |
 
 Reglas para nuevas vistas:
-1. Tamaño táctil mínimo `min-h-touch` (48 px) en todo elemento interactivo.
+1. Tamaño táctil mínimo `min-h-touch` (48 px) en todo elemento
+   interactivo, **incluido el botón ✕ de cierre** (usar
+   `min-h-touch min-w-touch`, nunca `h-touch`/`w-touch`: esas
+   utilidades no existen en la config).
 2. Nada de ancho fijo sin un ancestro `overflow-x-auto`.
+3. **Hojas/modales**: contenedor `flex flex-col max-h-[92vh]`, cuerpo
+   `flex-1 overflow-y-auto`, footer fijo fuera del scroll. Padding
+   inferior con `pb-[max(1rem,env(safe-area-inset-bottom))]` para
+   librar el home indicator.
+4. **Elementos `fixed` al borde inferior** (BottomNav, banners):
+   añadir `env(safe-area-inset-bottom)` y, si solapan la nav,
+   elevarse con `bottom-[calc(5rem+env(safe-area-inset-bottom))]`
+   en `<lg`.
+5. No duplicar la navegación de periodo de la Topbar dentro de una
+   vista que ya esté en `VISTAS_CON_PERIODO`.
 3. Cuando una grilla no aporta en pantalla angosta, ofrecer una
    representación apilada (lista/agenda) con la **misma** información
    y, si aplica, toggle para volver a la grilla — nunca eliminar

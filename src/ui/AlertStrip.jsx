@@ -20,10 +20,11 @@ export default function AlertStrip({ alerts, setView }) {
           <button
             key={i}
             onClick={() => setView("alertas")}
+            title={a.msg}
             className="flex min-h-touch shrink-0 items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-900 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           >
             <Icon name={a.icon} size={14} />
-            <span className="max-w-[140px] truncate">{a.msg.split(" — ")[0]}</span>
+            <span className="max-w-[60vw] truncate sm:max-w-[240px]">{a.msg.split(" — ")[0]}</span>
             <Icon name="chevronRight" size={14} className="text-red-500" />
           </button>
         ))}

@@ -39,7 +39,7 @@ export default function ModalFuncionario({ valor, cerrar, guardar }) {
       <div role="dialog" aria-modal="true" aria-label={titulo} className="max-h-[94vh] w-full max-w-3xl overflow-hidden rounded-t-3xl bg-white shadow-2xl md:rounded-3xl">
         <div className="flex justify-between border-b p-5">
           <h3 className="text-lg font-semibold">{titulo}</h3>
-          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="min-h-touch rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">✕</button>
+          <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="-mr-1 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-lg font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
         <div className="max-h-[70vh] space-y-5 overflow-y-auto p-5">
           <Seccion id="sec-identificacion" titulo={t("modalFuncionario.sec.identificacion")}>
@@ -105,7 +105,7 @@ export default function ModalFuncionario({ valor, cerrar, guardar }) {
             <textarea className={`${cls} min-h-24`} value={f.obs} onChange={(e) => set("obs", e.target.value)} aria-label={t("modalFuncionario.obs")} />
           </Seccion>
         </div>
-        <div className="flex justify-end gap-2 border-t bg-slate-50 p-4">
+        <div className="flex justify-end gap-2 border-t bg-slate-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <button onClick={cerrar} className="min-h-touch rounded-xl border bg-white px-4 py-2 text-sm font-semibold">{t("acciones.cancelar")}</button>
           <button onClick={() => guardar(f)} className="min-h-touch rounded-xl bg-emerald-800 px-4 py-2 text-sm font-semibold text-white">{t("acciones.guardar")}</button>
         </div>
