@@ -216,6 +216,13 @@ const dict = {
   modalFuncionario: {
     editar: "Editar funcionario",
     agregar: "Agregar funcionario",
+    sec: {
+      identificacion: "Identificación",
+      puesto: "Puesto y condición",
+      jornada: "Jornada y modalidad",
+      contratacion: "Contratación y fechas",
+      atributos: "Atributos",
+    },
     nombre: "Nombre",
     cedula: "Cédula",
     correo: "Correo",

@@ -10,7 +10,7 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
   const t = useT();
   const [a, setA] = useState(valor);
   const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
-  const cls = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100";
+  const cls = "w-full min-h-touch rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100";
   const porPuesto = opcionesPuestoOperativo.map((puesto) => ({ puesto, items: personas.filter((p) => p.puestoOperativo === puesto) }));
   const lugarModo = opcionesLugarActividad.includes(a.lugar) ? a.lugar : "Otro";
   const esExistente = actividadesPlan.some((x) => x.id === a.id);
