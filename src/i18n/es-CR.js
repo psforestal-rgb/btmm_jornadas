@@ -363,6 +363,11 @@ const dict = {
   planificacion: {
     titulo: "Planificación general — {mes} {anio}",
     agregar: "+ Agregar actividad",
+    vistaAgenda: "Agenda",
+    vistaCuadricula: "Cuadrícula",
+    vistaAria: "Modo de vista del calendario",
+    agendaVacia: "Sin actividades",
+    agregarEnDia: "Agregar actividad el día {dia}",
     leyendaProgramada: "Actividad programada",
     leyendaViatico: "Requiere adelanto de viático",
     leyendaFinde: "Fin de semana",
