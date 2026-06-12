@@ -50,6 +50,7 @@ const dict = {
     configuracion: "Configuración",
   },
   topbar: {
+    periodo: "Periodo",
     mesAnterior: "Mes anterior",
     mesSiguiente: "Mes siguiente",
     mes: "Mes",

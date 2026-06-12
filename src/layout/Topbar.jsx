@@ -43,44 +43,50 @@ export default function Topbar({ view, setView, month, setMonth, year, setYear, 
         <div className="flex flex-wrap items-center gap-2">
           {VISTAS_CON_PERIODO.includes(view) && (
             <>
-              <button
-                onClick={() => moverMes(-1)}
-                aria-label={t("topbar.mesAnterior")}
-                className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:px-3"
+              {/* Periodo como un solo control segmentado: ‹ mes año ›.
+                  Bordes compartidos para que quepa en una línea de 360 px. */}
+              <div
+                role="group"
+                aria-label={t("topbar.periodo")}
+                className="inline-flex items-stretch overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
               >
-                <Icon name="chevronLeft" size={16} />
-                <span className="hidden md:inline">{t("topbar.mesAnterior")}</span>
-              </button>
-              <select
-                aria-label={t("topbar.mes")}
-                className="min-h-touch rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 sm:px-3"
-                value={month}
-                onChange={(e) => setMonth(Number(e.target.value))}
-              >
-                {meses.map((m, i) => (
-                  <option key={m} value={i}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <select
-                aria-label={t("topbar.anio")}
-                className="min-h-touch rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 sm:px-3"
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-              >
-                {[2025, 2026, 2027, 2028, 2029].map((y) => (
-                  <option key={y}>{y}</option>
-                ))}
-              </select>
-              <button
-                onClick={() => moverMes(1)}
-                aria-label={t("topbar.mesSiguiente")}
-                className="inline-flex min-h-touch min-w-touch items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:px-3"
-              >
-                <span className="hidden md:inline">{t("topbar.mesSiguiente")}</span>
-                <Icon name="chevronRight" size={16} />
-              </button>
+                <button
+                  onClick={() => moverMes(-1)}
+                  aria-label={t("topbar.mesAnterior")}
+                  className="inline-flex min-h-touch min-w-touch items-center justify-center px-2 text-slate-700 hover:bg-slate-50"
+                >
+                  <Icon name="chevronLeft" size={16} />
+                </button>
+                <select
+                  aria-label={t("topbar.mes")}
+                  className="min-h-touch border-x border-slate-200 bg-white px-1.5 text-sm font-medium text-slate-700 outline-none sm:px-2"
+                  value={month}
+                  onChange={(e) => setMonth(Number(e.target.value))}
+                >
+                  {meses.map((m, i) => (
+                    <option key={m} value={i}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label={t("topbar.anio")}
+                  className="min-h-touch bg-white px-1.5 text-sm font-medium text-slate-700 outline-none sm:px-2"
+                  value={year}
+                  onChange={(e) => setYear(Number(e.target.value))}
+                >
+                  {[2025, 2026, 2027, 2028, 2029].map((y) => (
+                    <option key={y}>{y}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => moverMes(1)}
+                  aria-label={t("topbar.mesSiguiente")}
+                  className="inline-flex min-h-touch min-w-touch items-center justify-center border-l border-slate-200 px-2 text-slate-700 hover:bg-slate-50"
+                >
+                  <Icon name="chevronRight" size={16} />
+                </button>
+              </div>
               {view === "roles" && (
                 <button
                   onClick={() => setCompact(!compact)}
