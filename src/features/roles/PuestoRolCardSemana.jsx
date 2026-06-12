@@ -196,17 +196,17 @@ export default function PuestoRolCardSemana({
           const modalidad = getCfg(nombre);
           return (
             <article key={nombre} className={`rounded-2xl border ${editing ? "border-emerald-300 bg-emerald-50/40" : "border-slate-200 bg-white"} p-3 shadow-sm`}>
-              <header className="mb-2 flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-slate-900">{nombre}</p>
-                  <p className="text-[11px] text-slate-500">{modalidad}</p>
+              <header className="mb-2 flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-sm font-semibold leading-tight text-slate-900">{nombre}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">{modalidad}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => toggleEdit(nombre)}
                   aria-pressed={editing}
                   aria-label={editing ? t("roles.bloquear", { nombre }) : t("roles.permitir", { nombre })}
-                  className="inline-flex min-h-touch min-w-touch items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-slate-700"
+                  className="inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-slate-700"
                 >
                   <Icon name={editing ? "unlock" : "lock"} size={18} />
                 </button>
@@ -236,6 +236,10 @@ export default function PuestoRolCardSemana({
                 </div>
               )}
 
+              {/* Botones de día: el anillo de conflicto se hizo más fino
+                  (ring-2) para no comerse al texto cuando la columna es
+                  estrecha, y el min-h subió a 60 px para que día+número+
+                  código quepan con zoom de sistema activo. */}
               <div className="grid grid-cols-7 gap-1.5">
                 {semana.map((d) => {
                   const dow = new Date(year, month, d).getDay();
@@ -259,15 +263,15 @@ export default function PuestoRolCardSemana({
                       disabled={!clickable}
                       onClick={onClick}
                       title={conflicto ? t("roles.titleConflicto") : editing ? t("roles.titleEditar") : t("roles.titleSinEdicion")}
-                      className={`relative flex min-h-touch flex-col items-center justify-center rounded-xl border-2 px-1 py-1.5 text-[11px] font-semibold ${cls} ${
+                      className={`relative flex min-h-[60px] flex-col items-center justify-center gap-0.5 overflow-hidden rounded-xl border-2 px-1 py-1.5 text-[11px] font-semibold ${cls} ${
                         esInicio ? "ring-2 ring-inset ring-emerald-700" : ""
-                      } ${conflicto ? "ring-4 ring-inset ring-red-600" : ""} ${
+                      } ${conflicto ? "ring-2 ring-inset ring-red-600" : ""} ${
                         clickable ? "cursor-pointer hover:brightness-95" : "cursor-default opacity-90"
                       }`}
                     >
-                      <span className="text-[9px] uppercase opacity-70">{dias[dow]}</span>
-                      <span className="text-[11px] font-bold">{d}</span>
-                      <span className="mt-0.5 inline-flex min-w-7 items-center justify-center rounded bg-white/55 px-1 text-[11px] font-bold shadow-sm ring-1 ring-black/5">
+                      <span className="text-[9px] uppercase leading-none opacity-70">{dias[dow]}</span>
+                      <span className="text-[11px] font-bold leading-none">{d}</span>
+                      <span className="inline-flex min-w-6 items-center justify-center rounded bg-white/55 px-1 text-[11px] font-bold leading-none shadow-sm ring-1 ring-black/5">
                         {(val || "—").toUpperCase()}
                       </span>
                       {conflicto && (
