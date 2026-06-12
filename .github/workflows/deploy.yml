@@ -1,12 +1,12 @@
 name: Compilar y desplegar en GitHub Pages
 
 on:
-  # Se dispara solo cuando CI termina exitoso sobre main, evitando
-  # desplegar versiones con tests rotos.
-  workflow_run:
-    workflows: ["CI · tests + build"]
+  # Trigger directo en push a main — el trigger workflow_run dejó de
+  # disparar (GitHub deshabilita workflows con inactividad y, en algunos
+  # casos, no encadena correctamente con CI). Confiamos en que CI
+  # bloquea los merges con tests rotos.
+  push:
     branches: [main]
-    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -15,8 +15,6 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Solo desplegar si el workflow de CI terminó exitoso.
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
