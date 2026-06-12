@@ -97,37 +97,73 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
 
   return (
     <section ref={swipeRef} className="space-y-5">
-      {/* Navegación de fecha */}
-      <div className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <button
-          onClick={() => moveDay(-1)}
-          aria-label={t("dia.diaAnterior")}
-          className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
-        >
-          <Icon name="chevronLeft" size={16} />
-          {t("dia.anterior")}
-        </button>
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            {dowLabel} · {meses[monthIdx]} {yearD}
-          </span>
-          <input
-            type="date"
-            value={diaVista}
-            onChange={(e) => e.target.value && setDiaVista(e.target.value)}
-            aria-label={t("dia.seleccionarFecha")}
-            className="min-h-touch rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700"
-          />
-          <span className="text-[10px] text-slate-400 lg:hidden">{t("dia.pistaSwipe")}</span>
+      {/* Navegación de fecha. Móvil: fecha+selector arriba; Anterior y
+          Siguiente debajo, cada uno ocupando media línea (mínimo 48 px).
+          Desde `sm` vuelve a tres columnas en línea, sin desbordes. */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:px-4 sm:py-3">
+        <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-2">
+          <button
+            onClick={() => moveDay(-1)}
+            aria-label={t("dia.diaAnterior")}
+            className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+          >
+            <Icon name="chevronLeft" size={16} />
+            {t("dia.anterior")}
+          </button>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {dowLabel} · {meses[monthIdx]} {yearD}
+            </span>
+            <input
+              type="date"
+              value={diaVista}
+              onChange={(e) => e.target.value && setDiaVista(e.target.value)}
+              aria-label={t("dia.seleccionarFecha")}
+              className="min-h-touch rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700"
+            />
+          </div>
+          <button
+            onClick={() => moveDay(1)}
+            aria-label={t("dia.diaSiguiente")}
+            className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+          >
+            {t("dia.siguiente")}
+            <Icon name="chevronRight" size={16} />
+          </button>
         </div>
-        <button
-          onClick={() => moveDay(1)}
-          aria-label={t("dia.diaSiguiente")}
-          className="inline-flex min-h-touch items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
-        >
-          {t("dia.siguiente")}
-          <Icon name="chevronRight" size={16} />
-        </button>
+        <div className="flex flex-col items-stretch gap-2 sm:hidden">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              {dowLabel} · {meses[monthIdx]} {yearD}
+            </span>
+            <input
+              type="date"
+              value={diaVista}
+              onChange={(e) => e.target.value && setDiaVista(e.target.value)}
+              aria-label={t("dia.seleccionarFecha")}
+              className="min-h-touch w-full max-w-xs rounded-xl border border-slate-300 px-3 py-1.5 text-center text-sm font-semibold text-slate-900 outline-none focus:border-emerald-700"
+            />
+            <span className="text-[10px] text-slate-400">{t("dia.pistaSwipe")}</span>
+          </div>
+          <div className="flex items-stretch gap-2">
+            <button
+              onClick={() => moveDay(-1)}
+              aria-label={t("dia.diaAnterior")}
+              className="inline-flex min-h-touch flex-1 items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+            >
+              <Icon name="chevronLeft" size={16} />
+              {t("dia.anterior")}
+            </button>
+            <button
+              onClick={() => moveDay(1)}
+              aria-label={t("dia.diaSiguiente")}
+              className="inline-flex min-h-touch flex-1 items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+            >
+              {t("dia.siguiente")}
+              <Icon name="chevronRight" size={16} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* KPIs del día */}
@@ -260,7 +296,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                 <Avatar name={p.nombre} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-semibold text-slate-950">{p.nombre}</span>
+                    <span className="break-words text-sm font-semibold text-slate-950">{p.nombre}</span>
                     <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
                     {p.tieneViatico && <Badge className="border-orange-200 bg-orange-100 text-orange-900">{t("dia.viaticoBadge")}</Badge>}
                   </div>
@@ -279,27 +315,30 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
         )}
       </Card>
 
-      {/* En turno sin actividad */}
+      {/* En turno sin actividad — botón Asignar como acción primaria; en
+          móvil ocupa una línea propia para no chocar con el badge del rol. */}
       <Card title={t("dia.enTurnoSinActTitulo", { n: enTurnoSinAct.length })} icon={enTurnoSinAct.length > 0 ? "⚠️" : "✅"}>
         {enTurnoSinAct.length === 0 ? (
           <p className="text-sm text-slate-400">{t("dia.enTurnoSinActVacio")}</p>
         ) : (
           <div className="divide-y divide-slate-100">
             {enTurnoSinAct.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 py-3">
-                <Avatar name={p.nombre} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="font-semibold text-slate-950">{p.nombre}</span>
-                    <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
-                  </div>
-                  <div className="mt-0.5 text-xs text-slate-500">
-                    {p.puestoOperativo} · {p.puesto}
+              <div key={p.id} className="py-3">
+                <div className="flex items-start gap-3">
+                  <Avatar name={p.nombre} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="break-words text-sm font-semibold text-slate-950">{p.nombre}</span>
+                      <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-500">
+                      {p.puestoOperativo} · {p.puesto}
+                    </div>
                   </div>
                 </div>
                 <button
                   onClick={() => setModalActividad(nuevaAct([p.nombre], p.puestoOperativo || ""))}
-                  className="shrink-0 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+                  className="mt-2 inline-flex min-h-touch w-full items-center justify-center rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-700 sm:w-auto"
                 >
                   {t("dia.asignar")}
                 </button>

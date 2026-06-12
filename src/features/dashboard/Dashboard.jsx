@@ -13,7 +13,7 @@ import { actividadesEnDia, esAtencionRutinaria } from "../../domain/actividades.
 import { puestoRequiereAtencionRutinaria } from "../../domain/cobertura.js";
 import { useApp } from "../../context/AppContext.jsx";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
-import { useMediaQuery } from "../../lib/responsive.js";
+import { useIsMobile } from "../../lib/responsive.js";
 import { useT } from "../../i18n/useT.js";
 import CoberturaDetalleModal from "./CoberturaDetalleModal.jsx";
 import ModalActividad from "../actividades/ModalActividad.jsx";
@@ -27,9 +27,10 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
   const { reglas } = useApp();
   const puestosRequieren = reglas?.puestosRequierenVisitantesDiario;
   const feriados = useFeriadosDelAno(year);
-  // Bajo el breakpoint `sm` la grilla de 7 columnas deja casillas de ~45 px;
-  // ahí la cobertura se presenta como lista apilada (misma información).
-  const esAngosto = useMediaQuery("(max-width: 639px)");
+  // Hasta el breakpoint `lg` (1023 px) la grilla de 7 columnas deja
+  // casillas apretadas (también en tablets en portrait y con zoom de
+  // sistema alto); ahí la cobertura se presenta como lista apilada.
+  const esAngosto = useIsMobile();
   const personasActivas = useMemo(() => personas.filter((p) => p.estado !== "Inactivo"), [personas]);
   const diasMes = useMemo(() => Array.from({ length: dim(year, month) }, (_, i) => i + 1), [year, month]);
   const diasCalendario = ["LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO"];

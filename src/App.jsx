@@ -68,10 +68,13 @@ function AppShell() {
   );
 
   return (
-    <div className="pnlq-print-root min-h-screen bg-slate-100 text-slate-950">
+    <div className="pnlq-print-root min-h-screen overflow-x-clip bg-slate-100 text-slate-950">
       <div className="flex min-h-screen">
         <Sidebar view={view} setView={setView} nAlertas={nAlertas} />
-        <main className="min-w-0 flex-1">
+        {/* `min-w-0` y `overflow-x-clip` aseguran que un hijo ancho
+            (tabla con overflow-x propio, modal mal medido, etc.) NO
+            produzca scroll horizontal de la página entera en móvil. */}
+        <main className="min-w-0 flex-1 overflow-x-clip">
           <Topbar
             view={view}
             setView={setView}
