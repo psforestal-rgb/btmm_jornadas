@@ -85,7 +85,9 @@ function AppShell() {
             compact={compact}
             setCompact={setCompact}
           />
-          <div className="space-y-5 p-4 pb-24 lg:p-6 lg:pb-6">
+          {/* pb generoso en móvil para librar la BottomNav fija (≈64px) más
+              el safe-area del home indicator; en lg la nav desaparece. */}
+          <div className="space-y-5 p-4 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:p-6 lg:pb-6">
             <Suspense fallback={<FallbackVista />}>
               {view === "dashboard" && (
                 <Dashboard
