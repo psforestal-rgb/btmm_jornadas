@@ -1,0 +1,9 @@
+# PNLQ — Gestión de Jornadas Laborales
+# Herramienta institucional SINAC · Costa Rica
+#
+# Esta es una herramienta administrativa interna. Se permite indexación
+# básica de la página pública desplegada (GitHub Pages), pero no hay
+# contenido sensible y los datos viven en el navegador del usuario.
+
+User-agent: *
+Allow: /
