@@ -83,16 +83,20 @@ alineado con el breakpoint `lg` de Tailwind).
 |---|---|---|
 | Funcionarios | Tabla (overflow-x) | Tarjetas |
 | Roles | Tabla mensual (overflow-x) | Tarjetas por semana |
-| Planificación | Calendario 7 col | Mismo calendario con scroll horizontal (`min-w-[700px]` + `overflow-x-auto`) |
-| Dashboard (cobertura) | Etiquetas Turno/Plan/Visit. | Abreviadas T/P/V (`sm:hidden` / `hidden sm:inline`) |
+| Planificación | Cuadrícula 7 col (toggle a Agenda) | Agenda vertical por día + alta rápida `+` (toggle a cuadrícula con scroll-x) |
+| Dashboard (cobertura) | Grilla 7 col, etiquetas completas | Lista apilada por día (<640 px), etiquetas completas, mismo modal |
 | Detalle del día | Botones | Botones + swipe (`lib/useSwipe.js`) |
+| Modales de formulario | Secciones tituladas a 2 col | Mismas secciones a 1 col; campos y botones `min-h-touch` |
 | Navegación | Sidebar | BottomNav + menú "Más" |
 
 Reglas para nuevas vistas:
 1. Tamaño táctil mínimo `min-h-touch` (48 px) en todo elemento interactivo.
 2. Nada de ancho fijo sin un ancestro `overflow-x-auto`.
-3. Texto que no quepa en ~45 px de columna → variante abreviada con
-   `sm:hidden` / `hidden sm:inline` (nunca eliminar la información).
+3. Cuando una grilla no aporta en pantalla angosta, ofrecer una
+   representación apilada (lista/agenda) con la **misma** información
+   y, si aplica, toggle para volver a la grilla — nunca eliminar
+   datos; abreviar (`sm:hidden` / `hidden sm:inline`) es el último
+   recurso.
 
 ## Convenciones de código
 
