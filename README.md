@@ -423,10 +423,12 @@ ninguna funcionalidad de escritorio:
   conflicto de rol), conteo 👥 en turno y alta rápida `+` con la
   fecha del día prellenada. La cuadrícula de 7 columnas sigue
   íntegra y es el default de escritorio.
-- **Dashboard (cobertura)** — bajo 640 px la grilla de 7 columnas
-  se presenta como lista apilada: una fila por día con etiquetas
-  completas Turno/Plan/Visit., la misma clasificación semafórica
-  y el mismo modal de detalle al tocar.
+- **Dashboard (cobertura)** — bajo 1024 px la grilla de 7 columnas
+  se presenta como mini-calendario semafórico (patrón "mes + agenda"
+  de Google Calendar/Outlook móvil): celdas día+color que sí caben
+  en 360 px, panel con Turno/Plan/Visit. del día tocado debajo,
+  botón al mismo modal de detalle de siempre, y deslizar ←/→ rota
+  entre puestos operativos.
 - **Modales de formulario** — `ModalFuncionario` agrupa sus campos
   en cinco secciones tituladas (Identificación, Puesto y condición,
   Jornada y modalidad, Contratación y fechas, Atributos); campos y

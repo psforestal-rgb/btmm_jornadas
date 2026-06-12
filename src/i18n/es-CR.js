@@ -113,6 +113,11 @@ const dict = {
       titulo: "Ver detalle",
       alerta: "ALERTA: sin atención rutinaria de visitantes asignada",
     },
+    mini: {
+      hint: "Toque un día para ver su resumen · deslice ←/→ para cambiar de puesto",
+      verDetalle: "Ver detalle del día",
+      diaAria: "Resumen del día {dia}",
+    },
   },
   cobertura: {
     titulo: "Cobertura programada",
