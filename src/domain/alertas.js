@@ -1,4 +1,5 @@
 import { faltan, fecha } from "./fechas.js";
+import { historialPorFuncionario } from "./reposicion.js";
 
 const HOY_DEFAULT = new Date(2026, 4, 19);
 
@@ -15,6 +16,7 @@ const HOY_DEFAULT = new Date(2026, 4, 19);
 export function alertas(personas, opts = {}) {
   const {
     actividadesPlan = [],
+    reposiciones = [],
     hoy = HOY_DEFAULT,
     flags = {},
   } = opts;
@@ -22,6 +24,7 @@ export function alertas(personas, opts = {}) {
     alertaInactivoConActividad = true,
     alertaIncapacitadoConActividad = true,
     alertaAcumulativaSinModalidad = true,
+    alertaReposicionPendiente = true,
   } = flags;
 
   const r = [];
@@ -111,6 +114,25 @@ export function alertas(personas, opts = {}) {
       }
     }
   });
+
+  // 7. Tiempo trabajado en día libre/feriado/fuera de turno pendiente de
+  //    reponer. Una alerta por funcionario con saldo pendiente, para que
+  //    la administración no pierda de vista la reposición.
+  if (alertaReposicionPendiente && reposiciones.length) {
+    for (const fila of historialPorFuncionario(reposiciones)) {
+      if (fila.pendientes === 0) continue;
+      const piezas = [];
+      if (fila.pend.diasEnteros) piezas.push(`${fila.pend.diasEnteros} día${fila.pend.diasEnteros !== 1 ? "s" : ""} completo${fila.pend.diasEnteros !== 1 ? "s" : ""}`);
+      if (fila.pend.mediosDias) piezas.push(`${fila.pend.mediosDias} medio${fila.pend.mediosDias !== 1 ? "s" : ""} día${fila.pend.mediosDias !== 1 ? "s" : ""}`);
+      if (fila.pend.horas) piezas.push(`${fila.pend.horas} h`);
+      r.push({
+        t: "warn",
+        icon: "⟳",
+        msg: `Tiempo por reponer — ${fila.funcionario}`,
+        sub: `${fila.pendientes} registro${fila.pendientes !== 1 ? "s" : ""} de trabajo fuera de rol sin reponer${piezas.length ? ` (${piezas.join(", ")})` : ""}. Coordinar la reposición del tiempo.`,
+      });
+    }
+  }
 
   return r.length
     ? r

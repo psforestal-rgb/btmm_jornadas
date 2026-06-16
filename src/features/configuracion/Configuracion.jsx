@@ -182,6 +182,7 @@ export default function Configuracion() {
               ["alertaInactivoConActividad", t("configuracion.alertaInactivo")],
               ["alertaIncapacitadoConActividad", t("configuracion.alertaIncapacitado")],
               ["alertaAcumulativaSinModalidad", t("configuracion.alertaSinModalidad")],
+              ["alertaReposicionPendiente", t("configuracion.alertaReposicion")],
             ].map(([k, label]) => (
               <label key={k} className="flex items-start gap-2 rounded-xl border border-slate-300 p-3 text-sm">
                 <input

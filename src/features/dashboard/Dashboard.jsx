@@ -11,6 +11,7 @@ import { dim, faltan, isoFecha } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo } from "../../domain/roles.js";
 import { actividadesEnDia, esAtencionRutinaria } from "../../domain/actividades.js";
 import { puestoRequiereAtencionRutinaria } from "../../domain/cobertura.js";
+import { resumenReposiciones } from "../../domain/reposicion.js";
 import { useApp } from "../../context/AppContext.jsx";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import { useIsMobile } from "../../lib/responsive.js";
@@ -19,7 +20,7 @@ import { useT } from "../../i18n/useT.js";
 import CoberturaDetalleModal from "./CoberturaDetalleModal.jsx";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
-export default function Dashboard({ personas, alerts, setView, actividadesPlan, setActividadesPlan, roleData, month, year }) {
+export default function Dashboard({ personas, alerts, setView, actividadesPlan, setActividadesPlan, roleData, reposiciones = [], month, year }) {
   const t = useT();
   const [detalleCobertura, setDetalleCobertura] = useState(null);
   const [modalActividad, setModalActividad] = useState(null);
@@ -195,6 +196,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     [personas],
   );
   const totalActivos = useMemo(() => personas.filter((f) => f.estado === "Activo").length, [personas]);
+  const reposicionesPendientes = useMemo(() => resumenReposiciones(reposiciones).pendientes, [reposiciones]);
 
   // KPIs separados por horizonte temporal: "Hoy" vs "Este mes".
   const kpisHoy = [
@@ -218,6 +220,13 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
       value: porVencer,
       sub: t("kpi.porVencerSub"),
       color: porVencer > 0 ? "text-amber-600" : "text-slate-900",
+    },
+    {
+      label: t("kpi.reposicionPendiente"),
+      value: reposicionesPendientes,
+      sub: t("kpi.reposicionPendienteSub"),
+      color: reposicionesPendientes > 0 ? "text-amber-600" : "text-slate-900",
+      cta: { label: t("dashboard.verReposicion"), action: () => setView("reposicion") },
     },
     {
       label: t("kpi.personalActivo"),
@@ -425,7 +434,7 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
           </h2>
         </header>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {kpisMes.map(({ label, value, sub, color }) => (
+          {kpisMes.map(({ label, value, sub, color, cta }) => (
             <div key={label} className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</div>
@@ -433,6 +442,11 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
               </div>
               <div className={`mt-2 text-4xl font-semibold ${color}`}>{value}</div>
               <div className="mt-1 text-xs text-slate-400">{sub}</div>
+              {cta && value > 0 && (
+                <button onClick={cta.action} className="mt-3 inline-flex min-h-touch items-center gap-1 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700">
+                  {cta.label}
+                </button>
+              )}
             </div>
           ))}
         </div>

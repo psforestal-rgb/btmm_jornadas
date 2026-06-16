@@ -31,6 +31,37 @@ describe("alertas Fase 6 — vencimiento exactamente HOY", () => {
   });
 });
 
+describe("alertas — tiempo pendiente de reponer", () => {
+  const repo = (over = {}) => ({
+    id: "r1",
+    folio: "REP-001",
+    funcionario: "X User",
+    fecha: "2026-05-10",
+    tipoDia: "Día libre",
+    motivo: "Incendio forestal",
+    magnitud: "diaEntero",
+    horas: 0,
+    estado: "Pendiente",
+    fechaReposicion: "",
+    ...over,
+  });
+
+  it("dispara warn por funcionario con saldo pendiente", () => {
+    const r = alertas([base], { reposiciones: [repo()] });
+    expect(r.some((a) => a.t === "warn" && /Tiempo por reponer — X User/.test(a.msg))).toBe(true);
+  });
+
+  it("no dispara si la reposición ya está repuesta", () => {
+    const r = alertas([base], { reposiciones: [repo({ estado: "Repuesto", fechaReposicion: "2026-05-20" })] });
+    expect(r.some((a) => /Tiempo por reponer/.test(a.msg))).toBe(false);
+  });
+
+  it("respeta el flag alertaReposicionPendiente=false", () => {
+    const r = alertas([base], { reposiciones: [repo()], flags: { alertaReposicionPendiente: false } });
+    expect(r.some((a) => /Tiempo por reponer/.test(a.msg))).toBe(false);
+  });
+});
+
 describe("alertas Fase 6 — persona inactiva con actividad futura", () => {
   it("dispara warn", () => {
     const r = alertas(

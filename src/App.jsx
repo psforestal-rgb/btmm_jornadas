@@ -62,8 +62,8 @@ function AppShell() {
   } = useApp();
 
   const alerts = useMemo(
-    () => alertas(personas, { actividadesPlan, flags: reglas }),
-    [personas, actividadesPlan, reglas],
+    () => alertas(personas, { actividadesPlan, reposiciones, flags: reglas }),
+    [personas, actividadesPlan, reposiciones, reglas],
   );
   const nAlertas = useMemo(
     () => alerts.filter((a) => a.t === "danger" || a.t === "warn").length,
@@ -100,6 +100,7 @@ function AppShell() {
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
                   roleData={roleData}
+                  reposiciones={reposiciones}
                   month={month}
                   year={year}
                 />
