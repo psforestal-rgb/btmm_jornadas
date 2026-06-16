@@ -161,6 +161,43 @@ export function registrosConSaldoDe(items = [], nombre, hj = HORAS_JORNADA_DEFAU
     .sort((a, b) => String(a.fecha || "").localeCompare(String(b.fecha || "")));
 }
 
+/** Mapea la categoría del rol (L/V/I/O) al tipo de día de una reposición. */
+export function tipoDiaDeCategoria(cat) {
+  if (cat === "L") return "Día libre";
+  if (cat === "V") return "Vacaciones interrumpidas";
+  return "Fuera de turno";
+}
+
+/**
+ * Construye un registro de reposición nuevo (día completo) para un
+ * funcionario que trabajó en un día fuera de su rol. No muta nada.
+ */
+export function nuevoRegistroReposicion({ reposiciones = [], funcionario, fecha, categoria, motivo = "Actividad especial", detalle = "" }) {
+  return {
+    id: `rep${Date.now()}`,
+    folio: siguienteFolio(reposiciones),
+    funcionario,
+    fecha,
+    tipoDia: tipoDiaDeCategoria(categoria),
+    motivo,
+    motivoDetalle: detalle,
+    magnitud: "diaEntero",
+    horas: 0,
+    cuotas: [],
+    observaciones: "",
+  };
+}
+
+/**
+ * Devuelve una copia de `reposiciones` aplicando una cuota al registro
+ * pendiente más antiguo del funcionario. Si no hay saldo, devuelve igual.
+ */
+export function aplicarCuotaAlMasAntiguo(reposiciones = [], funcionario, cuota, hj = HORAS_JORNADA_DEFAULT) {
+  const objetivo = registrosConSaldoDe(reposiciones, funcionario, hj)[0];
+  if (!objetivo) return reposiciones;
+  return reposiciones.map((x) => (x.id === objetivo.id ? { ...x, cuotas: [...cuotasDe(x), cuota] } : x));
+}
+
 /**
  * Agrupa los registros por funcionario con sus estadísticas (total,
  * pendientes, parciales, repuestos y saldo en horas), priorizando a quien
