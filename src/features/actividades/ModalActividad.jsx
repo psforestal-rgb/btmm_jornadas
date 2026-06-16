@@ -9,19 +9,11 @@ import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import { codigoRolFuncionario, esRolActivo, categoriaDe, patchCategoriaDia } from "../../domain/roles.js";
 import {
   saldoFuncionario,
-  registrosConSaldoDe,
-  siguienteFolio,
-  cuotasDe,
+  nuevoRegistroReposicion,
+  aplicarCuotaAlMasAntiguo,
   HORAS_JORNADA_DEFAULT,
 } from "../../domain/reposicion.js";
 import AsignacionLibreModal from "./AsignacionLibreModal.jsx";
-
-// Mapea la categoría del rol (L/V/I/O) al tipo de día de una reposición.
-function tipoDiaDeCategoria(cat) {
-  if (cat === "L") return "Día libre";
-  if (cat === "V") return "Vacaciones interrumpidas";
-  return "Fuera de turno";
-}
 
 export default function ModalActividad({ valor, personas, cerrar, guardar, eliminar, actividadesPlan = [] }) {
   useEscapeClose(cerrar);
@@ -101,34 +93,22 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
   const resolverReposicion = () => {
     const { funcionario, categoria } = asignLibre;
     if (setReposiciones) {
-      const nuevo = {
-        id: `rep${Date.now()}`,
-        folio: siguienteFolio(reposiciones),
-        funcionario,
-        fecha: a.inicio,
-        tipoDia: tipoDiaDeCategoria(categoria),
-        motivo: "Actividad especial",
-        motivoDetalle: a.titulo || "",
-        magnitud: "diaEntero",
-        horas: 0,
-        cuotas: [],
-        observaciones: "",
-      };
-      setReposiciones((prev) => [nuevo, ...prev]);
+      setReposiciones((prev) => [
+        nuevoRegistroReposicion({ reposiciones: prev, funcionario, fecha: a.inicio, categoria, detalle: a.titulo || "" }),
+        ...prev,
+      ]);
     }
     agregarFuncionario(funcionario);
     setAsignLibre(null);
   };
   const resolverReponer = () => {
     const { funcionario } = asignLibre;
-    const objetivo = registrosConSaldoDe(reposiciones, funcionario, hj)[0];
-    if (objetivo && setReposiciones) {
+    if (setReposiciones) {
       const cuota = { id: `c${Date.now()}`, fecha: a.inicio, magnitud: "diaEntero", horas: 0 };
-      setReposiciones((prev) =>
-        prev.map((x) => (x.id === objetivo.id ? { ...x, cuotas: [...cuotasDe(x), cuota] } : x)),
-      );
+      setReposiciones((prev) => aplicarCuotaAlMasAntiguo(prev, funcionario, cuota, hj));
     }
-    // No se agrega a la actividad: el día libre se usa para reponer (descanso).
+    // El día libre se usa para reponer (descanso): se quita de la actividad.
+    quitarFuncionario(funcionario);
     setAsignLibre(null);
   };
   const modificarActividadExistente = (act) => setA({ ...act });
@@ -144,6 +124,25 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
           <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="-mr-1 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-lg font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
         <div className="max-h-[72vh] overflow-y-auto p-5">
+          {a.funcionarios.filter((n) => esLibreDe(n)).length > 0 && (
+            <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-800">{t("modalActividad.libresAsignados")}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {a.funcionarios.filter((n) => esLibreDe(n)).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() =>
+                      setAsignLibre({ funcionario: n, iso: a.inicio, rol: rolDe(n), categoria: categoriaDe(rolDe(n)), saldo: saldoDe(n) })
+                    }
+                    className="inline-flex items-center gap-1 rounded-xl border border-amber-400 bg-white px-3 py-1.5 text-xs font-bold text-amber-900 hover:bg-amber-100"
+                  >
+                    {n} · {t("modalActividad.resolver")}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-2">
             <label className="md:col-span-2">
               <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.titulo")}</span>
