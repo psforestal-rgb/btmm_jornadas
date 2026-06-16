@@ -16,6 +16,7 @@ export default function BottomNav({ view, setView, nAlertas }) {
     ["roles", t("bottomNav.roles"), "chart"],
     ["planFuncionario", t("bottomNav.planFunc"), "clipboard"],
     ["adelantos", t("bottomNav.viaticos"), "banknote"],
+    ["reposicion", t("bottomNav.reposicion"), "refresh"],
     ["disponibilidad", t("bottomNav.disponib"), "shield"],
     ["datos", t("bottomNav.datos"), "shieldAlert"],
     ["configuracion", t("bottomNav.config"), "traffic"],

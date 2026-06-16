@@ -58,6 +58,7 @@ describe("i18n diccionario — completitud mínima", () => {
       "planificacion",
       "planFuncionario",
       "adelantos",
+      "reposicion",
       "disponibilidad",
       "alertas",
       "datos",
