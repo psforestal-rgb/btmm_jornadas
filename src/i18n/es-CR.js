@@ -90,6 +90,7 @@ const dict = {
     bloqueHoy: "Hoy · día {dia}",
     bloqueMes: "Este mes · {mes} {anio}",
     verDia: "Ver detalle del día →",
+    verReposicion: "Ver reposición →",
     badgeHoy: "Hoy",
     badgeMes: "Mes",
     coberturaTitulo: "Cobertura por puesto operativo — {mes} {anio}",
@@ -146,6 +147,8 @@ const dict = {
     porVencerSub: "disponibilidades ≤30 días",
     personalActivo: "Personal activo",
     personalActivoSub: "/ {total} total",
+    reposicionPendiente: "Tiempo por reponer",
+    reposicionPendienteSub: "funcionarios con tiempo pendiente",
     enTurno: "En turno",
     conActividad: "Con actividad",
     fueraDeTurno: "Fuera de turno",
@@ -553,6 +556,7 @@ const dict = {
     incapaConDisp: "Revisar disponibilidad — {nombre}",
     incapaConActividad: "Incapacitado con actividad planificada — {nombre}",
     inactivoConActividad: "Inactivo con actividad planificada — {nombre}",
+    reposicionPendiente: "Tiempo por reponer — {nombre}",
   },
   datos: {
     titulo: "Datos · respaldo local",
@@ -623,6 +627,7 @@ const dict = {
     alertaInactivo: "Persona inactiva con actividad futura",
     alertaIncapacitado: "Incapacitado con actividad futura",
     alertaSinModalidad: "Acumulativa sin modalidad",
+    alertaReposicion: "Tiempo trabajado pendiente de reponer",
     alertasNota:
       "Cada checkbox controla si se evalúa esa familia de alertas. Si se detectan falsos positivos, puede desactivarse temporalmente sin tocar código.",
     advertenciasTitulo: "Advertencias antes de aplicar:",

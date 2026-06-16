@@ -52,6 +52,12 @@ export const REGLAS_DEFAULT = Object.freeze({
   alertaInactivoConActividad: true,
   alertaIncapacitadoConActividad: true,
   alertaAcumulativaSinModalidad: true,
+
+  /**
+   * Alertar cuando un funcionario tiene tiempo trabajado fuera de su rol
+   * (día libre, feriado, fuera de turno) pendiente de reponer.
+   */
+  alertaReposicionPendiente: true,
 });
 
 export const VIATICOS_OBJETIVO_OPCIONES = ["siguiente", "actual"];
