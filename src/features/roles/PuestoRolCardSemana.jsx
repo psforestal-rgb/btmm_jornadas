@@ -14,8 +14,10 @@ import {
   formatearCategoria,
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { indexarReposiciones } from "../../domain/reposicion.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import { useT } from "../../i18n/useT.js";
+import MarcaReposicionCelda from "../reposicion/MarcaReposicionCelda.jsx";
 import MenuCelda from "./MenuCelda.jsx";
 import ConflictoModal from "./ConflictoModal.jsx";
 import ActividadesDiaModal from "./ActividadesDiaModal.jsx";
@@ -60,8 +62,13 @@ export default function PuestoRolCardSemana({
   personas,
   actividadesPlan,
   setActividadesPlan,
+  reposiciones = [],
 }) {
   const t = useT();
+  const { trabajadas, reposiciones: reposicionesDia } = useMemo(
+    () => indexarReposiciones(reposiciones),
+    [reposiciones],
+  );
   const semanas = useMemo(() => semanasDelMes(year, month), [year, month]);
   const totalSemanas = semanas.length;
   const [semIdx, setSemIdx] = useState(0);
@@ -274,6 +281,10 @@ export default function PuestoRolCardSemana({
                       <span className="inline-flex min-w-6 items-center justify-center rounded bg-white/55 px-1 text-[11px] font-bold leading-none shadow-sm ring-1 ring-black/5">
                         {(val || "—").toUpperCase()}
                       </span>
+                      <MarcaReposicionCelda
+                        trabajada={trabajadas[`${nombre}|${iso}`]}
+                        reposicion={reposicionesDia[`${nombre}|${iso}`]}
+                      />
                       {conflicto && (
                         <span className="pnlq-pulse absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-700 text-[9px] font-bold text-white">
                           !

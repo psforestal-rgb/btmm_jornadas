@@ -53,7 +53,14 @@ export default function ModalReposicion({ valor, personas, cerrar, guardar, elim
       >
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-5">
           <div>
-            <h3 className="text-lg font-semibold">{titulo}</h3>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-lg font-semibold">{titulo}</h3>
+              {r.folio && (
+                <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 font-mono text-xs font-semibold text-slate-700">
+                  {r.folio}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-slate-600">{t("modalReposicion.sub")}</p>
           </div>
           <button

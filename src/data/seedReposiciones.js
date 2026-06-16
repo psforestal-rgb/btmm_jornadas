@@ -10,6 +10,7 @@
 export const baseReposiciones = [
   {
     id: "rep1",
+    folio: "REP-001",
     funcionario: "Errol Salazar",
     fecha: "2026-05-24",
     tipoDia: "Día libre",
@@ -23,6 +24,7 @@ export const baseReposiciones = [
   },
   {
     id: "rep2",
+    folio: "REP-002",
     funcionario: "Juan Pablo Granados",
     fecha: "2026-05-17",
     tipoDia: "Feriado",
@@ -36,6 +38,7 @@ export const baseReposiciones = [
   },
   {
     id: "rep3",
+    folio: "REP-003",
     funcionario: "Mariano Solís",
     fecha: "2026-04-19",
     tipoDia: "Fuera de turno",

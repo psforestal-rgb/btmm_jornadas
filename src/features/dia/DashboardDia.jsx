@@ -10,14 +10,40 @@ import { pad2, fecha } from "../../domain/fechas.js";
 import { codigoRolFuncionario, esRolActivo, categoriaDe } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
 import { conflictosActividadDia } from "../../domain/conflictos.js";
+import { indexarReposiciones } from "../../domain/reposicion.js";
 import { useSwipe } from "../../lib/useSwipe.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import { useT } from "../../i18n/useT.js";
 import { plural } from "../../i18n/es-CR.js";
+import { magnitudLabel } from "../reposicion/etiquetas.js";
 import ModalActividad from "../actividades/ModalActividad.jsx";
 
-export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData }) {
+function MarcasDia({ trabajada, reposicion, t }) {
+  if (!trabajada && !reposicion) return null;
+  return (
+    <>
+      {trabajada && (
+        <Badge className="border-amber-300 bg-amber-100 text-amber-900">
+          ⚑ {trabajada.folio} · {magnitudLabel(trabajada, t)}
+          {trabajada.estado === "Repuesto" ? ` · ${t("modalReposicion.estadoRepuesto").toLowerCase()}` : ""}
+        </Badge>
+      )}
+      {reposicion && (
+        <Badge className="border-sky-300 bg-sky-100 text-sky-900">
+          ⟲ {reposicion.folio} · {t("reposicion.marca.reposicionDe", { fecha: fecha(reposicion.fecha) })}
+        </Badge>
+      )}
+    </>
+  );
+}
+
+export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData, reposiciones = [] }) {
   const t = useT();
+  const { trabajadas, reposiciones: reposicionesDia } = indexarReposiciones(reposiciones);
+  const marcaDe = (nombre) => ({
+    trabajada: trabajadas[`${nombre}|${diaVista}`],
+    reposicion: reposicionesDia[`${nombre}|${diaVista}`],
+  });
   const [modalActividad, setModalActividad] = useState(null);
   const [yearD, monthD, dayD] = diaVista.split("-").map(Number);
   const monthIdx = monthD - 1;
@@ -299,6 +325,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                     <span className="break-words text-sm font-semibold text-slate-950">{p.nombre}</span>
                     <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
                     {p.tieneViatico && <Badge className="border-orange-200 bg-orange-100 text-orange-900">{t("dia.viaticoBadge")}</Badge>}
+                    <MarcasDia {...marcaDe(p.nombre)} t={t} />
                   </div>
                   <div className="mt-0.5 text-xs text-slate-500">{p.puestoOperativo}</div>
                   <div className="mt-1.5 flex flex-wrap gap-1">
@@ -330,6 +357,7 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="break-words text-sm font-semibold text-slate-950">{p.nombre}</span>
                       <Badge className={codigoCls(p.rol, finde)}>{p.rol}</Badge>
+                      <MarcasDia {...marcaDe(p.nombre)} t={t} />
                     </div>
                     <div className="mt-0.5 text-xs text-slate-500">
                       {p.puestoOperativo} · {p.puesto}
@@ -371,6 +399,9 @@ export default function DashboardDia({ diaVista, setDiaVista, personas, activida
                         <div>
                           <div className="text-sm font-semibold text-slate-900">{p.nombre}</div>
                           <div className="text-[10px] text-slate-400">{(p.puestoOperativo || "").replace("Puesto ", "")}</div>
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            <MarcasDia {...marcaDe(p.nombre)} t={t} />
+                          </div>
                         </div>
                       </div>
                     ))}

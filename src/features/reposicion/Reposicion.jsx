@@ -5,9 +5,17 @@ import Avatar from "../../ui/Avatar.jsx";
 import Icon from "../../ui/Icon.jsx";
 import EmptyState from "../../ui/EmptyState.jsx";
 import { fecha } from "../../domain/fechas.js";
-import { resumenReposiciones, ordenarPorFecha, estaRepuesto } from "../../domain/reposicion.js";
+import {
+  resumenReposiciones,
+  ordenarPorFecha,
+  estaRepuesto,
+  siguienteFolio,
+  historialPorFuncionario,
+} from "../../domain/reposicion.js";
 import { useT } from "../../i18n/useT.js";
+import { magnitudLabel } from "./etiquetas.js";
 import ModalReposicion from "./ModalReposicion.jsx";
+import HistorialFuncionario from "./HistorialFuncionario.jsx";
 
 // Fecha de hoy (ISO) para prellenar registros y reposiciones.
 function hoyISO() {
@@ -19,8 +27,10 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
   const [modal, setModal] = useState(null);
   const [borrar, setBorrar] = useState(null);
   const [filtro, setFiltro] = useState("todos");
+  const [tab, setTab] = useState("registros");
 
   const resumen = useMemo(() => resumenReposiciones(reposiciones), [reposiciones]);
+  const historial = useMemo(() => historialPorFuncionario(reposiciones), [reposiciones]);
 
   const filtrados = useMemo(() => {
     const base = ordenarPorFecha(reposiciones);
@@ -31,6 +41,7 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
 
   const nuevo = () => ({
     id: `rep${Date.now()}`,
+    folio: siguienteFolio(reposiciones),
     funcionario: "",
     fecha: hoyISO(),
     tipoDia: "Día libre",
@@ -58,13 +69,6 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
 
   const reabrir = (id) =>
     setReposiciones((prev) => prev.map((x) => (x.id === id ? { ...x, estado: "Pendiente", fechaReposicion: "" } : x)));
-
-  const magnitudLabel = (r) =>
-    r.magnitud === "horas"
-      ? t("reposicion.horasN", { n: r.horas })
-      : r.magnitud === "medioDia"
-      ? t("modalReposicion.magnitudMedioDia")
-      : t("modalReposicion.magnitudDiaEntero");
 
   const desglose = (d) =>
     t("reposicion.resumen.desglose", { dias: d.diasEnteros, medios: d.mediosDias, horas: d.horas });
@@ -115,6 +119,30 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
       >
         <p className="mb-4 text-sm text-slate-600">{t("reposicion.subtitulo")}</p>
 
+        <div role="tablist" aria-label={t("reposicion.tabsAria")} className="mb-4 inline-flex overflow-hidden rounded-xl border border-slate-300 bg-white">
+          {[
+            ["registros", t("reposicion.tabRegistros")],
+            ["historial", t("reposicion.tabHistorial")],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              onClick={() => setTab(id)}
+              className={`min-h-touch px-4 py-2 text-xs font-bold ${
+                tab === id ? "bg-emerald-800 text-white" : "text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "historial" ? (
+          <HistorialFuncionario historial={historial} />
+        ) : (
+        <>
         <div className="mb-4 flex flex-wrap gap-2">
           {filtros.map(([id, label, n]) => (
             <button
@@ -146,6 +174,7 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
             <table className="min-w-[900px] w-full border-collapse text-sm">
               <thead className="bg-slate-100 text-left text-[11px] uppercase tracking-wider text-slate-500">
                 <tr>
+                  <th className="p-3">{t("reposicion.th.folio")}</th>
                   <th className="p-3">{t("reposicion.th.funcionario")}</th>
                   <th className="p-3">{t("reposicion.th.fecha")}</th>
                   <th className="p-3">{t("reposicion.th.tipoDia")}</th>
@@ -158,6 +187,9 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
               <tbody className="divide-y divide-slate-200">
                 {filtrados.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50 align-top">
+                    <td className="p-3 whitespace-nowrap">
+                      <Badge className="border-slate-300 bg-white font-mono text-slate-700">{r.folio || "—"}</Badge>
+                    </td>
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <Avatar name={r.funcionario || "—"} />
@@ -173,7 +205,7 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
                       {r.motivoDetalle && <div className="mt-0.5 text-xs text-slate-500">{r.motivoDetalle}</div>}
                     </td>
                     <td className="p-3 whitespace-nowrap">
-                      <Badge className="border-blue-200 bg-blue-100 text-blue-900">{magnitudLabel(r)}</Badge>
+                      <Badge className="border-blue-200 bg-blue-100 text-blue-900">{magnitudLabel(r, t)}</Badge>
                     </td>
                     <td className="p-3">
                       {estaRepuesto(r) ? (
@@ -227,6 +259,8 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
               </tbody>
             </table>
           </div>
+        )}
+        </>
         )}
 
         <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">

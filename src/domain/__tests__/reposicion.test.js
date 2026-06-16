@@ -4,6 +4,10 @@ import {
   desglosePorUnidad,
   resumenReposiciones,
   ordenarPorFecha,
+  folioNumero,
+  siguienteFolio,
+  indexarReposiciones,
+  historialPorFuncionario,
   TIPOS_DIA,
   MOTIVOS,
   MAGNITUDES,
@@ -77,5 +81,51 @@ describe("reposicion · ordenarPorFecha", () => {
     const out = ordenarPorFecha(orig);
     expect(out.map((x) => x.fecha)).toEqual(["2026-05-20", "2026-05-10", "2026-05-01"]);
     expect(orig.map((x) => x.fecha)).toEqual(["2026-05-01", "2026-05-20", "2026-05-10"]);
+  });
+});
+
+describe("reposicion · folios", () => {
+  it("folioNumero extrae la parte numérica", () => {
+    expect(folioNumero("REP-007")).toBe(7);
+    expect(folioNumero("REP-012")).toBe(12);
+    expect(folioNumero("")).toBe(null);
+    expect(folioNumero(undefined)).toBe(null);
+  });
+
+  it("siguienteFolio toma el máximo + 1 con padding", () => {
+    expect(siguienteFolio([])).toBe("REP-001");
+    expect(siguienteFolio([reg({ folio: "REP-001" }), reg({ folio: "REP-004" })])).toBe("REP-005");
+    expect(siguienteFolio([reg({ folio: "REP-009" })])).toBe("REP-010");
+  });
+});
+
+describe("reposicion · indexarReposiciones", () => {
+  it("indexa día trabajado siempre y día de reposición solo si está repuesto", () => {
+    const items = [
+      reg({ folio: "REP-001", funcionario: "Ana", fecha: "2026-05-10", estado: "Pendiente" }),
+      reg({ folio: "REP-002", funcionario: "Ana", fecha: "2026-05-12", estado: "Repuesto", fechaReposicion: "2026-05-20" }),
+    ];
+    const { trabajadas, reposiciones } = indexarReposiciones(items);
+    expect(trabajadas["Ana|2026-05-10"]?.folio).toBe("REP-001");
+    expect(trabajadas["Ana|2026-05-12"]?.folio).toBe("REP-002");
+    // Solo el repuesto genera marca en su fechaReposicion.
+    expect(reposiciones["Ana|2026-05-20"]?.folio).toBe("REP-002");
+    expect(Object.keys(reposiciones)).toHaveLength(1);
+  });
+});
+
+describe("reposicion · historialPorFuncionario", () => {
+  it("agrupa por funcionario y prioriza a quien tiene más pendientes", () => {
+    const h = historialPorFuncionario([
+      reg({ funcionario: "Ana", estado: "Repuesto", magnitud: "medioDia", fechaReposicion: "2026-05-20" }),
+      reg({ funcionario: "Beto", estado: "Pendiente", magnitud: "diaEntero" }),
+      reg({ funcionario: "Beto", estado: "Pendiente", magnitud: "horas", horas: 3 }),
+    ]);
+    expect(h).toHaveLength(2);
+    expect(h[0].funcionario).toBe("Beto");
+    expect(h[0].pendientes).toBe(2);
+    expect(h[0].pend).toEqual({ diasEnteros: 1, mediosDias: 0, horas: 3 });
+    expect(h[1].funcionario).toBe("Ana");
+    expect(h[1].repuestos).toBe(1);
   });
 });

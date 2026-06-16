@@ -1,8 +1,9 @@
 import { memo } from "react";
 import { codigoCls } from "../../ui/styles.js";
 import { t } from "../../i18n/es-CR.js";
+import MarcaReposicionCelda from "../reposicion/MarcaReposicionCelda.jsx";
 
-function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInicio, conflicto }) {
+function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInicio, conflicto, repoTrabajada, repoReposicion }) {
   const v = String(value || "").toUpperCase();
   const handleClick = conflicto ? onConflicto : editable ? onOpen : undefined;
   const clickable = conflicto || editable;
@@ -33,6 +34,7 @@ function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInic
         <span className="inline-flex min-w-8 items-center justify-center rounded-md bg-white/45 px-1.5 py-0.5 shadow-sm ring-1 ring-black/5">
           {v || "—"}
         </span>
+        <MarcaReposicionCelda trabajada={repoTrabajada} reposicion={repoReposicion} />
         {conflicto && (
           <span className="pnlq-pulse absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-bl-md bg-red-700 text-[10px] text-white">
             !
@@ -48,6 +50,10 @@ function RoleCell({ value, onOpen, onConflicto, finde, compact, editable, esInic
   );
 }
 
+function marcaKey(r) {
+  return r ? `${r.folio}:${r.estado}` : "";
+}
+
 function areEqual(prev, next) {
   return (
     prev.value === next.value &&
@@ -55,7 +61,9 @@ function areEqual(prev, next) {
     prev.compact === next.compact &&
     prev.editable === next.editable &&
     prev.esInicio === next.esInicio &&
-    prev.conflicto === next.conflicto
+    prev.conflicto === next.conflicto &&
+    marcaKey(prev.repoTrabajada) === marcaKey(next.repoTrabajada) &&
+    marcaKey(prev.repoReposicion) === marcaKey(next.repoReposicion)
   );
 }
 

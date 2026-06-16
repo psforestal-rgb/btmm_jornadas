@@ -112,6 +112,7 @@ function AppShell() {
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
                   roleData={roleData}
+                  reposiciones={reposiciones}
                 />
               )}
               {view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}
@@ -125,6 +126,7 @@ function AppShell() {
                   personas={personas}
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
+                  reposiciones={reposiciones}
                 />
               )}
               {view === "planificacion" && (

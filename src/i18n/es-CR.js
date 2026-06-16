@@ -448,6 +448,9 @@ const dict = {
     filtroPendientes: "Pendientes",
     filtroRepuestos: "Repuestos",
     horasN: "{n} h",
+    tabsAria: "Vistas de reposición",
+    tabRegistros: "Registros",
+    tabHistorial: "Historial por funcionario",
     resumen: {
       total: "Registros",
       pendientes: "Pendientes de reponer",
@@ -455,6 +458,7 @@ const dict = {
       desglose: "{dias} día(s) · {medios} medio(s) día(s) · {horas} h",
     },
     th: {
+      folio: "Folio",
       funcionario: "Funcionario",
       fecha: "Fecha trabajada",
       tipoDia: "Tipo de día",
@@ -462,6 +466,22 @@ const dict = {
       tiempo: "Tiempo",
       estado: "Estado",
       acciones: "Acciones",
+    },
+    magnitudCorta: {
+      diaEntero: "día completo",
+      medioDia: "medio día",
+    },
+    marca: {
+      trabajadaTitulo: "{folio} · Trabajó día {tipoDia} ({magnitud}) · {estado}",
+      reposicionTitulo: "{folio} · Día de reposición del tiempo trabajado el {fecha}",
+      reposicionDe: "reposición del {fecha}",
+    },
+    historial: {
+      vacioTitulo: "Sin historial",
+      vacioDesc: "Aún no hay registros de reposición para mostrar por funcionario.",
+      veces: "{n} registro(s)",
+      pendientesN: "{n} pendiente(s)",
+      repuestosN: "{n} repuesto(s)",
     },
     marcarRepuesto: "Marcar repuesto",
     reabrir: "Reabrir",

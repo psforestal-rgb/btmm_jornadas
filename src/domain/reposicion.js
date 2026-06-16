@@ -35,6 +35,36 @@ export function estaRepuesto(r) {
   return r?.estado === "Repuesto";
 }
 
+/** Extrae la parte numérica de un folio "REP-007" → 7 (o null). */
+export function folioNumero(folio) {
+  const m = String(folio || "").match(/(\d+)/);
+  return m ? Number(m[1]) : null;
+}
+
+/** Genera el siguiente folio consecutivo "REP-###" a partir de los existentes. */
+export function siguienteFolio(items = []) {
+  const max = items.reduce((mx, r) => Math.max(mx, folioNumero(r.folio) || 0), 0);
+  return `REP-${String(max + 1).padStart(3, "0")}`;
+}
+
+/**
+ * Indexa los registros por celda (funcionario + fecha ISO) para que la
+ * matriz de roles pueda consultar en O(1) si un día tiene marca de
+ * "trabajado" (día trabajado) o de "reposición" (día en que se repuso).
+ * No muta los roles: es solo una capa de señalización derivada.
+ */
+export function indexarReposiciones(items = []) {
+  const trabajadas = {};
+  const reposiciones = {};
+  for (const r of items) {
+    if (r.funcionario && r.fecha) trabajadas[`${r.funcionario}|${r.fecha}`] = r;
+    if (r.funcionario && estaRepuesto(r) && r.fechaReposicion) {
+      reposiciones[`${r.funcionario}|${r.fechaReposicion}`] = r;
+    }
+  }
+  return { trabajadas, reposiciones };
+}
+
 /**
  * Suma los registros por unidad sin asumir una duración fija de jornada
  * (la jornada acumulativa varía según modalidad). Devuelve la cantidad
@@ -71,4 +101,26 @@ export function resumenReposiciones(items = []) {
 /** Ordena por fecha trabajada descendente (lo más reciente primero). */
 export function ordenarPorFecha(items = []) {
   return [...items].sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")));
+}
+
+/**
+ * Agrupa los registros por funcionario y devuelve, por cada uno, sus
+ * estadísticas (total, pendientes, repuestos y desglose por unidad de lo
+ * pendiente y lo repuesto) más la lista de registros ordenada por fecha.
+ * El resultado se ordena por cantidad de pendientes (desc) y luego por
+ * total (desc) para priorizar a quienes tienen tiempo sin reponer.
+ */
+export function historialPorFuncionario(items = []) {
+  const porNombre = new Map();
+  for (const r of items) {
+    const nombre = r.funcionario || "—";
+    if (!porNombre.has(nombre)) porNombre.set(nombre, []);
+    porNombre.get(nombre).push(r);
+  }
+  const filas = [];
+  for (const [funcionario, registros] of porNombre.entries()) {
+    filas.push({ funcionario, registros: ordenarPorFecha(registros), ...resumenReposiciones(registros) });
+  }
+  filas.sort((a, b) => b.pendientes - a.pendientes || b.total - a.total || a.funcionario.localeCompare(b.funcionario));
+  return filas;
 }
