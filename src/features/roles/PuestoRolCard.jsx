@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Badge from "../../ui/Badge.jsx";
 import { meses, dias } from "../../data/calendario.js";
 import { opcionesModalidad } from "../../data/opciones.js";
@@ -12,6 +12,7 @@ import {
   formatearCategoria,
 } from "../../domain/roles.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { indexarReposiciones } from "../../domain/reposicion.js";
 import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
 import { useT } from "../../i18n/useT.js";
 import RoleCell from "./RoleCell.jsx";
@@ -31,8 +32,13 @@ export default function PuestoRolCard({
   personas,
   actividadesPlan,
   setActividadesPlan,
+  reposiciones = [],
 }) {
   const t = useT();
+  const { trabajadas, reposiciones: reposicionesDia } = useMemo(
+    () => indexarReposiciones(reposiciones),
+    [reposiciones],
+  );
   const [editRows, setEditRows] = useState({});
   const [menu, setMenu] = useState(null);
   const [conflictoActivo, setConflictoActivo] = useState(null);
@@ -184,8 +190,9 @@ export default function PuestoRolCard({
                   </td>
                   {days.map((d) => {
                     const dow = new Date(year, month, d).getDay();
+                    const iso = isoFecha(year, month, d);
                     const val = getCelda(nombre, pi, d);
-                    const tieneActividad = actividadesEnDia(actividadesPlan || [], isoFecha(year, month, d)).some((a) =>
+                    const tieneActividad = actividadesEnDia(actividadesPlan || [], iso).some((a) =>
                       (a.funcionarios || []).includes(nombre)
                     );
                     const conflicto = tieneActividad && !esRolActivo(val);
@@ -198,6 +205,8 @@ export default function PuestoRolCard({
                         finde={dow === 0 || dow === 6}
                         esInicio={editing && d === inicio}
                         conflicto={conflicto}
+                        repoTrabajada={trabajadas[`${nombre}|${iso}`]}
+                        repoReposicion={reposicionesDia[`${nombre}|${iso}`]}
                         onOpen={() => editing && setMenu({ persona: nombre, pi, dia: d, valor: val, esInicio: d === inicio })}
                         onConflicto={() => abrirConflicto(nombre, pi, d, val)}
                       />

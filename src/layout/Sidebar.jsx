@@ -16,6 +16,7 @@ export default function Sidebar({ view, setView, nAlertas }) {
       ["planificacion", t("view.planificacion"), "calendarDays"],
       ["planFuncionario", t("view.planFuncionario"), "clipboard"],
       ["adelantos", t("view.adelantos"), "banknote"],
+      ["reposicion", t("view.reposicion"), "refresh"],
       ["disponibilidad", t("view.disponibilidad"), "shield"],
     ]],
     [t("sidebar.grupoControl"), [

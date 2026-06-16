@@ -20,6 +20,7 @@ export default function Roles({
   personas,
   actividadesPlan,
   setActividadesPlan,
+  reposiciones = [],
 }) {
   const t = useT();
   const days = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
@@ -123,6 +124,7 @@ export default function Roles({
                   personas={personas}
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
+                  reposiciones={reposiciones}
                 />
               ) : (
                 <PuestoRolCard
@@ -137,6 +139,7 @@ export default function Roles({
                   personas={personas}
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
+                  reposiciones={reposiciones}
                 />
               )}
               <RolesPrintFooter />

@@ -16,6 +16,7 @@ const Roles = lazy(() => import("./features/roles/Roles.jsx"));
 const Planificacion = lazy(() => import("./features/planificacion/Planificacion.jsx"));
 const PlanificacionFuncionario = lazy(() => import("./features/planFuncionario/PlanificacionFuncionario.jsx"));
 const AdelantoViaticos = lazy(() => import("./features/viaticos/AdelantoViaticos.jsx"));
+const Reposicion = lazy(() => import("./features/reposicion/Reposicion.jsx"));
 const Disponibilidad = lazy(() => import("./features/disponibilidad/Disponibilidad.jsx"));
 const Alertas = lazy(() => import("./features/alertas/Alertas.jsx"));
 const Datos = lazy(() => import("./features/datos/Datos.jsx"));
@@ -53,6 +54,8 @@ function AppShell() {
     setRoleData,
     actividadesPlan,
     setActividadesPlan,
+    reposiciones,
+    setReposiciones,
     diaVista,
     setDiaVista,
     reglas,
@@ -109,6 +112,7 @@ function AppShell() {
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
                   roleData={roleData}
+                  reposiciones={reposiciones}
                 />
               )}
               {view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}
@@ -122,6 +126,7 @@ function AppShell() {
                   personas={personas}
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
+                  reposiciones={reposiciones}
                 />
               )}
               {view === "planificacion" && (
@@ -148,6 +153,13 @@ function AppShell() {
                 />
               )}
               {view === "adelantos" && <AdelantoViaticos actividadesPlan={actividadesPlan} personas={personas} />}
+              {view === "reposicion" && (
+                <Reposicion
+                  personas={personas}
+                  reposiciones={reposiciones}
+                  setReposiciones={setReposiciones}
+                />
+              )}
               {view === "disponibilidad" && <Disponibilidad personas={personas} />}
               {view === "alertas" && <Alertas alerts={alerts} />}
               {view === "datos" && <Datos />}

@@ -48,11 +48,13 @@ export default function Datos() {
   const totalPersonas = (ctx.personas || []).length;
   const totalActividades = (ctx.actividadesPlan || []).length;
   const totalRoleEntries = Object.keys(ctx.roleData || {}).length;
+  const totalReposiciones = (ctx.reposiciones || []).length;
 
   const onExport = () => {
     const snap = exportSnapshot({
       personas: ctx.personas,
       actividadesPlan: ctx.actividadesPlan,
+      reposiciones: ctx.reposiciones,
       roleData: ctx.roleData,
     });
     const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
@@ -76,6 +78,7 @@ export default function Datos() {
       ctx.replaceState({
         personas: parsed.state.personas ?? ctx.personas,
         actividadesPlan: parsed.state.actividadesPlan ?? ctx.actividadesPlan,
+        reposiciones: parsed.state.reposiciones ?? ctx.reposiciones,
         roleData: parsed.state.roleData ?? ctx.roleData,
       });
       setImportOk({ exportadoEn: parsed.exportadoEn, archivo: file.name });
@@ -174,7 +177,7 @@ export default function Datos() {
           </div>
         </div>
 
-        <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.funcionarios")}</p>
             <p className="mt-1 text-3xl font-semibold text-slate-900">{totalPersonas}</p>
@@ -182,6 +185,10 @@ export default function Datos() {
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.actividadesPlanificadas")}</p>
             <p className="mt-1 text-3xl font-semibold text-slate-900">{totalActividades}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.reposiciones")}</p>
+            <p className="mt-1 text-3xl font-semibold text-slate-900">{totalReposiciones}</p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t("datos.celdasOverride")}</p>

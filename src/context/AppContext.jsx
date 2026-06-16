@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { baseFuncionarios } from "../data/seedFuncionarios.js";
 import { baseActividadesPlan } from "../data/seedActividades.js";
+import { baseReposiciones } from "../data/seedReposiciones.js";
 import {
   loadState,
   loadStateAsync,
@@ -23,6 +24,7 @@ const seedState = {
   compact: false,
   roleData: {},
   actividadesPlan: baseActividadesPlan,
+  reposiciones: baseReposiciones,
   diaVista: "2026-05-19",
   reglas: { ...REGLAS_DEFAULT },
 };
@@ -64,6 +66,8 @@ function reducer(state, action) {
       return { ...state, personas: resolveUpdater(action.payload, state.personas) };
     case "SET_ACTIVIDADES_PLAN":
       return { ...state, actividadesPlan: resolveUpdater(action.payload, state.actividadesPlan) };
+    case "SET_REPOSICIONES":
+      return { ...state, reposiciones: resolveUpdater(action.payload, state.reposiciones) };
     case "SET_ROLE_DATA":
       return { ...state, roleData: resolveUpdater(action.payload, state.roleData) };
     case "SET_REGLAS": {
@@ -184,6 +188,7 @@ export function AppProvider({ children }) {
   const setDiaVista = useCallback((v) => dispatch({ type: "SET_DIA_VISTA", payload: v }), []);
   const setPersonas = useCallback((v) => dispatch({ type: "SET_PERSONAS", payload: v }), []);
   const setActividadesPlan = useCallback((v) => dispatch({ type: "SET_ACTIVIDADES_PLAN", payload: v }), []);
+  const setReposiciones = useCallback((v) => dispatch({ type: "SET_REPOSICIONES", payload: v }), []);
   const setRoleData = useCallback((v) => dispatch({ type: "SET_ROLE_DATA", payload: v }), []);
   const setReglas = useCallback((v) => dispatch({ type: "SET_REGLAS", payload: v }), []);
 
@@ -211,6 +216,7 @@ export function AppProvider({ children }) {
       setDiaVista,
       setPersonas,
       setActividadesPlan,
+      setReposiciones,
       setRoleData,
       setReglas,
       resetReglas,
@@ -232,6 +238,7 @@ export function AppProvider({ children }) {
       setDiaVista,
       setPersonas,
       setActividadesPlan,
+      setReposiciones,
       setRoleData,
       setReglas,
       resetReglas,
