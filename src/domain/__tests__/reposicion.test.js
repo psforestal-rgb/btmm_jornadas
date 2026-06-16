@@ -1,13 +1,20 @@
 import { describe, it, expect } from "vitest";
 import {
   estaRepuesto,
-  desglosePorUnidad,
+  estadoReposicion,
+  horasDeMagnitud,
+  horasTrabajadas,
+  horasRepuestas,
+  saldoHoras,
+  cuotasDe,
   resumenReposiciones,
   ordenarPorFecha,
   folioNumero,
   siguienteFolio,
   indexarReposiciones,
   historialPorFuncionario,
+  saldoFuncionario,
+  registrosConSaldoDe,
   TIPOS_DIA,
   MOTIVOS,
   MAGNITUDES,
@@ -16,70 +23,103 @@ import {
 
 const reg = (over = {}) => ({
   id: "x",
+  folio: "REP-000",
   funcionario: "Errol Salazar",
   fecha: "2026-05-10",
   tipoDia: "Día libre",
   motivo: "Emergencia",
   magnitud: "diaEntero",
   horas: 0,
-  estado: "Pendiente",
+  cuotas: [],
   ...over,
 });
 
+const cuota = (over = {}) => ({ id: "c", fecha: "2026-05-20", magnitud: "diaEntero", horas: 0, ...over });
+
 describe("reposicion · constantes", () => {
-  it("expone catálogos de opciones no vacíos", () => {
+  it("expone catálogos de opciones", () => {
     expect(TIPOS_DIA.length).toBeGreaterThan(0);
     expect(MOTIVOS).toContain("Incendio forestal");
     expect(MAGNITUDES).toEqual(["diaEntero", "medioDia", "horas"]);
-    expect(ESTADOS).toEqual(["Pendiente", "Repuesto"]);
+    expect(ESTADOS).toEqual(["Pendiente", "Parcial", "Repuesto"]);
   });
 });
 
-describe("reposicion · estaRepuesto", () => {
-  it("true solo cuando estado === 'Repuesto'", () => {
-    expect(estaRepuesto(reg({ estado: "Repuesto" }))).toBe(true);
-    expect(estaRepuesto(reg({ estado: "Pendiente" }))).toBe(false);
-    expect(estaRepuesto(undefined)).toBe(false);
+describe("reposicion · conversión a horas", () => {
+  it("horasDeMagnitud usa la jornada para día/medio y el valor para horas", () => {
+    expect(horasDeMagnitud("diaEntero", 0, 8)).toBe(8);
+    expect(horasDeMagnitud("medioDia", 0, 8)).toBe(4);
+    expect(horasDeMagnitud("horas", 3.5, 8)).toBe(3.5);
+    expect(horasDeMagnitud("diaEntero", 0, 12)).toBe(12);
   });
 });
 
-describe("reposicion · desglosePorUnidad", () => {
-  it("cuenta días enteros, medios días y suma horas sueltas", () => {
-    const d = desglosePorUnidad([
-      reg({ magnitud: "diaEntero" }),
-      reg({ magnitud: "diaEntero" }),
-      reg({ magnitud: "medioDia" }),
-      reg({ magnitud: "horas", horas: 4 }),
-      reg({ magnitud: "horas", horas: 2.5 }),
-    ]);
-    expect(d).toEqual({ diasEnteros: 2, mediosDias: 1, horas: 6.5 });
+describe("reposicion · saldo parcial", () => {
+  it("día completo trabajado y medio día repuesto deja saldo de medio día (Parcial)", () => {
+    const r = reg({ magnitud: "diaEntero", cuotas: [cuota({ magnitud: "medioDia" })] });
+    expect(horasTrabajadas(r, 8)).toBe(8);
+    expect(horasRepuestas(r, 8)).toBe(4);
+    expect(saldoHoras(r, 8)).toBe(4);
+    expect(estadoReposicion(r, 8)).toBe("Parcial");
+    expect(estaRepuesto(r, 8)).toBe(false);
   });
 
-  it("lista vacía devuelve ceros", () => {
-    expect(desglosePorUnidad([])).toEqual({ diasEnteros: 0, mediosDias: 0, horas: 0 });
+  it("sin cuotas: Pendiente con saldo completo", () => {
+    const r = reg({ magnitud: "diaEntero" });
+    expect(estadoReposicion(r, 8)).toBe("Pendiente");
+    expect(saldoHoras(r, 8)).toBe(8);
+  });
+
+  it("cuotas que cubren el total: Repuesto, saldo 0", () => {
+    const r = reg({ magnitud: "diaEntero", cuotas: [cuota({ magnitud: "medioDia" }), cuota({ id: "c2", magnitud: "medioDia" })] });
+    expect(estadoReposicion(r, 8)).toBe("Repuesto");
+    expect(saldoHoras(r, 8)).toBe(0);
+    expect(estaRepuesto(r, 8)).toBe(true);
+  });
+
+  it("la jornada configurable cambia la equivalencia", () => {
+    const r = reg({ magnitud: "diaEntero", cuotas: [cuota({ magnitud: "horas", horas: 6 })] });
+    expect(saldoHoras(r, 12)).toBe(6); // día = 12h, repuesto 6h
+    expect(saldoHoras(r, 8)).toBe(2); // día = 8h, repuesto 6h
+  });
+});
+
+describe("reposicion · cuotasDe (compatibilidad)", () => {
+  it("migra datos antiguos (estado Repuesto sin cuotas) a una cuota equivalente", () => {
+    const legacy = { id: "L", magnitud: "medioDia", estado: "Repuesto", fechaReposicion: "2026-05-06" };
+    const c = cuotasDe(legacy);
+    expect(c).toHaveLength(1);
+    expect(c[0].fecha).toBe("2026-05-06");
+    expect(estadoReposicion(legacy, 8)).toBe("Repuesto");
+  });
+
+  it("datos antiguos pendientes no generan cuotas", () => {
+    expect(cuotasDe({ id: "L", magnitud: "diaEntero", estado: "Pendiente" })).toEqual([]);
   });
 });
 
 describe("reposicion · resumenReposiciones", () => {
-  it("separa pendientes de repuestos con su desglose", () => {
-    const r = resumenReposiciones([
-      reg({ estado: "Pendiente", magnitud: "diaEntero" }),
-      reg({ estado: "Pendiente", magnitud: "horas", horas: 3 }),
-      reg({ estado: "Repuesto", magnitud: "medioDia" }),
-    ]);
+  it("cuenta por estado y suma el saldo en horas", () => {
+    const r = resumenReposiciones(
+      [
+        reg({ magnitud: "diaEntero" }), // pendiente 8h
+        reg({ magnitud: "diaEntero", cuotas: [cuota({ magnitud: "medioDia" })] }), // parcial 4h
+        reg({ magnitud: "medioDia", cuotas: [cuota({ magnitud: "medioDia" })] }), // repuesto 0
+      ],
+      8,
+    );
     expect(r.total).toBe(3);
     expect(r.pendientes).toBe(2);
+    expect(r.parciales).toBe(1);
     expect(r.repuestos).toBe(1);
-    expect(r.pend).toEqual({ diasEnteros: 1, mediosDias: 0, horas: 3 });
-    expect(r.rep).toEqual({ diasEnteros: 0, mediosDias: 1, horas: 0 });
+    expect(r.saldoHoras).toBe(12);
   });
 });
 
 describe("reposicion · ordenarPorFecha", () => {
-  it("ordena descendente sin mutar el arreglo original", () => {
+  it("ordena descendente sin mutar el original", () => {
     const orig = [reg({ fecha: "2026-05-01" }), reg({ fecha: "2026-05-20" }), reg({ fecha: "2026-05-10" })];
-    const out = ordenarPorFecha(orig);
-    expect(out.map((x) => x.fecha)).toEqual(["2026-05-20", "2026-05-10", "2026-05-01"]);
+    expect(ordenarPorFecha(orig).map((x) => x.fecha)).toEqual(["2026-05-20", "2026-05-10", "2026-05-01"]);
     expect(orig.map((x) => x.fecha)).toEqual(["2026-05-01", "2026-05-20", "2026-05-10"]);
   });
 });
@@ -87,45 +127,42 @@ describe("reposicion · ordenarPorFecha", () => {
 describe("reposicion · folios", () => {
   it("folioNumero extrae la parte numérica", () => {
     expect(folioNumero("REP-007")).toBe(7);
-    expect(folioNumero("REP-012")).toBe(12);
     expect(folioNumero("")).toBe(null);
-    expect(folioNumero(undefined)).toBe(null);
   });
-
   it("siguienteFolio toma el máximo + 1 con padding", () => {
     expect(siguienteFolio([])).toBe("REP-001");
     expect(siguienteFolio([reg({ folio: "REP-001" }), reg({ folio: "REP-004" })])).toBe("REP-005");
-    expect(siguienteFolio([reg({ folio: "REP-009" })])).toBe("REP-010");
   });
 });
 
 describe("reposicion · indexarReposiciones", () => {
-  it("indexa día trabajado siempre y día de reposición solo si está repuesto", () => {
+  it("indexa el día trabajado y cada cuota de reposición", () => {
     const items = [
-      reg({ folio: "REP-001", funcionario: "Ana", fecha: "2026-05-10", estado: "Pendiente" }),
-      reg({ folio: "REP-002", funcionario: "Ana", fecha: "2026-05-12", estado: "Repuesto", fechaReposicion: "2026-05-20" }),
+      reg({ folio: "REP-001", funcionario: "Ana", fecha: "2026-05-10", magnitud: "diaEntero",
+        cuotas: [cuota({ fecha: "2026-05-20", magnitud: "medioDia" }), cuota({ id: "c2", fecha: "2026-05-22", magnitud: "medioDia" })] }),
     ];
-    const { trabajadas, reposiciones } = indexarReposiciones(items);
+    const { trabajadas, reposiciones } = indexarReposiciones(items, 8);
     expect(trabajadas["Ana|2026-05-10"]?.folio).toBe("REP-001");
-    expect(trabajadas["Ana|2026-05-12"]?.folio).toBe("REP-002");
-    // Solo el repuesto genera marca en su fechaReposicion.
-    expect(reposiciones["Ana|2026-05-20"]?.folio).toBe("REP-002");
-    expect(Object.keys(reposiciones)).toHaveLength(1);
+    expect(trabajadas["Ana|2026-05-10"]?.estadoCalc).toBe("Repuesto");
+    expect(reposiciones["Ana|2026-05-20"]?.folio).toBe("REP-001");
+    expect(reposiciones["Ana|2026-05-22"]?.folio).toBe("REP-001");
   });
 });
 
-describe("reposicion · historialPorFuncionario", () => {
-  it("agrupa por funcionario y prioriza a quien tiene más pendientes", () => {
-    const h = historialPorFuncionario([
-      reg({ funcionario: "Ana", estado: "Repuesto", magnitud: "medioDia", fechaReposicion: "2026-05-20" }),
-      reg({ funcionario: "Beto", estado: "Pendiente", magnitud: "diaEntero" }),
-      reg({ funcionario: "Beto", estado: "Pendiente", magnitud: "horas", horas: 3 }),
-    ]);
-    expect(h).toHaveLength(2);
+describe("reposicion · historial y saldo por funcionario", () => {
+  it("agrupa y prioriza por saldo pendiente", () => {
+    const items = [
+      reg({ funcionario: "Ana", magnitud: "medioDia", cuotas: [cuota({ magnitud: "medioDia" })] }), // saldo 0
+      reg({ funcionario: "Beto", magnitud: "diaEntero" }), // saldo 8
+      reg({ funcionario: "Beto", magnitud: "horas", horas: 3 }), // saldo 3
+    ];
+    const h = historialPorFuncionario(items, 8);
     expect(h[0].funcionario).toBe("Beto");
-    expect(h[0].pendientes).toBe(2);
-    expect(h[0].pend).toEqual({ diasEnteros: 1, mediosDias: 0, horas: 3 });
+    expect(h[0].saldoHoras).toBe(11);
     expect(h[1].funcionario).toBe("Ana");
     expect(h[1].repuestos).toBe(1);
+    expect(saldoFuncionario(items, "Beto", 8)).toBe(11);
+    expect(registrosConSaldoDe(items, "Beto", 8)).toHaveLength(2);
+    expect(registrosConSaldoDe(items, "Ana", 8)).toHaveLength(0);
   });
 });

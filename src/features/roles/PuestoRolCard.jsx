@@ -33,11 +33,12 @@ export default function PuestoRolCard({
   actividadesPlan,
   setActividadesPlan,
   reposiciones = [],
+  hj,
 }) {
   const t = useT();
   const { trabajadas, reposiciones: reposicionesDia } = useMemo(
-    () => indexarReposiciones(reposiciones),
-    [reposiciones],
+    () => indexarReposiciones(reposiciones, hj),
+    [reposiciones, hj],
   );
   const [editRows, setEditRows] = useState({});
   const [menu, setMenu] = useState(null);

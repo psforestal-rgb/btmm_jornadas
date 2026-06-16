@@ -8,36 +8,50 @@ import { fecha } from "../../domain/fechas.js";
 import {
   resumenReposiciones,
   ordenarPorFecha,
-  estaRepuesto,
+  estadoReposicion,
+  saldoHoras,
+  cuotasDe,
   siguienteFolio,
   historialPorFuncionario,
+  HORAS_JORNADA_DEFAULT,
 } from "../../domain/reposicion.js";
+import { useApp } from "../../context/AppContext.jsx";
 import { useT } from "../../i18n/useT.js";
-import { magnitudLabel } from "./etiquetas.js";
+import { magnitudLabel, saldoTexto } from "./etiquetas.js";
 import ModalReposicion from "./ModalReposicion.jsx";
+import ModalReponer from "./ModalReponer.jsx";
 import HistorialFuncionario from "./HistorialFuncionario.jsx";
 
-// Fecha de hoy (ISO) para prellenar registros y reposiciones.
+// Fecha de hoy (ISO) para prellenar registros.
 function hoyISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const ESTADO_CLS = {
+  Pendiente: "border-amber-300 bg-amber-100 text-amber-900",
+  Parcial: "border-indigo-300 bg-indigo-100 text-indigo-900",
+  Repuesto: "border-emerald-200 bg-emerald-100 text-emerald-900",
+};
+
 export default function Reposicion({ personas, reposiciones, setReposiciones }) {
   const t = useT();
+  const { reglas } = useApp();
+  const hj = reglas?.horasJornada ?? HORAS_JORNADA_DEFAULT;
   const [modal, setModal] = useState(null);
+  const [reponer, setReponer] = useState(null);
   const [borrar, setBorrar] = useState(null);
   const [filtro, setFiltro] = useState("todos");
   const [tab, setTab] = useState("registros");
 
-  const resumen = useMemo(() => resumenReposiciones(reposiciones), [reposiciones]);
-  const historial = useMemo(() => historialPorFuncionario(reposiciones), [reposiciones]);
+  const resumen = useMemo(() => resumenReposiciones(reposiciones, hj), [reposiciones, hj]);
+  const historial = useMemo(() => historialPorFuncionario(reposiciones, hj), [reposiciones, hj]);
 
   const filtrados = useMemo(() => {
     const base = ordenarPorFecha(reposiciones);
-    if (filtro === "pendientes") return base.filter((r) => !estaRepuesto(r));
-    if (filtro === "repuestos") return base.filter((r) => estaRepuesto(r));
+    if (filtro === "pendientes") return base.filter((r) => saldoHoras(r, hj) > 0);
+    if (filtro === "repuestos") return base.filter((r) => saldoHoras(r, hj) <= 0);
     return base;
-  }, [reposiciones, filtro]);
+  }, [reposiciones, filtro, hj]);
 
   const nuevo = () => ({
     id: `rep${Date.now()}`,
@@ -49,8 +63,7 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
     motivoDetalle: "",
     magnitud: "diaEntero",
     horas: 0,
-    estado: "Pendiente",
-    fechaReposicion: "",
+    cuotas: [],
     observaciones: "",
   });
 
@@ -62,16 +75,15 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
     setModal(null);
   };
 
-  const marcarRepuesto = (id) =>
-    setReposiciones((prev) =>
-      prev.map((x) => (x.id === id ? { ...x, estado: "Repuesto", fechaReposicion: x.fechaReposicion || hoyISO() } : x)),
-    );
+  // Aplica una cuota de reposición al registro (desde ModalReponer).
+  const guardarCuota = (obj) => {
+    setReposiciones((prev) => prev.map((x) => (x.id === obj.id ? obj : x)));
+    setReponer(null);
+  };
 
+  // Revierte la reposición: limpia las cuotas (vuelve a pendiente).
   const reabrir = (id) =>
-    setReposiciones((prev) => prev.map((x) => (x.id === id ? { ...x, estado: "Pendiente", fechaReposicion: "" } : x)));
-
-  const desglose = (d) =>
-    t("reposicion.resumen.desglose", { dias: d.diasEnteros, medios: d.mediosDias, horas: d.horas });
+    setReposiciones((prev) => prev.map((x) => (x.id === id ? { ...x, cuotas: [] } : x)));
 
   const filtros = [
     ["todos", t("reposicion.filtroTodos"), resumen.total],
@@ -92,14 +104,16 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
             {t("reposicion.resumen.pendientes")}
           </p>
           <p className="mt-1 text-3xl font-semibold text-amber-950">{resumen.pendientes}</p>
-          <p className="mt-1 text-xs font-semibold text-amber-800">{desglose(resumen.pend)}</p>
+          <p className="mt-1 text-xs font-semibold text-amber-800">
+            {t("reposicion.resumen.saldo", { saldo: saldoTexto(resumen.saldoHoras, hj) })}
+            {resumen.parciales > 0 ? ` · ${t("reposicion.resumen.parciales", { n: resumen.parciales })}` : ""}
+          </p>
         </div>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
             {t("reposicion.resumen.repuestos")}
           </p>
           <p className="mt-1 text-3xl font-semibold text-emerald-950">{resumen.repuestos}</p>
-          <p className="mt-1 text-xs font-semibold text-emerald-800">{desglose(resumen.rep)}</p>
         </div>
       </div>
 
@@ -140,7 +154,7 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
         </div>
 
         {tab === "historial" ? (
-          <HistorialFuncionario historial={historial} />
+          <HistorialFuncionario historial={historial} hj={hj} />
         ) : (
         <>
         <div className="mb-4 flex flex-wrap gap-2">
@@ -171,7 +185,7 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
           />
         ) : (
           <div className="overflow-auto rounded-xl border border-slate-300">
-            <table className="min-w-[900px] w-full border-collapse text-sm">
+            <table className="min-w-[940px] w-full border-collapse text-sm">
               <thead className="bg-slate-100 text-left text-[11px] uppercase tracking-wider text-slate-500">
                 <tr>
                   <th className="p-3">{t("reposicion.th.folio")}</th>
@@ -185,7 +199,11 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {filtrados.map((r) => (
+                {filtrados.map((r) => {
+                  const est = estadoReposicion(r, hj);
+                  const saldo = saldoHoras(r, hj);
+                  const cuotas = cuotasDe(r);
+                  return (
                   <tr key={r.id} className="hover:bg-slate-50 align-top">
                     <td className="p-3 whitespace-nowrap">
                       <Badge className="border-slate-300 bg-white font-mono text-slate-700">{r.folio || "—"}</Badge>
@@ -208,37 +226,36 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
                       <Badge className="border-blue-200 bg-blue-100 text-blue-900">{magnitudLabel(r, t)}</Badge>
                     </td>
                     <td className="p-3">
-                      {estaRepuesto(r) ? (
-                        <>
-                          <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">
-                            {t("modalReposicion.estadoRepuesto")}
-                          </Badge>
-                          {r.fechaReposicion && (
-                            <div className="mt-1 text-xs text-slate-500">
-                              {t("reposicion.repuestoEl", { fecha: fecha(r.fechaReposicion) })}
-                            </div>
-                          )}
-                        </>
+                      <Badge className={ESTADO_CLS[est]}>
+                        {t(`reposicion.estado.${est}`)}
+                      </Badge>
+                      {saldo > 0 ? (
+                        <div className="mt-1 text-xs font-semibold text-amber-800">
+                          {t("reposicion.saldoLabel", { saldo: saldoTexto(saldo, hj) })}
+                        </div>
                       ) : (
-                        <Badge className="border-amber-300 bg-amber-100 text-amber-900">
-                          {t("modalReposicion.estadoPendiente")}
-                        </Badge>
+                        cuotas.length > 0 && (
+                          <div className="mt-1 text-xs text-slate-500">
+                            {t("reposicion.repuestoEl", { fecha: fecha(cuotas[cuotas.length - 1].fecha) })}
+                          </div>
+                        )
                       )}
                     </td>
                     <td className="p-3 text-right whitespace-nowrap">
-                      {estaRepuesto(r) ? (
+                      {saldo > 0 && (
+                        <button
+                          onClick={() => setReponer(r)}
+                          className="rounded-lg px-2 py-1 font-semibold text-emerald-800 hover:bg-emerald-50"
+                        >
+                          {t("reposicion.reponer")}
+                        </button>
+                      )}
+                      {cuotas.length > 0 && (
                         <button
                           onClick={() => reabrir(r.id)}
                           className="rounded-lg px-2 py-1 font-semibold text-amber-800 hover:bg-amber-50"
                         >
                           {t("reposicion.reabrir")}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => marcarRepuesto(r.id)}
-                          className="rounded-lg px-2 py-1 font-semibold text-emerald-800 hover:bg-emerald-50"
-                        >
-                          {t("reposicion.marcarRepuesto")}
                         </button>
                       )}
                       <button
@@ -255,7 +272,8 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
                       </button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -273,12 +291,22 @@ export default function Reposicion({ personas, reposiciones, setReposiciones }) 
           valor={modal}
           personas={personas}
           reposiciones={reposiciones}
+          hj={hj}
           cerrar={() => setModal(null)}
           guardar={guardar}
           eliminar={(id) => {
             setReposiciones((prev) => prev.filter((x) => x.id !== id));
             setModal(null);
           }}
+        />
+      )}
+
+      {reponer && (
+        <ModalReponer
+          registro={reponer}
+          hj={hj}
+          cerrar={() => setReponer(null)}
+          guardar={guardarCuota}
         />
       )}
 

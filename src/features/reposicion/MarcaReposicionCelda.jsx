@@ -23,10 +23,14 @@ export default function MarcaReposicionCelda({ trabajada, reposicion }) {
             folio: trabajada.folio,
             tipoDia: String(trabajada.tipoDia || "").toLowerCase(),
             magnitud: magnitudLabelCorta(trabajada, t),
-            estado: trabajada.estado || "Pendiente",
+            estado: t(`reposicion.estado.${trabajada.estadoCalc || "Pendiente"}`),
           })}
           className={`flex items-center gap-0.5 rounded-br-md px-1 py-px text-[8px] font-bold leading-none text-white ${
-            trabajada.estado === "Repuesto" ? "bg-emerald-700" : "bg-amber-600"
+            trabajada.estadoCalc === "Repuesto"
+              ? "bg-emerald-700"
+              : trabajada.estadoCalc === "Parcial"
+              ? "bg-indigo-600"
+              : "bg-amber-600"
           }`}
         >
           <span aria-hidden="true">⚑</span>

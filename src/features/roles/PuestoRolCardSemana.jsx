@@ -63,11 +63,12 @@ export default function PuestoRolCardSemana({
   actividadesPlan,
   setActividadesPlan,
   reposiciones = [],
+  hj,
 }) {
   const t = useT();
   const { trabajadas, reposiciones: reposicionesDia } = useMemo(
-    () => indexarReposiciones(reposiciones),
-    [reposiciones],
+    () => indexarReposiciones(reposiciones, hj),
+    [reposiciones, hj],
   );
   const semanas = useMemo(() => semanasDelMes(year, month), [year, month]);
   const totalSemanas = semanas.length;
