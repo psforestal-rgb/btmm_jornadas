@@ -198,6 +198,26 @@ export default function Configuracion() {
           <p className="mt-1 text-xs text-slate-500">{t("configuracion.alertasNota")}</p>
         </section>
 
+        {/* Reposición de tiempo */}
+        <section className="mb-4">
+          <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-slate-700">
+            {t("configuracion.reposicionTitulo")}
+          </h3>
+          <label className="block max-w-xs">
+            <span className="mb-1 block text-xs font-bold uppercase text-slate-500">{t("configuracion.horasJornada")}</span>
+            <input
+              type="number"
+              min="1"
+              max="24"
+              step="0.5"
+              value={draft.horasJornada}
+              onChange={(e) => setCampo("horasJornada", Number(e.target.value))}
+              className="min-h-touch w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700"
+            />
+          </label>
+          <p className="mt-1 text-xs text-slate-500">{t("configuracion.horasJornadaSub")}</p>
+        </section>
+
         {advertencias.length > 0 && (
           <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950" role="alert">
             <p className="font-semibold">{t("configuracion.advertenciasTitulo")}</p>

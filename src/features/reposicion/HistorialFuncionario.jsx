@@ -3,9 +3,15 @@ import Avatar from "../../ui/Avatar.jsx";
 import Badge from "../../ui/Badge.jsx";
 import EmptyState from "../../ui/EmptyState.jsx";
 import { fecha } from "../../domain/fechas.js";
-import { estaRepuesto } from "../../domain/reposicion.js";
+import { estadoReposicion, saldoHoras, cuotasDe, HORAS_JORNADA_DEFAULT } from "../../domain/reposicion.js";
 import { useT } from "../../i18n/useT.js";
-import { magnitudLabel } from "./etiquetas.js";
+import { magnitudLabel, saldoTexto } from "./etiquetas.js";
+
+const ESTADO_CLS = {
+  Pendiente: "border-amber-300 bg-amber-100 text-amber-900",
+  Parcial: "border-indigo-300 bg-indigo-100 text-indigo-900",
+  Repuesto: "border-emerald-200 bg-emerald-100 text-emerald-900",
+};
 
 /**
  * Historial por funcionario: cuántas veces se le ha tenido que hacer
@@ -13,7 +19,7 @@ import { magnitudLabel } from "./etiquetas.js";
  * qué ya se repuso. Cada tarjeta es expandible para ver el detalle de los
  * registros con su folio (que enlaza día trabajado ↔ día de reposición).
  */
-export default function HistorialFuncionario({ historial }) {
+export default function HistorialFuncionario({ historial, hj = HORAS_JORNADA_DEFAULT }) {
   const t = useT();
   const [abierto, setAbierto] = useState({});
 
@@ -26,9 +32,6 @@ export default function HistorialFuncionario({ historial }) {
       />
     );
   }
-
-  const desglose = (d) =>
-    t("reposicion.resumen.desglose", { dias: d.diasEnteros, medios: d.mediosDias, horas: d.horas });
 
   return (
     <div className="space-y-3">
@@ -61,25 +64,15 @@ export default function HistorialFuncionario({ historial }) {
                   )}
                 </div>
               </div>
+              {fila.saldoHoras > 0 && (
+                <span className="shrink-0 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900">
+                  {t("reposicion.historial.saldoFavor", { saldo: saldoTexto(fila.saldoHoras, hj) })}
+                </span>
+              )}
               <span aria-hidden="true" className="shrink-0 text-slate-400">
                 {open ? "▲" : "▼"}
               </span>
             </button>
-
-            <div className="grid gap-2 px-4 pb-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-2.5">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
-                  {t("reposicion.resumen.pendientes")}
-                </div>
-                <div className="text-xs font-semibold text-amber-900">{desglose(fila.pend)}</div>
-              </div>
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
-                  {t("reposicion.resumen.repuestos")}
-                </div>
-                <div className="text-xs font-semibold text-emerald-900">{desglose(fila.rep)}</div>
-              </div>
-            </div>
 
             {open && (
               <div className="overflow-auto border-t border-slate-100">
@@ -95,7 +88,11 @@ export default function HistorialFuncionario({ historial }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {fila.registros.map((r) => (
+                    {fila.registros.map((r) => {
+                      const est = estadoReposicion(r, hj);
+                      const saldo = saldoHoras(r, hj);
+                      const cuotas = cuotasDe(r);
+                      return (
                       <tr key={r.id}>
                         <td className="p-2.5 whitespace-nowrap">
                           <Badge className="border-slate-300 bg-white font-mono text-slate-700">{r.folio || "—"}</Badge>
@@ -105,18 +102,22 @@ export default function HistorialFuncionario({ historial }) {
                         <td className="p-2.5">{r.motivo}</td>
                         <td className="p-2.5 whitespace-nowrap">{magnitudLabel(r, t)}</td>
                         <td className="p-2.5">
-                          {estaRepuesto(r) ? (
-                            <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">
-                              {t("reposicion.repuestoEl", { fecha: fecha(r.fechaReposicion) })}
-                            </Badge>
+                          <Badge className={ESTADO_CLS[est]}>{t(`reposicion.estado.${est}`)}</Badge>
+                          {saldo > 0 ? (
+                            <div className="mt-0.5 text-[11px] font-semibold text-amber-800">
+                              {t("reposicion.saldoLabel", { saldo: saldoTexto(saldo, hj) })}
+                            </div>
                           ) : (
-                            <Badge className="border-amber-300 bg-amber-100 text-amber-900">
-                              {t("modalReposicion.estadoPendiente")}
-                            </Badge>
+                            cuotas.length > 0 && (
+                              <div className="mt-0.5 text-[11px] text-slate-500">
+                                {t("reposicion.repuestoEl", { fecha: fecha(cuotas[cuotas.length - 1].fecha) })}
+                              </div>
+                            )
                           )}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

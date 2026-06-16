@@ -114,6 +114,7 @@ function AppShell() {
                   setActividadesPlan={setActividadesPlan}
                   roleData={roleData}
                   reposiciones={reposiciones}
+                  hj={reglas?.horasJornada}
                 />
               )}
               {view === "funcionarios" && <Funcionarios personas={personas} setPersonas={setPersonas} />}
@@ -128,6 +129,7 @@ function AppShell() {
                   actividadesPlan={actividadesPlan}
                   setActividadesPlan={setActividadesPlan}
                   reposiciones={reposiciones}
+                  hj={reglas?.horasJornada}
                 />
               )}
               {view === "planificacion" && (

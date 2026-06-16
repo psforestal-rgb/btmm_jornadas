@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { opcionesPuestoOperativo } from "../../data/puestos.js";
-import { TIPOS_DIA, MOTIVOS } from "../../domain/reposicion.js";
+import { fecha } from "../../domain/fechas.js";
+import { TIPOS_DIA, MOTIVOS, cuotasDe, saldoHoras, HORAS_JORNADA_DEFAULT } from "../../domain/reposicion.js";
 import { useEscapeClose } from "../../lib/a11y.js";
 import { useT } from "../../i18n/useT.js";
+import { magnitudLabel, saldoTexto } from "./etiquetas.js";
 
-export default function ModalReposicion({ valor, personas, cerrar, guardar, eliminar, reposiciones = [] }) {
+export default function ModalReposicion({ valor, personas, cerrar, guardar, eliminar, reposiciones = [], hj = HORAS_JORNADA_DEFAULT }) {
   useEscapeClose(cerrar);
   const t = useT();
   const [r, setR] = useState(valor);
   const set = (k, v) => setR((p) => ({ ...p, [k]: v }));
+  const cuotas = cuotasDe(r);
+  const quitarCuota = (id) => setR((p) => ({ ...p, cuotas: cuotasDe(p).filter((c) => c.id !== id) }));
   const cls =
     "w-full min-h-touch rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100";
 
@@ -34,7 +38,7 @@ export default function ModalReposicion({ valor, personas, cerrar, guardar, elim
     guardar({
       ...r,
       horas: r.magnitud === "horas" ? Number(r.horas) || 0 : 0,
-      fechaReposicion: r.estado === "Repuesto" ? r.fechaReposicion : "",
+      cuotas: cuotasDe(r),
     });
   };
 
@@ -185,48 +189,40 @@ export default function ModalReposicion({ valor, personas, cerrar, guardar, elim
             </div>
 
             <div className="md:col-span-2">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                {t("modalReposicion.estado")}
-              </span>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => set("estado", "Pendiente")}
-                  aria-pressed={r.estado !== "Repuesto"}
-                  className={`min-h-touch rounded-xl border px-3 py-2 text-sm font-bold ${
-                    r.estado !== "Repuesto"
-                      ? "border-amber-500 bg-amber-100 text-amber-950"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  {t("modalReposicion.estadoPendiente")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => set("estado", "Repuesto")}
-                  aria-pressed={r.estado === "Repuesto"}
-                  className={`min-h-touch rounded-xl border px-3 py-2 text-sm font-bold ${
-                    r.estado === "Repuesto"
-                      ? "border-emerald-600 bg-emerald-100 text-emerald-950"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  {t("modalReposicion.estadoRepuesto")}
-                </button>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  {t("modalReposicion.reposiciones")}
+                </span>
+                <span className="text-xs font-semibold text-amber-800">
+                  {t("reposicion.saldoLabel", { saldo: saldoTexto(saldoHoras(r, hj), hj) })}
+                </span>
               </div>
-              {r.estado === "Repuesto" && (
-                <label className="mt-2 block">
-                  <span className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
-                    {t("modalReposicion.fechaReposicion")}
-                  </span>
-                  <input
-                    type="date"
-                    className={cls}
-                    value={r.fechaReposicion}
-                    onChange={(e) => set("fechaReposicion", e.target.value)}
-                  />
-                </label>
+              {cuotas.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-slate-300 p-3 text-xs text-slate-500">
+                  {t("modalReposicion.sinCuotas")}
+                </p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {cuotas.map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm"
+                    >
+                      <span className="font-semibold text-emerald-950">
+                        {fecha(c.fecha)} · {magnitudLabel(c, t)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => quitarCuota(c.id)}
+                        className="rounded-lg px-2 py-1 text-xs font-semibold text-red-800 hover:bg-red-100"
+                      >
+                        {t("acciones.eliminar")}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
+              <p className="mt-1 text-[11px] text-slate-400">{t("modalReposicion.cuotasNota")}</p>
             </div>
 
             <label className="md:col-span-2">

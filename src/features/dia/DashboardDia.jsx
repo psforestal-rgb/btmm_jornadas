@@ -24,8 +24,7 @@ function MarcasDia({ trabajada, reposicion, t }) {
     <>
       {trabajada && (
         <Badge className="border-amber-300 bg-amber-100 text-amber-900">
-          ⚑ {trabajada.folio} · {magnitudLabel(trabajada, t)}
-          {trabajada.estado === "Repuesto" ? ` · ${t("modalReposicion.estadoRepuesto").toLowerCase()}` : ""}
+          ⚑ {trabajada.folio} · {magnitudLabel(trabajada, t)} · {t(`reposicion.estado.${trabajada.estadoCalc || "Pendiente"}`).toLowerCase()}
         </Badge>
       )}
       {reposicion && (
@@ -37,9 +36,9 @@ function MarcasDia({ trabajada, reposicion, t }) {
   );
 }
 
-export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData, reposiciones = [] }) {
+export default function DashboardDia({ diaVista, setDiaVista, personas, actividadesPlan, setActividadesPlan, roleData, reposiciones = [], hj }) {
   const t = useT();
-  const { trabajadas, reposiciones: reposicionesDia } = indexarReposiciones(reposiciones);
+  const { trabajadas, reposiciones: reposicionesDia } = indexarReposiciones(reposiciones, hj);
   const marcaDe = (nombre) => ({
     trabajada: trabajadas[`${nombre}|${diaVista}`],
     reposicion: reposicionesDia[`${nombre}|${diaVista}`],

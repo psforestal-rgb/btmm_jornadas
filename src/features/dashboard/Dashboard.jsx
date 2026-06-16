@@ -196,7 +196,10 @@ export default function Dashboard({ personas, alerts, setView, actividadesPlan, 
     [personas],
   );
   const totalActivos = useMemo(() => personas.filter((f) => f.estado === "Activo").length, [personas]);
-  const reposicionesPendientes = useMemo(() => resumenReposiciones(reposiciones).pendientes, [reposiciones]);
+  const reposicionesPendientes = useMemo(
+    () => resumenReposiciones(reposiciones, reglas?.horasJornada).pendientes,
+    [reposiciones, reglas],
+  );
 
   // KPIs separados por horizonte temporal: "Hoy" vs "Este mes".
   const kpisHoy = [

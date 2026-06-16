@@ -5,7 +5,8 @@
  * trabajar a un funcionario en día libre, feriado o fuera de turno
  * (emergencias, incendios, atención de denuncias, actividades
  * especiales, etc.) para luego reponerle el tiempo trabajado. La
- * magnitud puede ser por horas, medio día o día entero.
+ * magnitud puede ser por horas, medio día o día entero, y la reposición
+ * puede hacerse en partes (cuotas) hasta saldar.
  */
 export const baseReposiciones = [
   {
@@ -18,8 +19,8 @@ export const baseReposiciones = [
     motivoDetalle: "Apoyo en control de conato sector Orosi.",
     magnitud: "diaEntero",
     horas: 0,
-    estado: "Pendiente",
-    fechaReposicion: "",
+    // Repuesto parcialmente: trabajó día completo, se le repuso medio día.
+    cuotas: [{ id: "rep1-c1", fecha: "2026-05-31", magnitud: "medioDia", horas: 0 }],
     observaciones: "Llamado por la administración fuera de rol.",
   },
   {
@@ -32,8 +33,7 @@ export const baseReposiciones = [
     motivoDetalle: "Inspección por tala reportada en ingreso Quetzales.",
     magnitud: "horas",
     horas: 4,
-    estado: "Pendiente",
-    fechaReposicion: "",
+    cuotas: [],
     observaciones: "",
   },
   {
@@ -46,8 +46,8 @@ export const baseReposiciones = [
     motivoDetalle: "Atención de gira institucional.",
     magnitud: "medioDia",
     horas: 0,
-    estado: "Repuesto",
-    fechaReposicion: "2026-05-06",
+    // Totalmente repuesto en una sola cuota.
+    cuotas: [{ id: "rep3-c1", fecha: "2026-05-06", magnitud: "medioDia", horas: 0 }],
     observaciones: "Tiempo repuesto en coordinación con la administración.",
   },
 ];

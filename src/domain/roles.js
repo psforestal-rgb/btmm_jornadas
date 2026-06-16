@@ -1,4 +1,4 @@
-import { primerDiaLaboral } from "./fechas.js";
+import { dim, primerDiaLaboral } from "./fechas.js";
 
 /**
  * Dominio de roles mensuales (códigos T/L/V/I/O por funcionario y día).
@@ -94,6 +94,29 @@ export function codigoRolFuncionario(personas, roleData, year, month, nombre, di
     roleData[rolKey(year, month, puesto, nombre, dia)] ??
     generarValorPatron(modalidadFuncionario(personas, roleData, year, month, nombre), dia, inicio, year, month)
   );
+}
+
+/**
+ * Calcula el parche de `roleData` para fijar la categoría (T/L/V/I/O) de un
+ * día de un funcionario, renumerando consecutivamente toda su fila del mes.
+ * Devuelve un objeto de claves `rolKey` listo para mezclar en `roleData`.
+ * Permite cambiar el rol desde fuera de la vista de Roles (p. ej. al asignar
+ * una actividad a un funcionario que estaba libre).
+ */
+export function patchCategoriaDia({ roleData, personas, year, month, persona, dia, categoria, feriados = null }) {
+  const f = funcionarioPorNombre(personas, persona);
+  const puesto = f?.puestoOperativo || "Puesto Quetzales";
+  const modalidad = modalidadFuncionario(personas, roleData, year, month, persona);
+  const days = Array.from({ length: dim(year, month) }, (_, i) => i + 1);
+  const categorias = {};
+  for (const d of days) {
+    categorias[d] = categoriaDe(codigoRolFuncionario(personas, roleData, year, month, persona, d, feriados));
+  }
+  categorias[dia] = categoria;
+  const fila = renumerarFila({ days, categorias, modalidad });
+  const patch = {};
+  for (const d of days) patch[rolKey(year, month, puesto, persona, d)] = fila[d];
+  return patch;
 }
 
 // Renumera consecutivamente toda una fila tras un cambio puntual de categoría.

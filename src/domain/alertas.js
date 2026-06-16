@@ -3,6 +3,16 @@ import { historialPorFuncionario } from "./reposicion.js";
 
 const HOY_DEFAULT = new Date(2026, 4, 19);
 
+/** Formato breve de un saldo en horas, en días cuando calza con la jornada. */
+function saldoTextoCorto(horas, hj) {
+  const h = Math.round((Number(horas) || 0) * 100) / 100;
+  if (h <= 0) return "0 h";
+  const dias = h / hj;
+  if (Number.isInteger(dias)) return dias === 1 ? "1 día" : `${dias} días`;
+  if (h === hj / 2) return "medio día";
+  return `${h} h`;
+}
+
 /**
  * Genera el listado de alertas administrativas para el personal.
  *
@@ -25,6 +35,7 @@ export function alertas(personas, opts = {}) {
     alertaIncapacitadoConActividad = true,
     alertaAcumulativaSinModalidad = true,
     alertaReposicionPendiente = true,
+    horasJornada = 8,
   } = flags;
 
   const r = [];
@@ -119,17 +130,13 @@ export function alertas(personas, opts = {}) {
   //    reponer. Una alerta por funcionario con saldo pendiente, para que
   //    la administración no pierda de vista la reposición.
   if (alertaReposicionPendiente && reposiciones.length) {
-    for (const fila of historialPorFuncionario(reposiciones)) {
+    for (const fila of historialPorFuncionario(reposiciones, horasJornada)) {
       if (fila.pendientes === 0) continue;
-      const piezas = [];
-      if (fila.pend.diasEnteros) piezas.push(`${fila.pend.diasEnteros} día${fila.pend.diasEnteros !== 1 ? "s" : ""} completo${fila.pend.diasEnteros !== 1 ? "s" : ""}`);
-      if (fila.pend.mediosDias) piezas.push(`${fila.pend.mediosDias} medio${fila.pend.mediosDias !== 1 ? "s" : ""} día${fila.pend.mediosDias !== 1 ? "s" : ""}`);
-      if (fila.pend.horas) piezas.push(`${fila.pend.horas} h`);
       r.push({
         t: "warn",
         icon: "⟳",
         msg: `Tiempo por reponer — ${fila.funcionario}`,
-        sub: `${fila.pendientes} registro${fila.pendientes !== 1 ? "s" : ""} de trabajo fuera de rol sin reponer${piezas.length ? ` (${piezas.join(", ")})` : ""}. Coordinar la reposición del tiempo.`,
+        sub: `${fila.pendientes} registro${fila.pendientes !== 1 ? "s" : ""} de trabajo fuera de rol sin reponer · saldo a favor ${saldoTextoCorto(fila.saldoHoras, horasJornada)}. Coordinar la reposición del tiempo.`,
       });
     }
   }

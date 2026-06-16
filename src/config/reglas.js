@@ -58,6 +58,13 @@ export const REGLAS_DEFAULT = Object.freeze({
    * (día libre, feriado, fuera de turno) pendiente de reponer.
    */
   alertaReposicionPendiente: true,
+
+  /**
+   * Duración de una jornada (en horas) usada para calcular el saldo de
+   * reposición: un día completo = `horasJornada`, medio día = la mitad.
+   * Permite reponer en partes (día/medio día/horas) y llevar el saldo.
+   */
+  horasJornada: 8,
 });
 
 export const VIATICOS_OBJETIVO_OPCIONES = ["siguiente", "actual"];
@@ -92,6 +99,10 @@ export function validarReglas(r) {
   }
   if (!VIATICOS_OBJETIVO_OPCIONES.includes(r.mesObjetivoViaticos)) {
     w.push(`mesObjetivoViaticos debe ser uno de: ${VIATICOS_OBJETIVO_OPCIONES.join(", ")}.`);
+  }
+  const hj = Number(r.horasJornada);
+  if (!Number.isFinite(hj) || hj < 1 || hj > 24) {
+    w.push("Horas por jornada debe ser un número entre 1 y 24.");
   }
   return w;
 }
