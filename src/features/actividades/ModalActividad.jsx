@@ -4,12 +4,48 @@ import { opcionesPuestoOperativo } from "../../data/puestos.js";
 import { opcionesLugarActividad, opcionesActividadBase, actividadRutinariaVisitantes } from "../../data/opciones.js";
 import { useEscapeClose } from "../../lib/a11y.js";
 import { useT } from "../../i18n/useT.js";
+import { useApp } from "../../context/AppContext.jsx";
+import { useFeriadosDelAno } from "../../lib/useFeriadosDelAno.js";
+import { codigoRolFuncionario, esRolActivo, categoriaDe, patchCategoriaDia } from "../../domain/roles.js";
+import {
+  saldoFuncionario,
+  registrosConSaldoDe,
+  siguienteFolio,
+  cuotasDe,
+  HORAS_JORNADA_DEFAULT,
+} from "../../domain/reposicion.js";
+import AsignacionLibreModal from "./AsignacionLibreModal.jsx";
+
+// Mapea la categoría del rol (L/V/I/O) al tipo de día de una reposición.
+function tipoDiaDeCategoria(cat) {
+  if (cat === "L") return "Día libre";
+  if (cat === "V") return "Vacaciones interrumpidas";
+  return "Fuera de turno";
+}
 
 export default function ModalActividad({ valor, personas, cerrar, guardar, eliminar, actividadesPlan = [] }) {
   useEscapeClose(cerrar);
   const t = useT();
+  const { roleData = {}, setRoleData, reposiciones = [], setReposiciones, reglas } = useApp();
+  const hj = reglas?.horasJornada ?? HORAS_JORNADA_DEFAULT;
   const [a, setA] = useState(valor);
+  const [asignLibre, setAsignLibre] = useState(null);
   const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
+
+  // Rol del funcionario en el día de inicio de la actividad (para detectar
+  // asignaciones en día libre/vacaciones). Se deriva de la fecha de la
+  // propia actividad, no del período en pantalla.
+  const yA = Number(a.inicio?.slice(0, 4));
+  const mIdxA = Number(a.inicio?.slice(5, 7)) - 1;
+  const diaA = Number(a.inicio?.slice(8, 10));
+  const feriadosA = useFeriadosDelAno(yA);
+  const rolDe = (nombre) =>
+    a.inicio && Number.isFinite(yA) ? codigoRolFuncionario(personas, roleData, yA, mIdxA, nombre, diaA, feriadosA) : "";
+  const esLibreDe = (nombre) => {
+    const rl = rolDe(nombre);
+    return rl && !esRolActivo(rl);
+  };
+  const saldoDe = (nombre) => saldoFuncionario(reposiciones, nombre, hj);
   const cls = "w-full min-h-touch rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100";
   const porPuesto = opcionesPuestoOperativo.map((puesto) => ({ puesto, items: personas.filter((p) => p.puestoOperativo === puesto) }));
   const lugarModo = opcionesLugarActividad.includes(a.lugar) ? a.lugar : "Otro";
@@ -21,7 +57,80 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
     if (!a.funcionarios.includes(nombre)) set("funcionarios", [...a.funcionarios, nombre]);
   };
   const quitarFuncionario = (nombre) => set("funcionarios", a.funcionarios.filter((x) => x !== nombre));
-  const toggleFuncionario = (nombre) => (a.funcionarios.includes(nombre) ? quitarFuncionario(nombre) : agregarFuncionario(nombre));
+  const toggleFuncionario = (nombre) => {
+    if (a.funcionarios.includes(nombre)) {
+      quitarFuncionario(nombre);
+      return;
+    }
+    // Al asignar a alguien que ese día está libre/vacaciones/fuera de turno,
+    // se abre el diálogo para resolver (modificar rol, reposición, etc.).
+    if (esLibreDe(nombre)) {
+      setAsignLibre({
+        funcionario: nombre,
+        iso: a.inicio,
+        rol: rolDe(nombre),
+        categoria: categoriaDe(rolDe(nombre)),
+        saldo: saldoDe(nombre),
+      });
+      return;
+    }
+    agregarFuncionario(nombre);
+  };
+
+  // Acciones del diálogo de asignación en día libre.
+  const resolverModificarRol = () => {
+    const { funcionario } = asignLibre;
+    if (setRoleData) {
+      setRoleData((prev) => ({
+        ...prev,
+        ...patchCategoriaDia({
+          roleData: prev,
+          personas,
+          year: yA,
+          month: mIdxA,
+          persona: funcionario,
+          dia: diaA,
+          categoria: "T",
+          feriados: feriadosA,
+        }),
+      }));
+    }
+    agregarFuncionario(funcionario);
+    setAsignLibre(null);
+  };
+  const resolverReposicion = () => {
+    const { funcionario, categoria } = asignLibre;
+    if (setReposiciones) {
+      const nuevo = {
+        id: `rep${Date.now()}`,
+        folio: siguienteFolio(reposiciones),
+        funcionario,
+        fecha: a.inicio,
+        tipoDia: tipoDiaDeCategoria(categoria),
+        motivo: "Actividad especial",
+        motivoDetalle: a.titulo || "",
+        magnitud: "diaEntero",
+        horas: 0,
+        cuotas: [],
+        observaciones: "",
+      };
+      setReposiciones((prev) => [nuevo, ...prev]);
+    }
+    agregarFuncionario(funcionario);
+    setAsignLibre(null);
+  };
+  const resolverReponer = () => {
+    const { funcionario } = asignLibre;
+    const objetivo = registrosConSaldoDe(reposiciones, funcionario, hj)[0];
+    if (objetivo && setReposiciones) {
+      const cuota = { id: `c${Date.now()}`, fecha: a.inicio, magnitud: "diaEntero", horas: 0 };
+      setReposiciones((prev) =>
+        prev.map((x) => (x.id === objetivo.id ? { ...x, cuotas: [...cuotasDe(x), cuota] } : x)),
+      );
+    }
+    // No se agrega a la actividad: el día libre se usa para reponer (descanso).
+    setAsignLibre(null);
+  };
   const modificarActividadExistente = (act) => setA({ ...act });
   const titulo = esExistente ? t("modalActividad.editar") : t("modalActividad.agregar");
   return (
@@ -125,6 +234,18 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                             <input type="checkbox" checked={seleccionado} onChange={() => toggleFuncionario(f.nombre)} />
                             {f.nombre}
                           </label>
+                          {!seleccionado && esLibreDe(f.nombre) && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              <span className="rounded-full border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                                {t("modalActividad.diaLibre")}
+                              </span>
+                              {saldoDe(f.nombre) > 0 && (
+                                <span className="rounded-full border border-sky-300 bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-900">
+                                  {t("modalActividad.saldoFavor")}
+                                </span>
+                              )}
+                            </div>
+                          )}
                           {avisos.length > 0 && (
                             <div className="mt-2 rounded-lg border border-yellow-300 bg-yellow-100 p-2 text-[11px] leading-snug text-yellow-950">
                               <div className="font-bold">{t("modalActividad.avisoTraslape")}</div>
@@ -186,6 +307,17 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
           </div>
         </div>
       </div>
+      {asignLibre && (
+        <AsignacionLibreModal
+          data={asignLibre}
+          hj={hj}
+          cerrar={() => setAsignLibre(null)}
+          onModificarRol={resolverModificarRol}
+          onReposicion={resolverReposicion}
+          onReponer={resolverReponer}
+          onEditarFecha={() => setAsignLibre(null)}
+        />
+      )}
     </div>
   );
 }
