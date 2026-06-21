@@ -1,11 +1,17 @@
 import { fecha } from "../../domain/fechas.js";
 import { actividadesEnDia } from "../../domain/actividades.js";
+import { saldoFuncionario, HORAS_JORNADA_DEFAULT } from "../../domain/reposicion.js";
+import { saldoTexto } from "../reposicion/etiquetas.js";
+import { useApp } from "../../context/AppContext.jsx";
 import { useEscapeClose } from "../../lib/a11y.js";
 import { useT } from "../../i18n/useT.js";
 
 export default function AsignarActividadModal({ data, actividadesPlan, cerrar, crear, agregar }) {
   useEscapeClose(cerrar);
   const t = useT();
+  const { reposiciones = [], reglas } = useApp();
+  const hj = reglas?.horasJornada ?? HORAS_JORNADA_DEFAULT;
+  const saldo = saldoFuncionario(reposiciones, data.funcionario, hj);
   const existentes = actividadesEnDia(actividadesPlan, data.iso).filter((a) => !(a.funcionarios || []).includes(data.funcionario));
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 md:items-center md:p-4" onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
@@ -15,6 +21,11 @@ export default function AsignarActividadModal({ data, actividadesPlan, cerrar, c
           <div className="min-w-0">
             <h3 className="text-lg font-semibold">{t("asignarActividad.titulo")}</h3>
             <p className="text-sm text-slate-600">{t("asignarActividad.sub", { funcionario: data.funcionario, fecha: fecha(data.iso) })}</p>
+            {saldo > 0 && (
+              <span className="mt-1 inline-flex items-center rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-900">
+                {t("modalActividad.saldoFavorMonto", { saldo: saldoTexto(saldo, hj) })}
+              </span>
+            )}
           </div>
           <button onClick={cerrar} aria-label={t("acciones.cerrar")} className="-mr-1 inline-flex min-h-touch min-w-touch shrink-0 items-center justify-center rounded-xl text-lg font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
