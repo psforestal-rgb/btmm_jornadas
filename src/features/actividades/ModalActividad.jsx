@@ -13,6 +13,7 @@ import {
   aplicarCuotaAlMasAntiguo,
   HORAS_JORNADA_DEFAULT,
 } from "../../domain/reposicion.js";
+import { saldoTexto } from "../reposicion/etiquetas.js";
 import AsignacionLibreModal from "./AsignacionLibreModal.jsx";
 
 export default function ModalActividad({ valor, personas, cerrar, guardar, eliminar, actividadesPlan = [] }) {
@@ -22,6 +23,7 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
   const hj = reglas?.horasJornada ?? HORAS_JORNADA_DEFAULT;
   const [a, setA] = useState(valor);
   const [asignLibre, setAsignLibre] = useState(null);
+  const [soloSaldo, setSoloSaldo] = useState(false);
   const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
 
   // Rol del funcionario en el día de inicio de la actividad (para detectar
@@ -206,16 +208,25 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
             </label>
           </div>
           <div className="mt-5">
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">{t("modalActividad.participantes")}</span>
-              <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{t("modalActividad.seleccionados", { n: a.funcionarios.length })}</Badge>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-1.5 rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-900">
+                  <input type="checkbox" checked={soloSaldo} onChange={(e) => setSoloSaldo(e.target.checked)} />
+                  {t("modalActividad.soloSaldo")}
+                </label>
+                <Badge className="border-emerald-200 bg-emerald-100 text-emerald-900">{t("modalActividad.seleccionados", { n: a.funcionarios.length })}</Badge>
+              </div>
             </div>
             <div className="grid gap-3 md:grid-cols-3">
-              {porPuesto.map((g) => (
+              {porPuesto.map((g) => {
+                const items = soloSaldo ? g.items.filter((f) => saldoDe(f.nombre) > 0) : g.items;
+                if (soloSaldo && items.length === 0) return null;
+                return (
                 <div key={g.puesto} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
                   <div className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">{g.puesto}</div>
                   <div className="space-y-1.5">
-                    {g.items.map((f) => {
+                    {items.map((f) => {
                       const avisos = actividadesFuncionario(f.nombre);
                       const seleccionado = a.funcionarios.includes(f.nombre);
                       return (
@@ -233,14 +244,16 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                             <input type="checkbox" checked={seleccionado} onChange={() => toggleFuncionario(f.nombre)} />
                             {f.nombre}
                           </label>
-                          {!seleccionado && esLibreDe(f.nombre) && (
+                          {(esLibreDe(f.nombre) || saldoDe(f.nombre) > 0) && (
                             <div className="mt-1 flex flex-wrap gap-1">
-                              <span className="rounded-full border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
-                                {t("modalActividad.diaLibre")}
-                              </span>
+                              {!seleccionado && esLibreDe(f.nombre) && (
+                                <span className="rounded-full border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900">
+                                  {t("modalActividad.diaLibre")}
+                                </span>
+                              )}
                               {saldoDe(f.nombre) > 0 && (
                                 <span className="rounded-full border border-sky-300 bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-900">
-                                  {t("modalActividad.saldoFavor")}
+                                  {t("modalActividad.saldoFavorMonto", { saldo: saldoTexto(saldoDe(f.nombre), hj) })}
                                 </span>
                               )}
                             </div>
@@ -272,7 +285,8 @@ export default function ModalActividad({ valor, personas, cerrar, guardar, elimi
                     })}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
           <label className="mt-5 block">

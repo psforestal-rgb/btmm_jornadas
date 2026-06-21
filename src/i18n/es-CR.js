@@ -279,6 +279,8 @@ const dict = {
     guardarActividad: "Guardar actividad",
     diaLibre: "Día libre/vacaciones",
     saldoFavor: "Saldo a favor",
+    saldoFavorMonto: "Saldo a favor: {saldo}",
+    soloSaldo: "Solo con saldo a favor",
     libresAsignados: "Asignados en día libre/vacaciones",
     resolver: "Resolver",
   },
